@@ -24,11 +24,18 @@ _sym_db = _symbol_database.Default()
 
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x0b\x61udio.proto')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x0b\x61udio.proto\x12\x05\x61udio\"\"\n\x0c\x41udioRequest\x12\x12\n\naudio_path\x18\x01 \x01(\t\"\x1e\n\rAudioResponse\x12\r\n\x05notes\x18\x01 \x03(\t2J\n\rAudioAnalyzer\x12\x39\n\x0cProcessAudio\x12\x13.audio.AudioRequest\x1a\x14.audio.AudioResponseB\x15Z\x13internal/audioprotob\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
 _builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'audio_pb2', _globals)
 if not _descriptor._USE_C_DESCRIPTORS:
-  DESCRIPTOR._loaded_options = None
+  _globals['DESCRIPTOR']._loaded_options = None
+  _globals['DESCRIPTOR']._serialized_options = b'Z\023internal/audioproto'
+  _globals['_AUDIOREQUEST']._serialized_start=22
+  _globals['_AUDIOREQUEST']._serialized_end=56
+  _globals['_AUDIORESPONSE']._serialized_start=58
+  _globals['_AUDIORESPONSE']._serialized_end=88
+  _globals['_AUDIOANALYZER']._serialized_start=90
+  _globals['_AUDIOANALYZER']._serialized_end=164
 # @@protoc_insertion_point(module_scope)

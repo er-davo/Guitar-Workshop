@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+package audio;
+
+option go_package = "internal/audioproto";
+
+
+service AudioAnalyzer {
+    rpc ProcessAudio (AudioRequest) returns (AudioResponse);
+}
+
+message AudioRequest {
+    string audio_path = 1;
+}
+
+message AudioResponse {
+    repeated string notes = 1;
+}

@@ -1,0 +1,12 @@
+services:
+  tab-generator:
+    build: ./tab-generator
+    ports:
+      - "8080:8080"
+    depends_on:
+      - audio-analyzer
+  
+  audio-analyzer:
+    build: ./audio-analyzer
+    ports:
+      - "50051:50051"

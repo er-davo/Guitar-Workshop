@@ -1,6 +1,6 @@
 PROTO_DIR = proto
 
-PYTHON_VENV = audio-analyzer/app/audiovenv
+PYTHON_VENV = audio-analyzer/venv
 
 PYTHON_OUT = audio-analyzer
 GRPC_PYTHON_OUT = audio-analyzer

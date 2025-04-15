@@ -1,6 +1,8 @@
 package models
 
-import "fmt"
+import (
+	"strings"
+)
 
 type TabRequest struct {
 	AudioURL string `json:"audio_url"`
@@ -12,8 +14,10 @@ type TabResponse struct {
 }
 
 func GenerateTab(notes []string) string {
-	return fmt.Sprintf(
-		"e|-%s-\nB|-%s-\nG|-%s-\nD|--\nA|--\nE|--",
-		notes[0], notes[1], notes[2],
-	)
+	// return fmt.Sprintf(
+	// 	"e|-%s-\nB|-%s-\nG|-%s-\nD|--\nA|--\nE|--",
+	// 	notes[0], notes[1], notes[2],
+	// )
+
+	return strings.Join(notes, " ")
 }

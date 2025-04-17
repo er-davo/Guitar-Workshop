@@ -33,14 +33,14 @@ func main() {
 			return c.JSON(http.StatusBadRequest, "Invalid request")
 		}
 
-		audioReq, err := client.ProcessAudio(context.Background(), &audioproto.AudioRequest{
+		audioResp, err := client.ProcessAudio(context.Background(), &audioproto.AudioRequest{
 			AudioPath: tabReq.AudioURL,
 		})
 		if err != nil {
 			return c.JSON(http.StatusInternalServerError, "Audio analysis failed")
 		}
 
-		tab := models.GenerateTab(audioReq.Notes)
+		tab, err := models.GenerateTab(audioResp)
 
 		return c.JSON(http.StatusOK, models.TabResponse{
 			Tab:    tab,

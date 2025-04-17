@@ -1,7 +1,7 @@
 package models
 
 import (
-	"strings"
+	"tabgen/internal/audioproto"
 )
 
 type TabRequest struct {
@@ -13,11 +13,16 @@ type TabResponse struct {
 	Status string `json:"status"`
 }
 
-func GenerateTab(notes []string) string {
-	// return fmt.Sprintf(
-	// 	"e|-%s-\nB|-%s-\nG|-%s-\nD|--\nA|--\nE|--",
-	// 	notes[0], notes[1], notes[2],
-	// )
+func GenerateTab(audio *audioproto.AudioResponse) (string, error) {
+	chromo, err := decodeChromagram(audio.Chromagram)
+	if err != nil {
+		return "", err
+	}
 
-	return strings.Join(notes, " ")
+	rows, cols := chromo.Dims()
+	for frmIdx, frame := range chromo {
+
+	}
+
+	return "", nil
 }

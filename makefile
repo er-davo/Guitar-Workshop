@@ -2,11 +2,11 @@ PROTO_DIR = proto
 
 PYTHON_VENV = audio-analyzer/venv
 
-PYTHON_OUT = audio-analyzer
-GRPC_PYTHON_OUT = audio-analyzer
+PYTHON_OUT = audio-analyzer/app
+GRPC_PYTHON_OUT = audio-analyzer/app
 
-GO_OUT = tab-generator
-GO_GRPC_OUT = tab-generator
+GO_OUT = tab-generator/app
+GO_GRPC_OUT = tab-generator/app
 
 py-venv:
 	cd $(PYTHON_VENV)

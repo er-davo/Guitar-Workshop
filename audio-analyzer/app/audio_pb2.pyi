@@ -12,7 +12,17 @@ class AudioRequest(_message.Message):
     def __init__(self, audio_path: _Optional[str] = ...) -> None: ...
 
 class AudioResponse(_message.Message):
-    __slots__ = ("notes",)
-    NOTES_FIELD_NUMBER: _ClassVar[int]
-    notes: _containers.RepeatedScalarFieldContainer[str]
-    def __init__(self, notes: _Optional[_Iterable[str]] = ...) -> None: ...
+    __slots__ = ("pitches", "times", "chromagram", "tempo", "sr", "hop_length")
+    PITCHES_FIELD_NUMBER: _ClassVar[int]
+    TIMES_FIELD_NUMBER: _ClassVar[int]
+    CHROMAGRAM_FIELD_NUMBER: _ClassVar[int]
+    TEMPO_FIELD_NUMBER: _ClassVar[int]
+    SR_FIELD_NUMBER: _ClassVar[int]
+    HOP_LENGTH_FIELD_NUMBER: _ClassVar[int]
+    pitches: _containers.RepeatedScalarFieldContainer[float]
+    times: _containers.RepeatedScalarFieldContainer[float]
+    chromagram: bytes
+    tempo: float
+    sr: float
+    hop_length: int
+    def __init__(self, pitches: _Optional[_Iterable[float]] = ..., times: _Optional[_Iterable[float]] = ..., chromagram: _Optional[bytes] = ..., tempo: _Optional[float] = ..., sr: _Optional[float] = ..., hop_length: _Optional[int] = ...) -> None: ...

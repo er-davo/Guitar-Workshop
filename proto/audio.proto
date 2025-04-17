@@ -13,5 +13,10 @@ message AudioRequest {
 }
 
 message AudioResponse {
-    repeated string notes = 1;
+    repeated float pitches = 1; // Основная частота (Гц)
+    repeated float times = 2;   // Временные метки (сек)
+    bytes chromagram = 3;       // Хромаграмма
+    float tempo = 4;            // Темп
+    float sr = 5;               // Частота дискретизации
+    int32 hop_length = 6;       // Шаг
 }

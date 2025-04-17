@@ -67,7 +67,12 @@ func (x *AudioRequest) GetAudioPath() string {
 
 type AudioResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Notes         []string               `protobuf:"bytes,1,rep,name=notes,proto3" json:"notes,omitempty"`
+	Pitches       []float32              `protobuf:"fixed32,1,rep,packed,name=pitches,proto3" json:"pitches,omitempty"`              // Основная частота (Гц)
+	Times         []float32              `protobuf:"fixed32,2,rep,packed,name=times,proto3" json:"times,omitempty"`                  // Временные метки (сек)
+	Chromagram    []byte                 `protobuf:"bytes,3,opt,name=chromagram,proto3" json:"chromagram,omitempty"`                 // Хромаграмма
+	Tempo         float32                `protobuf:"fixed32,4,opt,name=tempo,proto3" json:"tempo,omitempty"`                         // Темп
+	Sr            float32                `protobuf:"fixed32,5,opt,name=sr,proto3" json:"sr,omitempty"`                               // Частота дискретизации
+	HopLength     int32                  `protobuf:"varint,6,opt,name=hop_length,json=hopLength,proto3" json:"hop_length,omitempty"` // Шаг
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -102,11 +107,46 @@ func (*AudioResponse) Descriptor() ([]byte, []int) {
 	return file_audio_proto_rawDescGZIP(), []int{1}
 }
 
-func (x *AudioResponse) GetNotes() []string {
+func (x *AudioResponse) GetPitches() []float32 {
 	if x != nil {
-		return x.Notes
+		return x.Pitches
 	}
 	return nil
+}
+
+func (x *AudioResponse) GetTimes() []float32 {
+	if x != nil {
+		return x.Times
+	}
+	return nil
+}
+
+func (x *AudioResponse) GetChromagram() []byte {
+	if x != nil {
+		return x.Chromagram
+	}
+	return nil
+}
+
+func (x *AudioResponse) GetTempo() float32 {
+	if x != nil {
+		return x.Tempo
+	}
+	return 0
+}
+
+func (x *AudioResponse) GetSr() float32 {
+	if x != nil {
+		return x.Sr
+	}
+	return 0
+}
+
+func (x *AudioResponse) GetHopLength() int32 {
+	if x != nil {
+		return x.HopLength
+	}
+	return 0
 }
 
 var File_audio_proto protoreflect.FileDescriptor
@@ -116,9 +156,17 @@ const file_audio_proto_rawDesc = "" +
 	"\vaudio.proto\x12\x05audio\"-\n" +
 	"\fAudioRequest\x12\x1d\n" +
 	"\n" +
-	"audio_path\x18\x01 \x01(\tR\taudioPath\"%\n" +
-	"\rAudioResponse\x12\x14\n" +
-	"\x05notes\x18\x01 \x03(\tR\x05notes2J\n" +
+	"audio_path\x18\x01 \x01(\tR\taudioPath\"\xa4\x01\n" +
+	"\rAudioResponse\x12\x18\n" +
+	"\apitches\x18\x01 \x03(\x02R\apitches\x12\x14\n" +
+	"\x05times\x18\x02 \x03(\x02R\x05times\x12\x1e\n" +
+	"\n" +
+	"chromagram\x18\x03 \x01(\fR\n" +
+	"chromagram\x12\x14\n" +
+	"\x05tempo\x18\x04 \x01(\x02R\x05tempo\x12\x0e\n" +
+	"\x02sr\x18\x05 \x01(\x02R\x02sr\x12\x1d\n" +
+	"\n" +
+	"hop_length\x18\x06 \x01(\x05R\thopLength2J\n" +
 	"\rAudioAnalyzer\x129\n" +
 	"\fProcessAudio\x12\x13.audio.AudioRequest\x1a\x14.audio.AudioResponseB\x15Z\x13internal/audioprotob\x06proto3"
 

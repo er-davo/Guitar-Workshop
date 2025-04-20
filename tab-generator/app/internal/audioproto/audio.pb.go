@@ -67,12 +67,7 @@ func (x *AudioRequest) GetAudioPath() string {
 
 type AudioResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Pitches       []float32              `protobuf:"fixed32,1,rep,packed,name=pitches,proto3" json:"pitches,omitempty"`              // Основная частота (Гц)
-	Times         []float32              `protobuf:"fixed32,2,rep,packed,name=times,proto3" json:"times,omitempty"`                  // Временные метки (сек)
-	Chromagram    []byte                 `protobuf:"bytes,3,opt,name=chromagram,proto3" json:"chromagram,omitempty"`                 // Хромаграмма
-	Tempo         float32                `protobuf:"fixed32,4,opt,name=tempo,proto3" json:"tempo,omitempty"`                         // Темп
-	Sr            float32                `protobuf:"fixed32,5,opt,name=sr,proto3" json:"sr,omitempty"`                               // Частота дискретизации
-	HopLength     int32                  `protobuf:"varint,6,opt,name=hop_length,json=hopLength,proto3" json:"hop_length,omitempty"` // Шаг
+	NoteFeatures  []*AudioEvent          `protobuf:"bytes,1,rep,name=note_features,json=noteFeatures,proto3" json:"note_features,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -107,46 +102,87 @@ func (*AudioResponse) Descriptor() ([]byte, []int) {
 	return file_audio_proto_rawDescGZIP(), []int{1}
 }
 
-func (x *AudioResponse) GetPitches() []float32 {
+func (x *AudioResponse) GetNoteFeatures() []*AudioEvent {
 	if x != nil {
-		return x.Pitches
+		return x.NoteFeatures
 	}
 	return nil
 }
 
-func (x *AudioResponse) GetTimes() []float32 {
+type AudioEvent struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Time          float32                `protobuf:"fixed32,1,opt,name=time,proto3" json:"time,omitempty"`
+	Pitch         float32                `protobuf:"fixed32,2,opt,name=pitch,proto3" json:"pitch,omitempty"`
+	MainNote      string                 `protobuf:"bytes,3,opt,name=main_note,json=mainNote,proto3" json:"main_note,omitempty"`
+	Octave        int32                  `protobuf:"varint,4,opt,name=octave,proto3" json:"octave,omitempty"`
+	ChromaNotes   []string               `protobuf:"bytes,5,rep,name=chroma_notes,json=chromaNotes,proto3" json:"chroma_notes,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *AudioEvent) Reset() {
+	*x = AudioEvent{}
+	mi := &file_audio_proto_msgTypes[2]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *AudioEvent) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AudioEvent) ProtoMessage() {}
+
+func (x *AudioEvent) ProtoReflect() protoreflect.Message {
+	mi := &file_audio_proto_msgTypes[2]
 	if x != nil {
-		return x.Times
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use AudioEvent.ProtoReflect.Descriptor instead.
+func (*AudioEvent) Descriptor() ([]byte, []int) {
+	return file_audio_proto_rawDescGZIP(), []int{2}
+}
+
+func (x *AudioEvent) GetTime() float32 {
+	if x != nil {
+		return x.Time
+	}
+	return 0
+}
+
+func (x *AudioEvent) GetPitch() float32 {
+	if x != nil {
+		return x.Pitch
+	}
+	return 0
+}
+
+func (x *AudioEvent) GetMainNote() string {
+	if x != nil {
+		return x.MainNote
+	}
+	return ""
+}
+
+func (x *AudioEvent) GetOctave() int32 {
+	if x != nil {
+		return x.Octave
+	}
+	return 0
+}
+
+func (x *AudioEvent) GetChromaNotes() []string {
+	if x != nil {
+		return x.ChromaNotes
 	}
 	return nil
-}
-
-func (x *AudioResponse) GetChromagram() []byte {
-	if x != nil {
-		return x.Chromagram
-	}
-	return nil
-}
-
-func (x *AudioResponse) GetTempo() float32 {
-	if x != nil {
-		return x.Tempo
-	}
-	return 0
-}
-
-func (x *AudioResponse) GetSr() float32 {
-	if x != nil {
-		return x.Sr
-	}
-	return 0
-}
-
-func (x *AudioResponse) GetHopLength() int32 {
-	if x != nil {
-		return x.HopLength
-	}
-	return 0
 }
 
 var File_audio_proto protoreflect.FileDescriptor
@@ -156,17 +192,16 @@ const file_audio_proto_rawDesc = "" +
 	"\vaudio.proto\x12\x05audio\"-\n" +
 	"\fAudioRequest\x12\x1d\n" +
 	"\n" +
-	"audio_path\x18\x01 \x01(\tR\taudioPath\"\xa4\x01\n" +
-	"\rAudioResponse\x12\x18\n" +
-	"\apitches\x18\x01 \x03(\x02R\apitches\x12\x14\n" +
-	"\x05times\x18\x02 \x03(\x02R\x05times\x12\x1e\n" +
+	"audio_path\x18\x01 \x01(\tR\taudioPath\"G\n" +
+	"\rAudioResponse\x126\n" +
+	"\rnote_features\x18\x01 \x03(\v2\x11.audio.AudioEventR\fnoteFeatures\"\x8e\x01\n" +
 	"\n" +
-	"chromagram\x18\x03 \x01(\fR\n" +
-	"chromagram\x12\x14\n" +
-	"\x05tempo\x18\x04 \x01(\x02R\x05tempo\x12\x0e\n" +
-	"\x02sr\x18\x05 \x01(\x02R\x02sr\x12\x1d\n" +
-	"\n" +
-	"hop_length\x18\x06 \x01(\x05R\thopLength2J\n" +
+	"AudioEvent\x12\x12\n" +
+	"\x04time\x18\x01 \x01(\x02R\x04time\x12\x14\n" +
+	"\x05pitch\x18\x02 \x01(\x02R\x05pitch\x12\x1b\n" +
+	"\tmain_note\x18\x03 \x01(\tR\bmainNote\x12\x16\n" +
+	"\x06octave\x18\x04 \x01(\x05R\x06octave\x12!\n" +
+	"\fchroma_notes\x18\x05 \x03(\tR\vchromaNotes2J\n" +
 	"\rAudioAnalyzer\x129\n" +
 	"\fProcessAudio\x12\x13.audio.AudioRequest\x1a\x14.audio.AudioResponseB\x15Z\x13internal/audioprotob\x06proto3"
 
@@ -182,19 +217,21 @@ func file_audio_proto_rawDescGZIP() []byte {
 	return file_audio_proto_rawDescData
 }
 
-var file_audio_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
+var file_audio_proto_msgTypes = make([]protoimpl.MessageInfo, 3)
 var file_audio_proto_goTypes = []any{
 	(*AudioRequest)(nil),  // 0: audio.AudioRequest
 	(*AudioResponse)(nil), // 1: audio.AudioResponse
+	(*AudioEvent)(nil),    // 2: audio.AudioEvent
 }
 var file_audio_proto_depIdxs = []int32{
-	0, // 0: audio.AudioAnalyzer.ProcessAudio:input_type -> audio.AudioRequest
-	1, // 1: audio.AudioAnalyzer.ProcessAudio:output_type -> audio.AudioResponse
-	1, // [1:2] is the sub-list for method output_type
-	0, // [0:1] is the sub-list for method input_type
-	0, // [0:0] is the sub-list for extension type_name
-	0, // [0:0] is the sub-list for extension extendee
-	0, // [0:0] is the sub-list for field type_name
+	2, // 0: audio.AudioResponse.note_features:type_name -> audio.AudioEvent
+	0, // 1: audio.AudioAnalyzer.ProcessAudio:input_type -> audio.AudioRequest
+	1, // 2: audio.AudioAnalyzer.ProcessAudio:output_type -> audio.AudioResponse
+	2, // [2:3] is the sub-list for method output_type
+	1, // [1:2] is the sub-list for method input_type
+	1, // [1:1] is the sub-list for extension type_name
+	1, // [1:1] is the sub-list for extension extendee
+	0, // [0:1] is the sub-list for field type_name
 }
 
 func init() { file_audio_proto_init() }
@@ -208,7 +245,7 @@ func file_audio_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_audio_proto_rawDesc), len(file_audio_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   2,
+			NumMessages:   3,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

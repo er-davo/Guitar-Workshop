@@ -5,15 +5,19 @@ import (
 	"log"
 	"net/http"
 
-	"tabgen/internal/audioproto"
+	audiopb "tabgen/internal/audioproto"
+	"tabgen/internal/logger"
 	"tabgen/internal/models"
 
 	"github.com/labstack/echo/v4"
+	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )
 
 func main() {
+	logger.Init()
+
 	conn, err := grpc.NewClient(
 		"audio-analyzer:50051",
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
@@ -23,7 +27,7 @@ func main() {
 	}
 	defer conn.Close()
 
-	client := audioproto.NewAudioAnalyzerClient(conn)
+	client := audiopb.NewAudioAnalyzerClient(conn)
 
 	e := echo.New()
 
@@ -33,10 +37,11 @@ func main() {
 			return c.JSON(http.StatusBadRequest, "Invalid request")
 		}
 
-		audioResp, err := client.ProcessAudio(context.Background(), &audioproto.AudioRequest{
+		audioResp, err := client.ProcessAudio(context.Background(), &audiopb.AudioRequest{
 			AudioPath: tabReq.AudioURL,
 		})
 		if err != nil {
+			logger.Log.Error("error on process audio", zap.Error(err))
 			return c.JSON(http.StatusInternalServerError, "Audio analysis failed")
 		}
 

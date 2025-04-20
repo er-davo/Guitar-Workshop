@@ -1,13 +1,16 @@
 package models
 
 import (
-	"encoding/binary"
 	"math"
-
-	"gonum.org/v1/gonum/mat"
 )
 
-var noteFrequencies = map[string][9]float64{
+type noteFeatures struct {
+	note     string
+	octave   int
+	duration float64
+}
+
+var noteFrequencies = map[string][9]float32{
 	"C":  {16.35, 32.7, 65.41, 130.81, 261.63, 523.25, 1046.5, 2093, 4186},
 	"C#": {17.32, 34.65, 69.3, 138.59, 277.18, 554.37, 1108.73, 2217.46, 4434.92},
 	"D":  {18.35, 36.71, 73.42, 146.83, 293.66, 587.33, 1174.66, 2349.32, 4698.63},
@@ -22,7 +25,7 @@ var noteFrequencies = map[string][9]float64{
 	"B":  {30.87, 61.74, 123.47, 246.94, 493.88, 987.77, 1975.53, 3951, 7902.13},
 }
 
-func closestNote(freq float64) (string, int) {
+func closestNote(freq float32) (string, int) {
 	if freq <= 0 {
 		return "-", 0
 	}
@@ -33,7 +36,7 @@ func closestNote(freq float64) (string, int) {
 
 	for note, octavesFreqs := range noteFrequencies {
 		for octNumber, octFreq := range octavesFreqs {
-			diff := math.Abs(octFreq - freq)
+			diff := math.Abs(float64(octFreq - freq))
 			if diff < minDiff {
 				minDiff = diff
 				closeNote = note
@@ -43,19 +46,4 @@ func closestNote(freq float64) (string, int) {
 	}
 
 	return closeNote, octave
-}
-
-// numpy array -> mat.Dense
-func decodeChromagram(data []byte) (*mat.Dense, error) {
-	// data - это сериализованная матрица 12xN (row-major)
-	rows := 12
-	cols := len(data) / (rows * 8) // float64 = 8 байт
-
-	floats := make([]float64, rows*cols)
-	for i := range floats {
-		start := i * 8
-		floats[i] = math.Float64frombits(binary.LittleEndian.Uint64(data[start : start+8]))
-	}
-
-	return mat.NewDense(rows, cols, floats), nil
 }

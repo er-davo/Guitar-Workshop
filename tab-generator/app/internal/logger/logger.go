@@ -31,21 +31,11 @@ func Init() {
 		}
 
 		consoleEncoder := zapcore.NewConsoleEncoder(encoderConfig)
-		fileEncoder := zapcore.NewJSONEncoder(encoderConfig)
 
 		zapLevel := zapcore.DebugLevel
 
-		logFile, err := os.OpenFile("logs/app.log", os.O_APPEND|os.O_WRONLY, 0644)
-		if err != nil {
-			consoleCore := zapcore.NewCore(consoleEncoder, zapcore.AddSync(os.Stdout), zapLevel)
-			Log = zap.New(consoleCore, zap.AddCaller(), zap.AddStacktrace(zapcore.ErrorLevel))
-			return
-		}
-
 		consoleCore := zapcore.NewCore(consoleEncoder, zapcore.AddSync(os.Stdout), zapLevel)
-		fileCore := zapcore.NewCore(fileEncoder, zapcore.AddSync(logFile), zapLevel)
-
-		core := zapcore.NewTee(consoleCore, fileCore)
-		Log = zap.New(core, zap.AddCaller(), zap.AddStacktrace(zapcore.ErrorLevel))
+		Log = zap.New(consoleCore, zap.AddCaller(), zap.AddStacktrace(zapcore.ErrorLevel))
+		return
 	})
 }

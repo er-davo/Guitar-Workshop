@@ -12,11 +12,22 @@ message AudioRequest {
     string audio_path = 1;
 }
 
+// message AudioResponse {
+//     repeated float pitches = 1; // Основная частота (Гц)
+//     repeated float times = 2;   // Временные метки (сек)
+//     bytes chromagram = 3;       // Хромаграмма
+//     float sr = 4;               // Частота дискретизации
+//     int32 hop_length = 5;       // Шаг
+// }
+
 message AudioResponse {
-    repeated float pitches = 1; // Основная частота (Гц)
-    repeated float times = 2;   // Временные метки (сек)
-    bytes chromagram = 3;       // Хромаграмма
-    float tempo = 4;            // Темп
-    float sr = 5;               // Частота дискретизации
-    int32 hop_length = 6;       // Шаг
+    repeated AudioEvent note_features = 1;
+}
+
+message AudioEvent {
+    float time = 1;
+    float pitch = 2;
+    string main_note = 3;
+    int32 octave = 4;
+    repeated string chroma_notes = 5;
 }

@@ -1,7 +1,8 @@
 package models
 
 import (
-	"tabgen/internal/audioproto"
+	audiopb "tabgen/internal/audioproto"
+	"tabgen/internal/guitar"
 )
 
 type TabRequest struct {
@@ -13,16 +14,24 @@ type TabResponse struct {
 	Status string `json:"status"`
 }
 
-func GenerateTab(audio *audioproto.AudioResponse) (string, error) {
-	chromo, err := decodeChromagram(audio.Chromagram)
-	if err != nil {
-		return "", err
+func newNote(n *audiopb.AudioEvent) *guitar.Note {
+	return &guitar.Note{
+		Note:   n.MainNote,
+		Octave: int(n.Octave),
+		Time:   n.Time,
+	}
+}
+
+func GenerateTab(audio *audiopb.AudioResponse) (string, error) {
+	events := newNotesEvent(audio)
+	fb := guitar.NewFingerBoard(guitar.StandartTuning, 24)
+	builder, err := guitar.NewTabBuilder(guitar.GuitarType)
+
+	for _, event := range events.notes {
+		notes := fb.GetNotes(event.mainNote, event.octave)
+		note := notes.ClosestTo()
+
 	}
 
-	rows, cols := chromo.Dims()
-	for frmIdx, frame := range chromo {
-
-	}
-
-	return "", nil
+	return events.notes[0].mainNote, nil
 }

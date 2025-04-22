@@ -14,24 +14,23 @@ type TabResponse struct {
 	Status string `json:"status"`
 }
 
-func newNote(n *audiopb.AudioEvent) *guitar.Note {
-	return &guitar.Note{
-		Note:   n.MainNote,
-		Octave: int(n.Octave),
-		Time:   n.Time,
-	}
-}
-
 func GenerateTab(audio *audiopb.AudioResponse) (string, error) {
 	events := newNotesEvent(audio)
 	fb := guitar.NewFingerBoard(guitar.StandartTuning, 24)
-	builder, err := guitar.NewTabBuilder(guitar.GuitarType)
+	builder, err := guitar.NewTabBuilder(guitar.GuitarType, *fb.GetTuningNotes())
+	if err != nil {
+		// TODO
+	}
 
 	for _, event := range events.notes {
 		notes := fb.GetNotes(event.mainNote, event.octave)
-		note := notes.ClosestTo()
-
+		note := notes.ClosestTo(guitar.Note{
+			Note:   event.mainNote,
+			Octave: event.octave,
+			Time:   event.time,
+		})
+		builder.WriteSingleNote(note)
 	}
 
-	return events.notes[0].mainNote, nil
+	return builder.Tab(), nil
 }

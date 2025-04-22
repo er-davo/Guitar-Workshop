@@ -1,5 +1,11 @@
 package guitar
 
+type TuningType int
+
+const (
+	StandartTuning TuningType = iota
+)
+
 type Tuning []Note
 
 func (t *Tuning) String() *[]string {
@@ -10,43 +16,87 @@ func (t *Tuning) String() *[]string {
 	return &notes
 }
 
-var StandartTuning = Tuning{
-	{
-		Note:   "E",
-		Octave: 4,
-		Fret:   0,
-		String: 0,
-	},
-	{
-		Note:   "B",
-		Octave: 3,
-		Fret:   0,
-		String: 1,
-	},
-	{
-		Note:   "G",
-		Octave: 3,
-		Fret:   0,
-		String: 2,
-	},
-	{
-		Note:   "D",
-		Octave: 3,
-		Fret:   0,
-		String: 3,
-	},
-	{
-		Note:   "A",
-		Octave: 2,
-		Fret:   0,
-		String: 4,
-	},
-	{
-		Note:   "E",
-		Octave: 2,
-		Fret:   0,
-		String: 5,
-	},
+func GetTuning(t TuningType) Tuning {
+	switch t {
+	case StandartTuning:
+		return Tuning{
+			{
+				Note:   "E",
+				Octave: 4,
+				Fret:   0,
+				String: 0,
+			},
+			{
+				Note:   "B",
+				Octave: 3,
+				Fret:   0,
+				String: 1,
+			},
+			{
+				Note:   "G",
+				Octave: 3,
+				Fret:   0,
+				String: 2,
+			},
+			{
+				Note:   "D",
+				Octave: 3,
+				Fret:   0,
+				String: 3,
+			},
+			{
+				Note:   "A",
+				Octave: 2,
+				Fret:   0,
+				String: 4,
+			},
+			{
+				Note:   "E",
+				Octave: 2,
+				Fret:   0,
+				String: 5,
+			},
+		}
+	default:
+		return Tuning{
+			{
+				Note:   "E",
+				Octave: 4,
+				Fret:   0,
+				String: 0,
+			},
+			{
+				Note:   "B",
+				Octave: 3,
+				Fret:   0,
+				String: 1,
+			},
+			{
+				Note:   "G",
+				Octave: 3,
+				Fret:   0,
+				String: 2,
+			},
+			{
+				Note:   "D",
+				Octave: 3,
+				Fret:   0,
+				String: 3,
+			},
+			{
+				Note:   "A",
+				Octave: 2,
+				Fret:   0,
+				String: 4,
+			},
+			{
+				Note:   "E",
+				Octave: 2,
+				Fret:   0,
+				String: 5,
+			},
+		}
+	}
 }
 
 type FingerBoard struct {
@@ -54,11 +104,15 @@ type FingerBoard struct {
 	frets  int
 }
 
-func NewFingerBoard(tuning Tuning, frets int) *FingerBoard {
+func NewFingerBoard(tuningType TuningType, frets int) *FingerBoard {
 	return &FingerBoard{
-		tuning: tuning,
+		tuning: GetTuning(tuningType),
 		frets:  frets,
 	}
+}
+
+func (fb *FingerBoard) GetTuningNotes() *[]string {
+	return fb.tuning.String()
 }
 
 func (fb *FingerBoard) GetNotes(note string, octave int) Notes {

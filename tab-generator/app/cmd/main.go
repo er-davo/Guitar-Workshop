@@ -47,6 +47,10 @@ func main() {
 
 		tab, err := models.GenerateTab(audioResp)
 
+		if err != nil {
+			return c.JSON(http.StatusInternalServerError, "Tab generarion failed")
+		}
+
 		return c.JSON(http.StatusOK, models.TabResponse{
 			Tab:    tab,
 			Status: "success",

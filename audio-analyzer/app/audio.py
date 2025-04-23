@@ -84,8 +84,8 @@ class AudioAnalyzerServicer(audio_pb2_grpc.AudioAnalyzerServicer):
                     chroma_frame = chroma[:, i]
                     for j in range(12):
                         if chroma_frame[j] > 0.3:
-                            note = librosa.midi_to_note(j + 36)[:-1]
-                            event.chroma_notes.append(note)
+                            chroma_note = librosa.midi_to_note(j + 36)[:-1]
+                            event.chroma_notes.append(chroma_note)
                     event.pitch = float(solo_note_hz)
                     event.main_note = note[:-1]
                     event.octave = int(note[-1])

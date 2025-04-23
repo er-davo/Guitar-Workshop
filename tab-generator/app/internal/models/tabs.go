@@ -16,19 +16,25 @@ type TabResponse struct {
 
 func GenerateTab(audio *audiopb.AudioResponse) (string, error) {
 	events := newNotesEvent(audio)
-	fb := guitar.NewFingerBoard(guitar.StandartTuning, 24)
-	builder, err := guitar.NewTabBuilder(guitar.GuitarType, *fb.GetTuningNotes())
+	fb, err := guitar.NewFingerBoard(guitar.StandartTuning, 24)
 	if err != nil {
-		// TODO
+		return "", err
+	}
+	builder, err := guitar.NewTabBuilder(guitar.GuitarType, fb.GetTuningNotes())
+	if err != nil {
+		return "", err
 	}
 
 	for _, event := range events.notes {
 		notes := fb.GetNotes(event.mainNote, event.octave)
-		note := notes.ClosestTo(guitar.Note{
+		note, err := notes.ClosestTo(guitar.Note{
 			Note:   event.mainNote,
 			Octave: event.octave,
 			Time:   event.time,
 		})
+		if err != nil {
+			return "", err
+		}
 		builder.WriteSingleNote(note)
 	}
 

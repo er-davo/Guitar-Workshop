@@ -1,8 +1,18 @@
 package guitar
 
-import "math"
+import (
+	"errors"
+	"fmt"
+	"math"
+	"slices"
+)
 
-var notesChromo = [12]string{"C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"}
+const (
+	fretDistanceThreshold   = 4.0
+	stringDistanceThreshold = 3.0
+)
+
+var notesChromo = []string{"C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"}
 
 type Note struct {
 	Note   string
@@ -12,46 +22,62 @@ type Note struct {
 	Time   float32
 }
 
-func (n *Note) AddFret() *Note {
-	for i := range 12 {
+func (n *Note) AddFret() error {
+	found := -1
+
+	for i := range len(notesChromo) {
 		if n.Note == notesChromo[i] {
-			if i == 11 {
-				n.Note = notesChromo[0]
-				n.Octave++
-			} else {
-				n.Note = notesChromo[i+1]
-			}
+			found = i
+			break
 		}
 	}
 
+	if found == -1 {
+		return fmt.Errorf("invalid note: %s", n.Note)
+	}
+
+	n.Note = notesChromo[(found+1)%len(notesChromo)]
+
+	if found == len(notesChromo)-1 {
+		n.Octave++
+	}
+
 	n.Fret++
-	return n
+	return nil
 }
 
 type Notes []Note
 
-func (n *Notes) ClosestTo(note Note) Note {
-	minStringDistanse := 100
-	minFretDistanse := 100
-	notePos := Note{}
+func (n *Notes) ClosestTo(target Note) (Note, error) {
+	if len(*n) == 0 {
+		return Note{}, errors.New("empty notes list")
+	}
 
-	for _, possibleNote := range *n {
-		curStringDistanse := math.Abs(float64(possibleNote.String - note.Octave))
-		curFretDistanse := math.Abs(float64(possibleNote.Fret - note.Fret))
+	minStringDistance := math.MaxFloat32
+	minFretDistance := math.MaxFloat32
+	closest := Note{}
 
-		stringAndFret := curStringDistanse < float64(minStringDistanse) &&
-			curFretDistanse < float64(minFretDistanse)
-		stringOnly := curStringDistanse < float64(minStringDistanse) &&
-			curFretDistanse-float64(minFretDistanse) <= 4
-		fretOnly := curStringDistanse-float64(minStringDistanse) <= 3 &&
-			curFretDistanse < float64(minFretDistanse)
+	for _, candidate := range *n {
+		curStringDistance := math.Abs(float64(candidate.String - target.String))
+		curFretDistance := math.Abs(float64(candidate.Fret - target.Fret))
+
+		stringAndFret := curStringDistance < float64(minStringDistance) &&
+			curFretDistance < float64(minFretDistance)
+		stringOnly := curStringDistance < float64(minStringDistance) &&
+			curFretDistance-float64(minFretDistance) <= fretDistanceThreshold
+		fretOnly := curStringDistance-float64(minStringDistance) <= stringDistanceThreshold &&
+			curFretDistance < float64(minFretDistance)
 
 		if stringAndFret || stringOnly || fretOnly {
-			notePos = possibleNote
-			minFretDistanse = int(curFretDistanse)
-			minStringDistanse = int(curStringDistanse)
+			closest = candidate
+			minFretDistance = curFretDistance
+			minStringDistance = curStringDistance
 		}
 	}
 
-	return notePos
+	return closest, nil
+}
+
+func noteIsValid(n Note) bool {
+	return slices.Contains(notesChromo, n.Note)
 }

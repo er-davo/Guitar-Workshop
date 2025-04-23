@@ -21,10 +21,12 @@ type tabBuilder struct {
 }
 
 func NewTabBuilder(instrumentType InstrumentType, tuningNotes []string) (*tabBuilder, error) {
+	defaultTimeStep := float32(0.2)
 	switch instrumentType {
 	case GuitarType:
 		tb := tabBuilder{
 			time:           0.0,
+			timeStep:       defaultTimeStep,
 			instrumentType: instrumentType,
 			tabStrings:     make([]strings.Builder, 6),
 		}
@@ -47,21 +49,24 @@ func (tb *tabBuilder) Tab() string {
 }
 
 func (tb *tabBuilder) WriteSingleNote(n Note) error {
-	if n.Time < tb.time {
-		// TODO
-		return errors.New("")
+	if !noteIsValid(n) {
+		return fmt.Errorf("invalid note: %s", n.Note)
 	}
+	if n.Time < tb.time {
+		return fmt.Errorf("note time %v precedes current time %v", n.Time, tb.time)
+	}
+
 	silence := int((n.Time - tb.time) / tb.timeStep)
 	tb.addSilence(silence)
 	tb.time += tb.timeStep * (float32(silence + 1))
+	skipToOtherStrings := "-"
+	if n.Fret/10 > 0 {
+		skipToOtherStrings = "--"
+	}
 
 	for i := range tb.tabStrings {
-		skipToOtherStrings := "-"
 
 		if i == n.String {
-			if n.Fret/10 > 0 {
-				skipToOtherStrings += "-"
-			}
 			tb.tabStrings[i].WriteString(fmt.Sprintf("%d", n.Fret))
 			continue
 		}
@@ -77,10 +82,15 @@ func (tb *tabBuilder) WriteChord() {
 
 }
 
-func (tb *tabBuilder) addNotes(notes []string) {
+func (tb *tabBuilder) addNotes(notes []string) error {
+	if len(notes) != len(tb.tabStrings) {
+		return fmt.Errorf("invalid tuning notes count")
+	}
+
 	for i := range notes {
 		tb.tabStrings[i].WriteString(notes[i] + "|")
 	}
+	return nil
 }
 
 func (tb *tabBuilder) addSilence(n int) {

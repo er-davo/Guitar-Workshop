@@ -1,8 +1,13 @@
 package models
 
 import (
+	"fmt"
 	"slices"
+
 	audiopb "tabgen/internal/audioproto"
+	"tabgen/internal/logger"
+
+	"go.uber.org/zap"
 )
 
 type noteEvent struct {
@@ -42,11 +47,12 @@ func newNotesEvent(events *audiopb.AudioResponse) *notesEvent {
 	for _, e := range events.NoteFeatures {
 		// skip noise and silence
 		if len(e.ChromaNotes) > 6 || e.MainNote == "" {
+			logger.Info("skipped", zap.String("audio_event", fmt.Sprintf("%+v", e)))
 			continue
 		}
-		if !slices.Contains(e.ChromaNotes, e.MainNote[:len(e.MainNote)-1]) {
-			continue
-		}
+		// if !slices.Contains(e.ChromaNotes, e.MainNote) {
+		// 	continue
+		// }
 
 		notes.notes = append(notes.notes, *createNoteEvent(e))
 	}

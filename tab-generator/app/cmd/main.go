@@ -16,7 +16,7 @@ import (
 )
 
 func main() {
-	logger.Init()
+	defer logger.Log.Sync()
 
 	conn, err := grpc.NewClient(
 		"audio-analyzer:50051",

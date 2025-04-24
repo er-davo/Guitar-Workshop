@@ -1,11 +1,9 @@
 package logger
 
 import (
-	"os"
 	"sync"
 
 	"go.uber.org/zap"
-	"go.uber.org/zap/zapcore"
 )
 
 var (
@@ -13,29 +11,32 @@ var (
 	once sync.Once
 )
 
-func Init() {
+func init() {
 	once.Do(func() {
-		encoderConfig := zapcore.EncoderConfig{
-			TimeKey:        "ts",
-			LevelKey:       "level",
-			NameKey:        "logger",
-			CallerKey:      "caller",
-			FunctionKey:    zapcore.OmitKey,
-			MessageKey:     "msg",
-			StacktraceKey:  "stacktrace",
-			LineEnding:     zapcore.DefaultLineEnding,
-			EncodeLevel:    zapcore.LowercaseColorLevelEncoder,
-			EncodeTime:     zapcore.RFC3339NanoTimeEncoder,
-			EncodeDuration: zapcore.StringDurationEncoder,
-			EncodeCaller:   zapcore.ShortCallerEncoder,
-		}
-
-		consoleEncoder := zapcore.NewConsoleEncoder(encoderConfig)
-
-		zapLevel := zapcore.DebugLevel
-
-		consoleCore := zapcore.NewCore(consoleEncoder, zapcore.AddSync(os.Stdout), zapLevel)
-		Log = zap.New(consoleCore, zap.AddCaller(), zap.AddStacktrace(zapcore.ErrorLevel))
-		return
+		Log, _ = zap.NewDevelopment()
 	})
+}
+
+func Info(msg string, fields ...zap.Field) {
+	Log.Info(msg, fields...)
+}
+
+func Debug(msg string, fields ...zap.Field) {
+	Log.Debug(msg, fields...)
+}
+
+func Warn(msg string, fields ...zap.Field) {
+	Log.Warn(msg, fields...)
+}
+
+func Error(msg string, fields ...zap.Field) {
+	Log.Error(msg, fields...)
+}
+
+func Fatal(msg string, fields ...zap.Field) {
+	Log.Fatal(msg, fields...)
+}
+
+func Panic(msg string, fields ...zap.Field) {
+	Log.Panic(msg, fields...)
 }

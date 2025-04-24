@@ -19,6 +19,6 @@ func TestWriteSingleNote(t *testing.T) {
 	err := tb.WriteSingleNote(note)
 
 	assert.NoError(t, err, "got error")
-	assert.Equal(t, "something", tb.Tab(), "something wrong")
 
+	assert.Equal(t, "something", tb.Tab(), "something wrong")
 }

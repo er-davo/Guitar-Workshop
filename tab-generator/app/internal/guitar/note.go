@@ -17,9 +17,11 @@ var notesChromo = []string{"C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A",
 type Note struct {
 	Note   string
 	Octave int
+
 	Fret   int
 	String int
-	Time   float32
+
+	Time float32
 }
 
 func (n *Note) AddFret() error {
@@ -74,6 +76,8 @@ func (n *Notes) ClosestTo(target Note) (Note, error) {
 			minStringDistance = curStringDistance
 		}
 	}
+
+	closest.Time = target.Time
 
 	return closest, nil
 }

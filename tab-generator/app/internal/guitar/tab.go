@@ -65,7 +65,6 @@ func (tb *tabBuilder) WriteSingleNote(n Note) error {
 	}
 
 	for i := range tb.tabStrings {
-
 		if i == n.String {
 			tb.tabStrings[i].WriteString(fmt.Sprintf("%d", n.Fret))
 			continue
@@ -73,6 +72,10 @@ func (tb *tabBuilder) WriteSingleNote(n Note) error {
 
 		tb.tabStrings[i].WriteString(skipToOtherStrings)
 	}
+
+	// to escape situations like:
+	// E|-3--123-----
+	tb.addSilence(1)
 
 	return nil
 }
@@ -96,7 +99,7 @@ func (tb *tabBuilder) addNotes(notes []string) error {
 func (tb *tabBuilder) addSilence(n int) {
 	for range n {
 		for i := range len(tb.tabStrings) {
-			tb.tabStrings[i].WriteRune('-')
+			tb.tabStrings[i].WriteString("-")
 		}
 	}
 }

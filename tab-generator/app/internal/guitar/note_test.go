@@ -55,7 +55,7 @@ func TestClosestTo(t *testing.T) {
 
 func TestAddFret(t *testing.T) {
 	note := Note{
-		Note:   "E",
+		Note:   "F",
 		Octave: 2,
 		Fret:   0,
 		String: 0,
@@ -67,7 +67,7 @@ func TestAddFret(t *testing.T) {
 	assert.NoError(t, err)
 
 	assert.Equal(t, Note{
-		Note:   "F",
+		Note:   "F#",
 		Octave: 2,
 		Fret:   1,
 		String: 0,

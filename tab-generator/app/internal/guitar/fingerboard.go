@@ -93,17 +93,23 @@ func (fb *FingerBoard) GetTuningNotes() []string {
 	return fb.tuning.NoteNames()
 }
 
-func (fb *FingerBoard) GetNotes(targetNote string, targetOctave int) Notes {
+// TODO
+// fix error
+// returns empty list for # notes
+func (fb FingerBoard) GetNotes(targetNote string, targetOctave int) Notes {
 	notes := Notes{}
-	tuningStrings := make(Tuning, len(fb.tuning))
+	currentNote := Note{}
 
 	for i := range fb.tuning {
-		copy(tuningStrings, fb.tuning)
-		for fret := 0; fret < fb.frets+1; fret++ {
-			if tuningStrings[i].Note == targetNote && tuningStrings[i].Octave == targetOctave {
-				notes = append(notes, tuningStrings[i])
+		currentNote.Note = strings.Clone(fb.tuning[i].Note)
+		currentNote.Octave = fb.tuning[i].Octave
+		currentNote.String = fb.tuning[i].String
+
+		for fret := 0; fret < fb.frets; fret++ {
+			if currentNote.Note == targetNote && currentNote.Octave == targetOctave {
+				notes = append(notes, currentNote)
 			}
-			tuningStrings[i].AddFret()
+			currentNote.AddFret()
 		}
 	}
 

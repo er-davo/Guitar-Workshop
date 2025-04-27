@@ -16,15 +16,25 @@ func TestNewFingerBoard(t *testing.T) {
 func TestGetNotes(t *testing.T) {
 	fb, _ := NewFingerBoard(StandartTuning, 24)
 
-	notes := fb.GetNotes("F#", 4)
+	notes := fb.GetNotes("A", 2)
 
 	assert.True(t, slices.Contains(notes, Note{
-		Note:   "E",
+		Note:   "A",
 		Octave: 2,
 		Fret:   0,
-		String: 5,
+		String: 4,
 		Time:   0,
 	}))
 
-	assert.Equal(t, Notes{}, notes)
+	notes = fb.GetNotes("C#", 3)
+
+	assert.True(t, slices.Contains(notes, Note{
+		Note:   "C#",
+		Octave: 3,
+		Fret:   4,
+		String: 4,
+		Time:   0,
+	}))
+
+	assert.True(t, len(notes) != 0)
 }

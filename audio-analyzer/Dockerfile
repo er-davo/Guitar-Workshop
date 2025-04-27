@@ -6,6 +6,6 @@ COPY app /audio-analyzer
 
 RUN apt-get update && apt-get install -y ffmpeg
 
-RUN pip install grpcio grpcio-tools librosa supabase pydub
+RUN pip install grpcio grpcio-tools librosa supabase pydub resampy
 
 CMD [ "python", "main.py" ]

@@ -72,12 +72,24 @@ func (n *notesEvent) removeLongDurations() {
 			for j := i; j < len(n.notes)-1; j++ {
 				if !n.notes[start].equalsTo(n.notes[j+1], timeDiff) {
 					end = j + 1
+					break
 				}
 			}
 
 			if end == -1 {
 				end = len(n.notes) - 1
 			}
+
+			// logger.Info("deleting from - to",
+			// 	zap.String(
+			// 		"start_note_event",
+			// 		fmt.Sprintf("%+v", n.notes[start]),
+			// 	),
+			// 	zap.String(
+			// 		"end_note_event",
+			// 		fmt.Sprintf("%+v", n.notes[end]),
+			// 	),
+			// )
 
 			n.notes = slices.Delete(n.notes, start, end)
 

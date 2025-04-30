@@ -12,7 +12,7 @@ func TestWriteSingleNote(t *testing.T) {
 		Octave: 2,
 		Fret:   12,
 		String: 5,
-		Time:   4,
+		Time:   0,
 	}
 	tun, _ := GetTuning(StandartTuning)
 	tb, _ := NewTabBuilder(GuitarType, tun.NoteNames())
@@ -20,7 +20,7 @@ func TestWriteSingleNote(t *testing.T) {
 
 	assert.NoError(t, err, "got error")
 
-	assert.Equal(t, "e|----------------------\nB|----------------------\nG|----------------------\nD|----------------------\nA|----------------------\nE|--------------------12\n",
+	assert.Equal(t, "e|--\nB|--\nG|--\nD|--\nA|--\nE|12\n",
 		tb.Tab(), "something wrong",
 	)
 }

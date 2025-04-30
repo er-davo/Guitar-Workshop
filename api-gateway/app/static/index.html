@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Генератор табулатур</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-guitar"></i> Генератор гитарных табулатур</h1>
+            <p class="subtitle">Преобразуйте музыку в ноты для гитары</p>
+        </header>
+
+        <div class="card">
+            <div class="tabs">
+                <button class="tab-button active" data-tab="file">
+                    <i class="fas fa-file-audio"></i> Из файла
+                </button>
+                <button class="tab-button" data-tab="youtube">
+                    <i class="fab fa-youtube"></i> Из YouTube
+                </button>
+            </div>
+
+            <form id="uploadForm">
+                <div class="tab-content active" id="file-tab">
+                    <div class="file-upload">
+                        <label for="audioFile" class="file-label">
+                            <i class="fas fa-cloud-upload-alt"></i>
+                            <span class="file-text">Выберите или перетащите аудиофайл</span>
+                            <span class="file-types">(MP3, WAV)</span>
+                        </label>
+                        <input type="file" id="audioFile" accept=".wav,.mp3" class="file-input">
+                        <div id="fileName" class="file-name"></div>
+                    </div>
+                </div>
+                
+                <div class="tab-content" id="youtube-tab">
+                    <div class="input-group">
+                        <i class="fab fa-youtube input-icon"></i>
+                        <input type="text" id="youtubeUrl" placeholder="https://www.youtube.com/watch?v=..." class="text-input">
+                    </div>
+                </div>
+
+                <button type="submit" class="submit-button">
+                    <i class="fas fa-magic"></i> Сгенерировать табулатуру
+                </button>
+            </form>
+        </div>
+
+        <div class="card result-card">
+            <h3><i class="fas fa-music"></i> Результат:</h3>
+            <div class="result-container">
+                <pre id="tabResult">Здесь появится сгенерированная табулатура...</pre>
+                <div id="loading" class="loading">
+                    <div class="spinner"></div>
+                    <div class="loading-text">Обработка...</div>
+                </div>
+            </div>
+            <button id="copyButton" class="copy-button" disabled>
+                <i class="far fa-copy"></i> Копировать
+            </button>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

@@ -80,7 +80,7 @@ func NewFingerBoard(tuningType TuningType, frets int) (*FingerBoard, error) {
 
 	tun, err := GetTuning(tuningType)
 	if err != nil {
-		return &FingerBoard{}, err
+		return nil, err
 	}
 
 	return &FingerBoard{
@@ -101,7 +101,7 @@ func (fb FingerBoard) GetNotes(targetNote string, targetOctave int) Notes {
 	currentNote := Note{}
 
 	for i := range fb.tuning {
-		currentNote.Note = strings.Clone(fb.tuning[i].Note)
+		currentNote.Note = fb.tuning[i].Note
 		currentNote.Octave = fb.tuning[i].Octave
 		currentNote.String = fb.tuning[i].String
 

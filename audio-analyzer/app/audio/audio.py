@@ -1,13 +1,13 @@
-from files_access import download_file, delete_file, m4a_to_wav
 from log import logger
 from scipy.signal import butter, lfilter
+from .audio import audio_pb2, audio_pb2_grpc
 
+import storage
 import grpc
 import librosa
 import numpy as np
 
 import audio_pb2_grpc
-import audio_pb2
 
 
 def butter_bandpass(lowcut, highcut, fs, order=5):
@@ -32,19 +32,14 @@ class AudioAnalyzerServicer(audio_pb2_grpc.AudioAnalyzerServicer):
 
         try:
             # Загрузка и конвертация файла
-            local_path = download_file(request.audio_path)
+            local_path = storage.download_file(request.audio_path)
             logger.info(f"File {request.audio_path} downloaded")
-
-            if request.audio_path.endswith(".m4a"):
-                request.audio_path = request.audio_path[:-4] + ".wav"
-                local_path = m4a_to_wav(local_path)
-                logger.info("Converted from .m4a to .wav")
 
             # Загрузка аудио с прогрессивной декодировкой
             y, sr = librosa.load(local_path, sr=44100, res_type='kaiser_best')
             y = librosa.util.normalize(y)
 
-            delete_file(request.audio_path, del_supabase=False)
+            storage.delete_file(request.audio_path, del_supabase=False)
             
             # Проверка длительности аудио
             duration = len(y) / sr

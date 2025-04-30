@@ -1,13 +1,12 @@
 from concurrent import futures
 
-import audio_pb2_grpc
 import audio
 import grpc
 
 
 def serve():
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
-    audio_pb2_grpc.add_AudioAnalyzerServicer_to_server(
+    audio.add_AudioAnalyzerServicer_to_server(
         audio.AudioAnalyzerServicer(), server
     )
     

@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+option go_package = "internal/tabproto";
+
+service TabGenerate {
+    rpc GenerateTab (TabRequest) returns (TabResponse);
+}
+
+enum RequestType {
+    FILE = 0;
+    YOUTUBE = 1;
+}
+
+message TabRequest {
+    string audio_url = 1;
+    RequestType type = 2;
+}
+
+message TabResponse {
+    string tab = 1;
+}

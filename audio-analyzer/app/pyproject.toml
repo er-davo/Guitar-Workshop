@@ -1,0 +1,20 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "audio-analyzer"
+version = "0.1.0"
+authors = [{name = "Eritsian David", email = "Wruser123@gmail.com"}]
+description = "Audio processing with gRPC and Supabase"
+dependencies = [
+    "grpcio>=1.60.0",
+    "grpcio-tools>=1.60.0",
+    "librosa>=0.10.0",
+    "supabase>=2.3.0",
+    "pydub>=0.25.1",
+    "resampy>=0.4.2"
+]
+
+[tool.setuptools]
+packages = ["audio", "storage"]

@@ -1,14 +1,13 @@
 from log import logger
 from scipy.signal import butter, lfilter
-from .audio import audio_pb2, audio_pb2_grpc
+from audioproto import audio_pb2, audio_pb2_grpc
 
 import storage
+import youtube
 import grpc
 import librosa
 import numpy as np
-
-import audio_pb2_grpc
-
+import os
 
 def butter_bandpass(lowcut, highcut, fs, order=5):
     nyq = 0.5 * fs
@@ -32,14 +31,21 @@ class AudioAnalyzerServicer(audio_pb2_grpc.AudioAnalyzerServicer):
 
         try:
             # Загрузка и конвертация файла
-            local_path = storage.download_file(request.audio_path)
-            logger.info(f"File {request.audio_path} downloaded")
+            if request.type == audio_pb2.FILE:
+                local_path = storage.download_file(request.audio_path)
+                logger.info(f"File {request.audio_path} downloaded")
+            elif request.type == audio_pb2.YOUTUBE:
+                local_path = youtube.download_audio(request.audio_path)
+                logger.info(f"File {local_path} downloaded")
 
             # Загрузка аудио с прогрессивной декодировкой
             y, sr = librosa.load(local_path, sr=44100, res_type='kaiser_best')
             y = librosa.util.normalize(y)
 
-            storage.delete_file(request.audio_path, del_supabase=False)
+            if request.type == audio_pb2.FILE:
+                storage.delete_file(request.audio_path, del_supabase=False)
+            elif request.type == audio_pb2.YOUTUBE:
+                os.remove(local_path)
             
             # Проверка длительности аудио
             duration = len(y) / sr

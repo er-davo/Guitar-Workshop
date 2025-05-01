@@ -21,9 +21,56 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
+type RequestType int32
+
+const (
+	RequestType_FILE    RequestType = 0
+	RequestType_YOUTUBE RequestType = 1
+)
+
+// Enum value maps for RequestType.
+var (
+	RequestType_name = map[int32]string{
+		0: "FILE",
+		1: "YOUTUBE",
+	}
+	RequestType_value = map[string]int32{
+		"FILE":    0,
+		"YOUTUBE": 1,
+	}
+)
+
+func (x RequestType) Enum() *RequestType {
+	p := new(RequestType)
+	*p = x
+	return p
+}
+
+func (x RequestType) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (RequestType) Descriptor() protoreflect.EnumDescriptor {
+	return file_audio_proto_enumTypes[0].Descriptor()
+}
+
+func (RequestType) Type() protoreflect.EnumType {
+	return &file_audio_proto_enumTypes[0]
+}
+
+func (x RequestType) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use RequestType.Descriptor instead.
+func (RequestType) EnumDescriptor() ([]byte, []int) {
+	return file_audio_proto_rawDescGZIP(), []int{0}
+}
+
 type AudioRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	AudioPath     string                 `protobuf:"bytes,1,opt,name=audio_path,json=audioPath,proto3" json:"audio_path,omitempty"`
+	Type          RequestType            `protobuf:"varint,2,opt,name=type,proto3,enum=audio.RequestType" json:"type,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -63,6 +110,13 @@ func (x *AudioRequest) GetAudioPath() string {
 		return x.AudioPath
 	}
 	return ""
+}
+
+func (x *AudioRequest) GetType() RequestType {
+	if x != nil {
+		return x.Type
+	}
+	return RequestType_FILE
 }
 
 type AudioResponse struct {
@@ -189,10 +243,11 @@ var File_audio_proto protoreflect.FileDescriptor
 
 const file_audio_proto_rawDesc = "" +
 	"\n" +
-	"\vaudio.proto\x12\x05audio\"-\n" +
+	"\vaudio.proto\x12\x05audio\"U\n" +
 	"\fAudioRequest\x12\x1d\n" +
 	"\n" +
-	"audio_path\x18\x01 \x01(\tR\taudioPath\"G\n" +
+	"audio_path\x18\x01 \x01(\tR\taudioPath\x12&\n" +
+	"\x04type\x18\x02 \x01(\x0e2\x12.audio.RequestTypeR\x04type\"G\n" +
 	"\rAudioResponse\x126\n" +
 	"\rnote_features\x18\x01 \x03(\v2\x11.audio.AudioEventR\fnoteFeatures\"\x8e\x01\n" +
 	"\n" +
@@ -201,7 +256,10 @@ const file_audio_proto_rawDesc = "" +
 	"\x05pitch\x18\x02 \x01(\x02R\x05pitch\x12\x1b\n" +
 	"\tmain_note\x18\x03 \x01(\tR\bmainNote\x12\x16\n" +
 	"\x06octave\x18\x04 \x01(\x05R\x06octave\x12!\n" +
-	"\fchroma_notes\x18\x05 \x03(\tR\vchromaNotes2J\n" +
+	"\fchroma_notes\x18\x05 \x03(\tR\vchromaNotes*$\n" +
+	"\vRequestType\x12\b\n" +
+	"\x04FILE\x10\x00\x12\v\n" +
+	"\aYOUTUBE\x10\x012J\n" +
 	"\rAudioAnalyzer\x129\n" +
 	"\fProcessAudio\x12\x13.audio.AudioRequest\x1a\x14.audio.AudioResponseB\x15Z\x13internal/audioprotob\x06proto3"
 
@@ -217,21 +275,24 @@ func file_audio_proto_rawDescGZIP() []byte {
 	return file_audio_proto_rawDescData
 }
 
+var file_audio_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
 var file_audio_proto_msgTypes = make([]protoimpl.MessageInfo, 3)
 var file_audio_proto_goTypes = []any{
-	(*AudioRequest)(nil),  // 0: audio.AudioRequest
-	(*AudioResponse)(nil), // 1: audio.AudioResponse
-	(*AudioEvent)(nil),    // 2: audio.AudioEvent
+	(RequestType)(0),      // 0: audio.RequestType
+	(*AudioRequest)(nil),  // 1: audio.AudioRequest
+	(*AudioResponse)(nil), // 2: audio.AudioResponse
+	(*AudioEvent)(nil),    // 3: audio.AudioEvent
 }
 var file_audio_proto_depIdxs = []int32{
-	2, // 0: audio.AudioResponse.note_features:type_name -> audio.AudioEvent
-	0, // 1: audio.AudioAnalyzer.ProcessAudio:input_type -> audio.AudioRequest
-	1, // 2: audio.AudioAnalyzer.ProcessAudio:output_type -> audio.AudioResponse
-	2, // [2:3] is the sub-list for method output_type
-	1, // [1:2] is the sub-list for method input_type
-	1, // [1:1] is the sub-list for extension type_name
-	1, // [1:1] is the sub-list for extension extendee
-	0, // [0:1] is the sub-list for field type_name
+	0, // 0: audio.AudioRequest.type:type_name -> audio.RequestType
+	3, // 1: audio.AudioResponse.note_features:type_name -> audio.AudioEvent
+	1, // 2: audio.AudioAnalyzer.ProcessAudio:input_type -> audio.AudioRequest
+	2, // 3: audio.AudioAnalyzer.ProcessAudio:output_type -> audio.AudioResponse
+	3, // [3:4] is the sub-list for method output_type
+	2, // [2:3] is the sub-list for method input_type
+	2, // [2:2] is the sub-list for extension type_name
+	2, // [2:2] is the sub-list for extension extendee
+	0, // [0:2] is the sub-list for field type_name
 }
 
 func init() { file_audio_proto_init() }
@@ -244,13 +305,14 @@ func file_audio_proto_init() {
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_audio_proto_rawDesc), len(file_audio_proto_rawDesc)),
-			NumEnums:      0,
+			NumEnums:      1,
 			NumMessages:   3,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
 		GoTypes:           file_audio_proto_goTypes,
 		DependencyIndexes: file_audio_proto_depIdxs,
+		EnumInfos:         file_audio_proto_enumTypes,
 		MessageInfos:      file_audio_proto_msgTypes,
 	}.Build()
 	File_audio_proto = out.File

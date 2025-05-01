@@ -31,6 +31,7 @@ func (s *TabService) GenerateTab(ctx context.Context, req *tabpb.TabRequest) (*t
 
 	audioResp, err := client.ProcessAudio(context.Background(), &audiopb.AudioRequest{
 		AudioPath: req.AudioUrl,
+		Type:      audiopb.RequestType(req.Type),
 	})
 	if err != nil {
 		logger.Log.Error("error on process audio", zap.Error(err))

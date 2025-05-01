@@ -38,7 +38,7 @@ func main() {
 	})
 
 	// TODO
-	e.POST("tab-generate", func(c echo.Context) error {
+	e.POST("/generate-tab", func(c echo.Context) error {
 		var tabReq tabpb.TabRequest
 		if err := c.Bind(&tabReq); err != nil {
 			return c.JSON(http.StatusBadRequest, "Invalid request")

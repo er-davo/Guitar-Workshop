@@ -30,7 +30,7 @@ document.addEventListener('DOMContentLoaded', () => {
         
         const activeTab = document.querySelector('.tab-button.active').getAttribute('data-tab');
         let formData = new FormData();
-        const endpoint = 'http://localhost:8081/tab-generate';
+        const endpoint = 'http://localhost:8081/generate-tab';
 
         resultDiv.textContent = 'Обработка...';
 
@@ -50,7 +50,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     throw new Error('Некорректная YouTube ссылка!');
                 }
                 formData.append('audio_url', youtubeUrl);
-                formData.append('source_type', TYPE_YOUTUBE);
+                formData.append('type', TYPE_YOUTUBE);
             }
 
             const response = await fetch(endpoint, {

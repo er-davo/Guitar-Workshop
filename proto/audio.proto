@@ -8,8 +8,14 @@ service AudioAnalyzer {
     rpc ProcessAudio (AudioRequest) returns (AudioResponse);
 }
 
+enum RequestType {
+    FILE = 0;
+    YOUTUBE = 1;
+}
+
 message AudioRequest {
     string audio_path = 1;
+    RequestType type = 2;
 }
 
 message AudioResponse {

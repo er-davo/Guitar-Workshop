@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"slices"
 	"strconv"
 
 	"api-gateway/internal/logger"
@@ -16,9 +17,14 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 )
 
+var testFiles = []string{
+	"nothing-else-matters.wav",
+	"chords.wav",
+}
+
 func TabGenerate(c echo.Context) error {
 	conn, err := grpc.NewClient(
-		"tab-generate:8081",
+		"tab-generator:50052",
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 	)
 	if err != nil {
@@ -28,7 +34,10 @@ func TabGenerate(c echo.Context) error {
 
 	client := tabpb.NewTabGenerateClient(conn)
 
-	intType, _ := strconv.Atoi(c.FormValue("type"))
+	intType, err := strconv.Atoi(c.FormValue("type"))
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid type format"})
+	}
 	reqType := tabpb.RequestType(intType)
 
 	var audioURL string
@@ -38,6 +47,11 @@ func TabGenerate(c echo.Context) error {
 		file, err := c.FormFile("audio_url")
 		if err != nil {
 			return c.JSON(http.StatusBadRequest, map[string]string{"error": "No file uploaded"})
+		}
+
+		if slices.Contains(testFiles, file.Filename) {
+			audioURL = file.Filename
+			break
 		}
 
 		// TODO: add unique  file name generation

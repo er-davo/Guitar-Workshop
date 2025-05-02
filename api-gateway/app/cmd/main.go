@@ -1,7 +1,9 @@
 package main
 
 import (
+	"api-gateway/internal/config"
 	"api-gateway/internal/handlers"
+	"fmt"
 
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
@@ -10,7 +12,7 @@ import (
 func main() {
 	e := echo.New()
 
-	e.Static("/static", "sctatic")
+	e.Static("/static", "static")
 
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
@@ -21,5 +23,5 @@ func main() {
 
 	e.POST("/generate-tab", handlers.TabGenerate)
 
-	e.Logger.Fatal(e.Start("0.0.0.0:8080"))
+	e.Logger.Fatal(e.Start(fmt.Sprintf(":%s", config.Load().PORT)))
 }

@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Генератор табулатур</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="static/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
@@ -34,6 +34,10 @@
                         </label>
                         <input type="file" id="audioFile" accept=".wav,.mp3" class="file-input">
                         <div id="fileName" class="file-name"></div>
+                        <div id="uploadProgress" class="progress-container">
+                            <div class="progress-bar"></div>
+                            <span class="progress-text">0%</span>
+                        </div>
                     </div>
                 </div>
                 
@@ -53,7 +57,14 @@
         <div class="card result-card">
             <h3><i class="fas fa-music"></i> Результат:</h3>
             <div class="result-container">
-                <pre id="tabResult">Здесь появится сгенерированная табулатура...</pre>
+                <div id="tabResult" class="tablature">
+                    <!-- <div class="tab-line">e|--0--</div>
+                    <div class="tab-line">B|--1--</div>
+                    <div class="tab-line">G|--0--</div>
+                    <div class="tab-line">D|--2--</div>
+                    <div class="tab-line">A|--3--</div>
+                    <div class="tab-line">E|-----</div> -->
+                </div>
                 <div id="loading" class="loading">
                     <div class="spinner"></div>
                     <div class="loading-text">Обработка...</div>
@@ -65,6 +76,6 @@
         </div>
     </div>
 
-    <script src="script.js"></script>
+    <script src="static/script.js"></script>
 </body>
 </html>

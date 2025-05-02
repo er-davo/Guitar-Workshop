@@ -299,6 +299,125 @@ h1 i {
     border-color: var(--success-color);
 }
 
+.progress-container {
+    width: 100%;
+    background-color: #e9ecef;
+    border-radius: var(--border-radius);
+    margin-top: 10px;
+    display: none;
+    height: 24px;
+    position: relative;
+}
+
+.progress-bar {
+    height: 100%;
+    border-radius: var(--border-radius);
+    background-color: var(--primary-color);
+    width: 0%;
+    transition: width 0.3s ease;
+}
+
+.progress-text {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    color: white;
+    font-size: 0.8rem;
+    font-weight: bold;
+    text-shadow: 0 0 2px rgba(0,0,0,0.5);
+}
+
+#tabResult {
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 8px;
+    border: 1px solid #eee;
+    height: 200px; /* Фиксированная высота */
+    overflow-x: auto; /* Только горизонтальный скролл */
+    overflow-y: hidden; /* Отключаем вертикальный скролл */
+    white-space: nowrap; /* Запрещаем переносы строк */
+    font-family: 'Courier New', monospace;
+    line-height: 1.5;
+}
+
+#tabResult div {
+    white-space: nowrap; /* Каждая строка таба без переносов */
+    padding: 2px 0;
+    min-width: 100%; /* Гарантируем, что строка не будет переноситься */
+}
+
+/* Стили для табулатуры */
+.tablature {
+    font-family: 'Courier New', Courier, monospace;
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: var(--border-radius);
+    border: 1px solid #eee;
+    min-height: 200px;
+    max-height: 400px;
+    overflow-y: auto;
+    line-height: 1.5;
+}
+
+.tab-line {
+    margin-bottom: 2px;
+    white-space: nowrap;
+    overflow-x: auto;
+    padding-bottom: 2px;
+}
+
+.tab-line::-webkit-scrollbar {
+    height: 4px;
+}
+
+.tab-line::-webkit-scrollbar-thumb {
+    background: var(--primary-color);
+    border-radius: 2px;
+}
+
+/* Подсветка нот в табулатуре */
+.tab-line span.note {
+    color: var(--accent-color);
+    font-weight: bold;
+    position: relative;
+}
+
+.tab-line span.note::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background-color: var(--accent-color);
+}
+
+.placeholder-text {
+    color: var(--secondary-color);
+    text-align: center;
+    padding: 30px;
+    font-style: italic;
+}
+
+.tablature.empty {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 200px;
+}
+
+/* Анимация для копирования */
+@keyframes fadeCopy {
+    0% { background-color: var(--light-color); }
+    50% { background-color: var(--success-color); color: white; }
+    100% { background-color: var(--light-color); }
+}
+
+.copy-button.copied {
+    animation: fadeCopy 1.5s ease;
+}
+
 @media (max-width: 600px) {
     .container {
         padding: 10px;

@@ -2,8 +2,8 @@ PROTO_DIR = proto
 
 PYTHON_VENV = audio-analyzer/venv
 
-PYTHON_OUT = audio-analyzer/app/audioproto
-GRPC_PYTHON_OUT = audio-analyzer/app/audioproto
+PYTHON_OUT = audio-analyzer/app
+GRPC_PYTHON_OUT = audio-analyzer/app
 
 TABGEN_GO_OUT = tab-generator/app
 TABGEN_GO_GRPC_OUT = tab-generator/app

@@ -9,8 +9,10 @@ services:
       - tab-generator
   tab-generator:
     build: ./tab-generator
+    env_file:
+      - /tab-generator/.env
     ports:
-      - "8081:8080"
+      - "50052:50052"
     depends_on:
       - audio-analyzer
   

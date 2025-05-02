@@ -1,7 +1,7 @@
 from log import logger
 from scipy.signal import butter, lfilter
-from audioproto import audio_pb2, audio_pb2_grpc
 
+import audio_pb2, audio_pb2_grpc
 import storage
 import youtube
 import grpc

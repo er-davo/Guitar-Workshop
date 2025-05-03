@@ -101,9 +101,7 @@ func (fb FingerBoard) GetNotes(targetNote string, targetOctave int) Notes {
 	currentNote := Note{}
 
 	for i := range fb.tuning {
-		currentNote.Note = fb.tuning[i].Note
-		currentNote.Octave = fb.tuning[i].Octave
-		currentNote.String = fb.tuning[i].String
+		currentNote = fb.tuning[i]
 
 		for fret := 0; fret < fb.frets; fret++ {
 			if currentNote.Note == targetNote && currentNote.Octave == targetOctave {
@@ -115,3 +113,19 @@ func (fb FingerBoard) GetNotes(targetNote string, targetOctave int) Notes {
 
 	return notes
 }
+
+/*
+e|----------0-------
+B|--------0---0-----
+G|------0-------0---
+D|------------------
+A|------------------
+E|----0-----------0-
+
+e|-----------------------------------------------------------
+B|------------------------0--0-------------------------------
+G|---------------------------------0-0----------------------0
+D|-----------------------------2-1---------------------------
+A|-----------------------------------------------------------
+E|-----------------0--0----------------4-0---0-------0-0--0--
+*/

@@ -328,23 +328,63 @@ h1 i {
     text-shadow: 0 0 2px rgba(0,0,0,0.5);
 }
 
-#tabResult {
+/* Удаляем старые стили для #tabResult и добавляем новые: */
+
+.result-container {
+    position: relative;
+    width: 100%;
+    overflow: hidden;
+}
+
+.tablature {
+    font-family: 'Courier New', Courier, monospace;
     background: #f8f9fa;
     padding: 15px;
-    border-radius: 8px;
+    border-radius: var(--border-radius);
     border: 1px solid #eee;
-    height: 200px; /* Фиксированная высота */
-    overflow-x: auto; /* Только горизонтальный скролл */
-    overflow-y: hidden; /* Отключаем вертикальный скролл */
-    white-space: nowrap; /* Запрещаем переносы строк */
-    font-family: 'Courier New', monospace;
+    display: flex;
+    flex-direction: column;
+    width: fit-content;
+    min-width: 100%;
+}
+
+.tab-line {
+    white-space: nowrap;
+    overflow-x: visible;
+    padding: 2px 0;
+    min-height: 1.5em;
     line-height: 1.5;
 }
 
-#tabResult div {
-    white-space: nowrap; /* Каждая строка таба без переносов */
-    padding: 2px 0;
-    min-width: 100%; /* Гарантируем, что строка не будет переноситься */
+/* Горизонтальный скролл для всего контейнера табулатуры */
+.result-container {
+    overflow-x: auto;
+    overflow-y: hidden;
+}
+
+/* Стили для скроллбара */
+.result-container::-webkit-scrollbar {
+    height: 8px;
+}
+
+.result-container::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+
+.result-container::-webkit-scrollbar-thumb {
+    background: var(--primary-color);
+    border-radius: 4px;
+}
+
+.result-container::-webkit-scrollbar-thumb:hover {
+    background: #3a5a8f;
+}
+
+/* Подсветка нот */
+.note {
+    color: var(--accent-color);
+    font-weight: bold;
 }
 
 /* Стили для табулатуры */

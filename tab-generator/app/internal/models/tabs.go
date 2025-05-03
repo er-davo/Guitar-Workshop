@@ -34,7 +34,7 @@ func GenerateTab(audio *audiopb.AudioResponse) (string, error) {
 	for _, event := range events.notes {
 		notes := fb.GetNotes(event.mainNote, event.octave)
 		if len(notes) == 0 {
-			logger.Error("got empty notes list")
+			logger.Error("got empty notes list", zap.String("note", event.mainNote), zap.Int("octave", event.octave))
 			continue
 		}
 

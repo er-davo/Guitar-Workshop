@@ -144,17 +144,22 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
     
+        // Очищаем контейнер
+        resultDiv.innerHTML = '';
+        
         // Разделяем строки и добавляем их как отдельные div
         const lines = tabText.split('\n').filter(line => line.trim());
-        let html = '';
         
         lines.forEach(line => {
+            const lineDiv = document.createElement('div');
+            lineDiv.className = 'tab-line';
+            
             // Подсвечиваем цифры (ноты) красным
-            const highlightedLine = line.replace(/(\d+)/g, '<span style="color:#ff6b6b; font-weight:bold;">$1</span>');
-            html += `<div>${highlightedLine}</div>`;
+            const highlightedLine = line.replace(/(\d+)/g, '<span class="note">$1</span>');
+            lineDiv.innerHTML = highlightedLine;
+            
+            resultDiv.appendChild(lineDiv);
         });
-        
-        resultDiv.innerHTML = html;
     }
 
     // Симуляция прогресса загрузки (для демонстрации)

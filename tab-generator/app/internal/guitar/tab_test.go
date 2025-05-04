@@ -7,37 +7,67 @@ import (
 )
 
 func TestWriteSingleNote(t *testing.T) {
-	note := Note{
-		Note:   "E",
-		Octave: 2,
-		Fret:   12,
-		String: 5,
-		Time:   0,
-	}
 	tun, _ := GetTuning(StandartTuning)
-	tb, _ := NewTabBuilder(GuitarType, tun.NoteNames())
-	err := tb.WriteSingleNote(note)
+	tuningNotes := tun.NoteNames()
 
-	assert.NoError(t, err)
-
-	assert.Equal(t, "e|---\nB|---\nG|---\nD|---\nA|---\nE|12-\n", tb.Tab())
-
-	newTb, _ := NewTabBuilder(GuitarType, tun.NoteNames())
-	newTb.WriteSingleNote(note)
-
-	note = Note{
-		Note:   "E",
-		Octave: 2,
-		Fret:   1,
-		String: 5,
-		Time:   0.2,
+	testCases := []struct {
+		name        string
+		notes       []Note
+		expectedTab string
+		expectError bool
+	}{
+		{
+			name: "single note on E",
+			notes: []Note{
+				{Note: "E", Octave: 2, Fret: 12, String: 5, Time: 0},
+			},
+			expectedTab: "e|---\nB|---\nG|---\nD|---\nA|---\nE|12-\n",
+		},
+		{
+			name: "multiple notes with timing",
+			notes: []Note{
+				{Note: "E", Fret: 0, String: 5, Time: 0},
+				{Note: "B", Fret: 1, String: 1, Time: 0.2},
+				{Note: "G", Fret: 3, String: 2, Time: 0.4},
+			},
+			expectedTab: "e|------\nB|--1---\nG|----3-\nD|------\nA|------\nE|0-----\n",
+		},
+		{
+			name: "invalid note time",
+			notes: []Note{
+				{Note: "E", Time: 0.5},
+				{Note: "B", Time: 0.3},
+			},
+			expectError: true,
+		},
+		{
+			name: "two-digit fret formatting",
+			notes: []Note{
+				{Note: "E", Fret: 10, String: 5, Time: 0},
+			},
+			expectedTab: "e|---\nB|---\nG|---\nD|---\nA|---\nE|10-\n",
+		},
 	}
 
-	err = newTb.WriteSingleNote(note)
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			tb, _ := NewTabBuilder(GuitarType, tuningNotes)
 
-	assert.NoError(t, err)
+			var err error
+			for _, n := range tc.notes {
+				err = tb.WriteSingleNote(n)
+				if err != nil {
+					break
+				}
+			}
 
-	assert.Equal(t, "e|-----\nB|-----\nG|-----\nD|-----\nA|-----\nE|12-1-\n",
-		newTb.Tab(),
-	)
+			if tc.expectError {
+				assert.Error(t, err)
+				return
+			}
+
+			assert.NoError(t, err)
+			assert.Equal(t, tc.expectedTab, tb.Tab())
+		})
+	}
 }

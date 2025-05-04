@@ -8,8 +8,10 @@ import (
 )
 
 const (
-	fretDistanceThreshold   = 4.0
-	stringDistanceThreshold = 3.0
+	fretDistanceThreshold                = 4.0
+	stringDistanceThreshold              = 3.0
+	fretDistanceForOpenStringThreshold   = 2.0
+	stringDistanceForOpenStringThreshold = 2.0
 )
 
 var notesChromo = []string{"C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"}
@@ -69,8 +71,9 @@ func (n *Notes) ClosestTo(target Note) (Note, error) {
 			curFretDistance-float64(minFretDistance) <= fretDistanceThreshold
 		fretOnly := curStringDistance-float64(minStringDistance) <= stringDistanceThreshold &&
 			curFretDistance < float64(minFretDistance)
+		openString := candidate.Fret == 0
 
-		if stringAndFret || stringOnly || fretOnly {
+		if stringAndFret || stringOnly || fretOnly || openString {
 			closest = candidate
 			minFretDistance = curFretDistance
 			minStringDistance = curStringDistance

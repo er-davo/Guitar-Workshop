@@ -21,7 +21,7 @@ def butter_bandpass(lowcut, highcut, fs, order=5):
     b, a = butter(order, [low, high], btype='band')
     return b, a
 
-def bandpass_filter(data, lowcut, highcut, fs, order=5):
+def bandpass_filter(data, lowcut, highcut, fs, order):
     b, a = butter_bandpass(lowcut, highcut, fs, order=order)
     y = lfilter(b, a, data)
     return y
@@ -33,6 +33,7 @@ class AudioAnalyzerServicer(audio_pb2_grpc.AudioAnalyzerServicer):
         n_fft = 4096        # Размер FFT окна
         hop_length = 512    # Шаг анализа
         min_duration = 0.5  # Минимальная длительность аудио
+        order = 5
 
         try:
             if request.type == audio_pb2.FILE:
@@ -62,8 +63,8 @@ class AudioAnalyzerServicer(audio_pb2_grpc.AudioAnalyzerServicer):
             logger.info(f"Loaded audio: {duration:.2f} seconds, {sr} Hz")
 
             # Применение фильтров
-            y_filtered = bandpass_filter(y, fmin, fmax, sr)
-            # y_filtered = librosa.effects.harmonic(y_filtered, margin=8)
+            y_filtered = bandpass_filter(y, fmin, fmax, sr, order)
+            y_filtered = librosa.effects.harmonic(y_filtered, margin=8)
             y_filtered = librosa.effects.trim(y_filtered, top_db=30)[0]
 
             # HPSS разделение
@@ -87,13 +88,6 @@ class AudioAnalyzerServicer(audio_pb2_grpc.AudioAnalyzerServicer):
                 hop_length=hop_length,
                 fill_na=0.0,  # Замена NaN на 0
                 center=False
-            )
-
-            onset_frames = librosa.onset.onset_detect(
-                y=y_harm,
-                sr=sr,
-                hop_length=hop_length,
-                units='time'
             )
 
             # Хромаграмма
@@ -121,7 +115,6 @@ class AudioAnalyzerServicer(audio_pb2_grpc.AudioAnalyzerServicer):
                 # Определение ноты
                 note = librosa.hz_to_note(f0[i])
                 event.main_note = note[:-1].replace("♯", "#")
-                # event.main_note = event.main_note.replace("♯", "#")
                 event.octave = int(note[-1])
                 
                 # Хроматические ноты

@@ -19,31 +19,31 @@ func TestWriteSingleNote(t *testing.T) {
 		{
 			name: "single note on E",
 			notes: []Note{
-				{Note: "E", Octave: 2, Fret: 12, String: 5, Time: 0},
+				{Name: "E", Octave: 2, Fret: 12, String: 5, Time: 0},
 			},
 			expectedTab: "e|---\nB|---\nG|---\nD|---\nA|---\nE|12-\n",
 		},
 		{
 			name: "multiple notes with timing",
 			notes: []Note{
-				{Note: "E", Fret: 0, String: 5, Time: 0},
-				{Note: "B", Fret: 1, String: 1, Time: 0.2},
-				{Note: "G", Fret: 3, String: 2, Time: 0.4},
+				{Name: "E", Fret: 0, String: 5, Time: 0},
+				{Name: "B", Fret: 1, String: 1, Time: 0.2},
+				{Name: "G", Fret: 3, String: 2, Time: 0.4},
 			},
 			expectedTab: "e|------\nB|--1---\nG|----3-\nD|------\nA|------\nE|0-----\n",
 		},
 		{
 			name: "invalid note time",
 			notes: []Note{
-				{Note: "E", Time: 0.5},
-				{Note: "B", Time: 0.3},
+				{Name: "E", Time: 0.5},
+				{Name: "B", Time: 0.3},
 			},
 			expectError: true,
 		},
 		{
 			name: "two-digit fret formatting",
 			notes: []Note{
-				{Note: "E", Fret: 10, String: 5, Time: 0},
+				{Name: "E", Fret: 10, String: 5, Time: 0},
 			},
 			expectedTab: "e|---\nB|---\nG|---\nD|---\nA|---\nE|10-\n",
 		},

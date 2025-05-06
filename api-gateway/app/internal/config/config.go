@@ -6,7 +6,9 @@ import (
 )
 
 type Config struct {
-	PORT string
+	PORT        string
+	SupabaseURL string
+	SupabaseKey string
 }
 
 var (
@@ -17,6 +19,8 @@ var (
 func Load() *Config {
 	once.Do(func() {
 		config.PORT = os.Getenv("PORT")
+		config.SupabaseURL = os.Getenv("SUPABASE_URL")
+		config.SupabaseKey = os.Getenv("ACCESS_KEY")
 	})
 
 	return &config

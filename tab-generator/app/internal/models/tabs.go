@@ -39,7 +39,7 @@ func GenerateTab(audio *audiopb.AudioResponse) (string, error) {
 		}
 
 		note, err := notes.ClosestTo(guitar.Note{
-			Note:   event.mainNote,
+			Name:   event.mainNote,
 			Octave: event.octave,
 			Time:   event.time,
 		})

@@ -8,16 +8,15 @@ import (
 )
 
 const (
-	fretDistanceThreshold                = 4.0
-	stringDistanceThreshold              = 3.0
-	fretDistanceForOpenStringThreshold   = 2.0
-	stringDistanceForOpenStringThreshold = 2.0
+	stringlWeight   = 1.0  // Предпочтение вертикальным перемещениям (по струнам)
+	fretWeight      = 1.0  // Вес для перемещений по ладам
+	openStringBonus = -2.0 // Бонус за открытые струны
 )
 
 var notesChromo = []string{"C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"}
 
 type Note struct {
-	Note   string
+	Name   string
 	Octave int
 
 	Fret   int
@@ -30,17 +29,17 @@ func (n *Note) AddFret() error {
 	found := -1
 
 	for i := range len(notesChromo) {
-		if n.Note == notesChromo[i] {
+		if n.Name == notesChromo[i] {
 			found = i
 			break
 		}
 	}
 
 	if found == -1 {
-		return fmt.Errorf("invalid note: %s", n.Note)
+		return fmt.Errorf("invalid note: %s", n.Name)
 	}
 
-	n.Note = notesChromo[(found+1)%len(notesChromo)]
+	n.Name = notesChromo[(found+1)%len(notesChromo)]
 
 	if found == len(notesChromo)-1 {
 		n.Octave++
@@ -50,6 +49,26 @@ func (n *Note) AddFret() error {
 	return nil
 }
 
+func (n *Note) calculateScore(target Note) float64 {
+	// Расстояние по горизонтали (лады)
+	fretDist := math.Abs(float64(n.Fret - target.Fret))
+
+	// Расстояние по вертикали (строки)
+	stringDist := math.Abs(float64(n.String - target.String))
+
+	// Бонус за открытые струны
+	openString := 0.0
+	if n.Fret == 0 {
+		openString = openStringBonus
+	}
+
+	score := (stringDist * stringlWeight) +
+		(fretDist * fretWeight) +
+		openString
+
+	return score
+}
+
 type Notes []Note
 
 func (n *Notes) ClosestTo(target Note) (Note, error) {
@@ -57,26 +76,15 @@ func (n *Notes) ClosestTo(target Note) (Note, error) {
 		return Note{}, errors.New("empty notes list")
 	}
 
-	minStringDistance := math.MaxFloat32
-	minFretDistance := math.MaxFloat32
 	closest := Note{}
+	minScore := math.MaxFloat64
 
 	for _, candidate := range *n {
-		curStringDistance := math.Abs(float64(candidate.String - target.String))
-		curFretDistance := math.Abs(float64(candidate.Fret - target.Fret))
+		currentScore := candidate.calculateScore(target)
 
-		stringAndFret := curStringDistance < float64(minStringDistance) &&
-			curFretDistance < float64(minFretDistance)
-		stringOnly := curStringDistance < float64(minStringDistance) &&
-			curFretDistance-float64(minFretDistance) <= fretDistanceThreshold
-		fretOnly := curStringDistance-float64(minStringDistance) <= stringDistanceThreshold &&
-			curFretDistance < float64(minFretDistance)
-		openString := candidate.Fret == 0
-
-		if stringAndFret || stringOnly || fretOnly || openString {
+		if currentScore < minScore {
+			minScore = currentScore
 			closest = candidate
-			minFretDistance = curFretDistance
-			minStringDistance = curStringDistance
 		}
 	}
 
@@ -86,5 +94,5 @@ func (n *Notes) ClosestTo(target Note) (Note, error) {
 }
 
 func noteIsValid(n Note) bool {
-	return slices.Contains(notesChromo, n.Note)
+	return slices.Contains(notesChromo, n.Name)
 }

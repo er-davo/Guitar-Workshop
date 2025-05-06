@@ -39,8 +39,8 @@ func TestGetNotes(t *testing.T) {
 			targetNote:   "A",
 			targetOctave: 2,
 			expected: []Note{
-				{Note: "A", Octave: 2, Fret: 0, String: 4},
-				{Note: "A", Octave: 2, Fret: 5, String: 5},
+				{Name: "A", Octave: 2, Fret: 0, String: 4},
+				{Name: "A", Octave: 2, Fret: 5, String: 5},
 			},
 		},
 		{
@@ -48,8 +48,8 @@ func TestGetNotes(t *testing.T) {
 			targetNote:   "C#",
 			targetOctave: 3,
 			expected: []Note{
-				{Note: "C#", Octave: 3, Fret: 4, String: 4},
-				{Note: "C#", Octave: 3, Fret: 9, String: 5},
+				{Name: "C#", Octave: 3, Fret: 4, String: 4},
+				{Name: "C#", Octave: 3, Fret: 9, String: 5},
 			},
 		},
 		{
@@ -57,11 +57,11 @@ func TestGetNotes(t *testing.T) {
 			targetNote:   "F",
 			targetOctave: 4,
 			expected: []Note{
-				{Note: "F", Octave: 4, Fret: 1, String: 0},
-				{Note: "F", Octave: 4, Fret: 6, String: 1},
-				{Note: "F", Octave: 4, Fret: 10, String: 2},
-				{Note: "F", Octave: 4, Fret: 15, String: 3},
-				{Note: "F", Octave: 4, Fret: 20, String: 4},
+				{Name: "F", Octave: 4, Fret: 1, String: 0},
+				{Name: "F", Octave: 4, Fret: 6, String: 1},
+				{Name: "F", Octave: 4, Fret: 10, String: 2},
+				{Name: "F", Octave: 4, Fret: 15, String: 3},
+				{Name: "F", Octave: 4, Fret: 20, String: 4},
 			},
 		},
 		{
@@ -87,7 +87,7 @@ func TestGetNotes(t *testing.T) {
 
 func containsNote(notes Notes, target Note) bool {
 	for _, n := range notes {
-		if n.Note == target.Note &&
+		if n.Name == target.Name &&
 			n.Octave == target.Octave &&
 			n.Fret == target.Fret &&
 			n.String == target.String {

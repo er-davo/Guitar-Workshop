@@ -50,7 +50,7 @@ func (tb *tabBuilder) Tab() string {
 
 func (tb *tabBuilder) WriteSingleNote(n Note) error {
 	if !noteIsValid(n) {
-		return fmt.Errorf("invalid note: %s", n.Note)
+		return fmt.Errorf("invalid note: %s", n.Name)
 	}
 	if n.Time < tb.time {
 		return fmt.Errorf("note time %v precedes current time %v", n.Time, tb.time)

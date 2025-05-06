@@ -16,7 +16,7 @@ type Tuning []Note
 func (t *Tuning) NoteNames() []string {
 	names := make([]string, len(*t))
 	for i := range *t {
-		names[i] = (*t)[i].Note
+		names[i] = (*t)[i].Name
 	}
 	names[0] = strings.ToLower(names[0])
 	return names
@@ -27,37 +27,37 @@ func GetTuning(t TuningType) (Tuning, error) {
 	case StandartTuning:
 		return Tuning{
 			{
-				Note:   "E",
+				Name:   "E",
 				Octave: 4,
 				Fret:   0,
 				String: 0,
 			},
 			{
-				Note:   "B",
+				Name:   "B",
 				Octave: 3,
 				Fret:   0,
 				String: 1,
 			},
 			{
-				Note:   "G",
+				Name:   "G",
 				Octave: 3,
 				Fret:   0,
 				String: 2,
 			},
 			{
-				Note:   "D",
+				Name:   "D",
 				Octave: 3,
 				Fret:   0,
 				String: 3,
 			},
 			{
-				Note:   "A",
+				Name:   "A",
 				Octave: 2,
 				Fret:   0,
 				String: 4,
 			},
 			{
-				Note:   "E",
+				Name:   "E",
 				Octave: 2,
 				Fret:   0,
 				String: 5,
@@ -104,7 +104,7 @@ func (fb FingerBoard) GetNotes(targetNote string, targetOctave int) Notes {
 		currentNote = fb.tuning[i]
 
 		for fret := 0; fret < fb.frets; fret++ {
-			if currentNote.Note == targetNote && currentNote.Octave == targetOctave {
+			if currentNote.Name == targetNote && currentNote.Octave == targetOctave {
 				notes = append(notes, currentNote)
 			}
 			currentNote.AddFret()

@@ -1,29 +1,23 @@
 package storage
 
 import (
+	"api-gateway/internal/config"
 	"fmt"
 	"io"
 	"net/http"
-	"os"
 )
-
-var (
-	supabaseURL string
-	supabaseKey string
-)
-
-func init() {
-	supabaseURL = os.Getenv("SUPABASE_URL")
-	supabaseKey = os.Getenv("ACCESS_KEY")
-}
 
 func UploadFileToSupabaseStorage(
 	bucketName string, fileName string,
 	file io.Reader, contentType string,
 ) error {
+	if bucketName == "" || fileName == "" {
+		return fmt.Errorf("bucket and file name must be specified")
+	}
+
 	uploadURL := fmt.Sprintf(
 		"%s/storage/v1/object/%s/%s",
-		supabaseURL,
+		config.Load().SupabaseURL,
 		bucketName,
 		fileName,
 	)
@@ -33,7 +27,7 @@ func UploadFileToSupabaseStorage(
 		return fmt.Errorf("failed to create request: %w", err)
 	}
 
-	req.Header.Set("Authorization", "Bearer "+supabaseKey)
+	req.Header.Set("Authorization", "Bearer "+config.Load().SupabaseKey)
 	req.Header.Set("Content-Type", contentType)
 	req.Header.Set("Cache-Control", "no-cache")
 

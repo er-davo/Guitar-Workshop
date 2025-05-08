@@ -19,7 +19,7 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	TabGenerate_GenerateTab_FullMethodName = "/TabGenerate/GenerateTab"
+	TabGenerate_GenerateTab_FullMethodName = "/tab.TabGenerate/GenerateTab"
 )
 
 // TabGenerateClient is the client API for TabGenerate service.
@@ -108,7 +108,7 @@ func _TabGenerate_GenerateTab_Handler(srv interface{}, ctx context.Context, dec 
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var TabGenerate_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "TabGenerate",
+	ServiceName: "tab.TabGenerate",
 	HandlerType: (*TabGenerateServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{

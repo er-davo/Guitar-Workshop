@@ -1,3 +1,10 @@
 .vscode
 .env
 venv
+
+generated
+
+# Visual Studio 2022
+fx-processor/.vs
+fx-processor/out
+fx-processor/app/juce

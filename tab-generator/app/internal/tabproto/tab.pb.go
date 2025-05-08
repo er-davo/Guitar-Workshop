@@ -70,7 +70,7 @@ func (RequestType) EnumDescriptor() ([]byte, []int) {
 type TabRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	AudioUrl      string                 `protobuf:"bytes,1,opt,name=audio_url,json=audioUrl,proto3" json:"audio_url,omitempty"`
-	Type          RequestType            `protobuf:"varint,2,opt,name=type,proto3,enum=RequestType" json:"type,omitempty"`
+	Type          RequestType            `protobuf:"varint,2,opt,name=type,proto3,enum=tab.RequestType" json:"type,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -167,18 +167,18 @@ var File_tab_proto protoreflect.FileDescriptor
 
 const file_tab_proto_rawDesc = "" +
 	"\n" +
-	"\ttab.proto\"K\n" +
+	"\ttab.proto\x12\x03tab\"O\n" +
 	"\n" +
 	"TabRequest\x12\x1b\n" +
-	"\taudio_url\x18\x01 \x01(\tR\baudioUrl\x12 \n" +
-	"\x04type\x18\x02 \x01(\x0e2\f.RequestTypeR\x04type\"\x1f\n" +
+	"\taudio_url\x18\x01 \x01(\tR\baudioUrl\x12$\n" +
+	"\x04type\x18\x02 \x01(\x0e2\x10.tab.RequestTypeR\x04type\"\x1f\n" +
 	"\vTabResponse\x12\x10\n" +
 	"\x03tab\x18\x01 \x01(\tR\x03tab*$\n" +
 	"\vRequestType\x12\b\n" +
 	"\x04FILE\x10\x00\x12\v\n" +
-	"\aYOUTUBE\x10\x0127\n" +
-	"\vTabGenerate\x12(\n" +
-	"\vGenerateTab\x12\v.TabRequest\x1a\f.TabResponseB\x13Z\x11internal/tabprotob\x06proto3"
+	"\aYOUTUBE\x10\x012?\n" +
+	"\vTabGenerate\x120\n" +
+	"\vGenerateTab\x12\x0f.tab.TabRequest\x1a\x10.tab.TabResponseB\x13Z\x11internal/tabprotob\x06proto3"
 
 var (
 	file_tab_proto_rawDescOnce sync.Once
@@ -195,14 +195,14 @@ func file_tab_proto_rawDescGZIP() []byte {
 var file_tab_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
 var file_tab_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
 var file_tab_proto_goTypes = []any{
-	(RequestType)(0),    // 0: RequestType
-	(*TabRequest)(nil),  // 1: TabRequest
-	(*TabResponse)(nil), // 2: TabResponse
+	(RequestType)(0),    // 0: tab.RequestType
+	(*TabRequest)(nil),  // 1: tab.TabRequest
+	(*TabResponse)(nil), // 2: tab.TabResponse
 }
 var file_tab_proto_depIdxs = []int32{
-	0, // 0: TabRequest.type:type_name -> RequestType
-	1, // 1: TabGenerate.GenerateTab:input_type -> TabRequest
-	2, // 2: TabGenerate.GenerateTab:output_type -> TabResponse
+	0, // 0: tab.TabRequest.type:type_name -> tab.RequestType
+	1, // 1: tab.TabGenerate.GenerateTab:input_type -> tab.TabRequest
+	2, // 2: tab.TabGenerate.GenerateTab:output_type -> tab.TabResponse
 	2, // [2:3] is the sub-list for method output_type
 	1, // [1:2] is the sub-list for method input_type
 	1, // [1:1] is the sub-list for extension type_name

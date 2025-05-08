@@ -1,5 +1,7 @@
 syntax = "proto3";
 
+package tab;
+
 option go_package = "internal/tabproto";
 
 service TabGenerate {

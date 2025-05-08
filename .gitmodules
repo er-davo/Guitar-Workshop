@@ -1,0 +1,3 @@
+[submodule "fx-processor/app/juce"]
+	path = fx-processor/app/juce
+	url = https://github.com/juce-framework/JUCE.git

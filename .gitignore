@@ -7,4 +7,5 @@ generated
 # Visual Studio 2022
 fx-processor/.vs
 fx-processor/out
-fx-processor/app/juce
+fx-processor/fx-processor/juce
+fx-processor/conan

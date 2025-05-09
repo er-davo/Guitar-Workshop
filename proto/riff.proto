@@ -1,0 +1,27 @@
+syntax = "proto3";
+
+package riff;
+
+option go_package = "internall/riffproto";
+
+service RiffGenerator {
+    rpc GenerateRiff (RiffRequest) returns (RiffResponse);
+}
+
+message RiffRequest {
+    string tone = 1;
+    Style style = 2;
+}
+
+message RiffResponse {
+    string riff = 1;
+}
+
+enum Style {
+    UNSPECIFIED = 0;
+    ROCK = 1;
+    BLUES = 2;
+    METAL = 3;
+    JAZZ = 4;
+    FUNK = 5;
+}

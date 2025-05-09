@@ -14,9 +14,8 @@ API_GO_GRPC_OUT = api-gateway/app
 FX_CPP_OUT = fx-processor/app/gen
 FX_CPP_GRPC_OUT = fx-processor/app/gen
 
-GRPC_PLUGIN = .plugins/grpc_cpp_plugin.exe
-
-docker run --rm -v "C:\Users\Lenovo\Desktop\VScodeFiles\Guitar Workshop:/proto" znly/protoc --cpp_out=/proto/generated --grpc_out=/proto/generated --plugin=protoc-gen-grpc=/usr/bin/grpc_cpp_plugin -I /proto /proto/proto/fx_processor.proto
+proto-cppgen:
+	docker run --rm -v "C:\Users\Lenovo\Desktop\VScodeFiles\Guitar Workshop:/proto" znly/protoc --cpp_out=/proto/generated --grpc_out=/proto/generated --plugin=protoc-gen-grpc=/usr/bin/grpc_cpp_plugin -I /proto /proto/proto/fx_processor.proto
 
 py-venv:
 	cd $(PYTHON_VENV)

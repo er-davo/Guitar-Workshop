@@ -2,8 +2,9 @@ package models
 
 import (
 	audiopb "tabgen/internal/audioproto"
-	"tabgen/internal/guitar"
 	"tabgen/internal/logger"
+
+	"github.com/DavidCage31/guitar"
 
 	"go.uber.org/zap"
 )

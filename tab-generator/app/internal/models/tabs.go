@@ -4,7 +4,7 @@ import (
 	audiopb "tabgen/internal/audioproto"
 	"tabgen/internal/logger"
 
-	"github.com/DavidCage31/guitar"
+	"github.com/er-davo/guitar"
 
 	"go.uber.org/zap"
 )
@@ -20,7 +20,8 @@ type TabResponse struct {
 
 func GenerateTab(audio *audiopb.AudioResponse) (string, error) {
 	events := newNotesEvent(audio)
-	fb, err := guitar.NewFingerBoard(guitar.StandartTuning, 24)
+	tun, err := guitar.GetTuning(guitar.StandardTuning, guitar.GuitarType)
+	fb, err := guitar.NewFingerBoard(tun, 24)
 	if err != nil {
 		logger.Error("failed to create FingerBoard", zap.Error(err))
 		return "", err
@@ -48,7 +49,7 @@ func GenerateTab(audio *audiopb.AudioResponse) (string, error) {
 			logger.Error("failed to get closest note", zap.Error(err))
 			return "", err
 		}
-		builder.WriteSingleNote(note)
+		builder.WriteNotes(note)
 	}
 
 	return builder.Tab(), nil

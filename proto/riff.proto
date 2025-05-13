@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package riff;
 
-option go_package = "internall/riffproto";
+option go_package = "internal/riffproto";
 
 service RiffGenerator {
     rpc GenerateRiff (RiffRequest) returns (RiffResponse);

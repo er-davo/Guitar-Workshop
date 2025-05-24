@@ -9,25 +9,16 @@ import (
 	"go.uber.org/zap"
 )
 
-type TabRequest struct {
-	AudioURL string `json:"audio_url"`
-}
-
-type TabResponse struct {
-	Tab    string `json:"tab"`
-	Status string `json:"status"`
-}
-
 func GenerateTab(audio *audiopb.AudioResponse) (string, error) {
 	events := newNotesEvent(audio)
-	tun, err := guitar.GetTuning(guitar.StandardTuning, guitar.GuitarType)
+	tun, err := guitar.ParseTuning(guitar.StandardTuning)
 	fb, err := guitar.NewFingerBoard(tun, 24)
 	if err != nil {
 		logger.Error("failed to create FingerBoard", zap.Error(err))
 		return "", err
 	}
 
-	builder, err := guitar.NewTabBuilder(guitar.GuitarType, fb.GetTuningNotes())
+	builder, err := guitar.NewTabBuilder(tun.NoteNames())
 	if err != nil {
 		logger.Error("failed to create tabBuilder", zap.Error(err))
 		return "", err

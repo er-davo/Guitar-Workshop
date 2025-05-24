@@ -5,6 +5,8 @@ from model.model import RiffGenerator
 
 import torch
 
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
 class RiffDataset(Dataset):
     def __init__(self, sequences, styles, tones):
         self.sequences = sequences

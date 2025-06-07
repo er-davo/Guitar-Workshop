@@ -1,10 +1,11 @@
 package storage
 
 import (
-	"api-gateway/internal/config"
 	"fmt"
 	"io"
 	"net/http"
+
+	"api-gateway/internal/config"
 )
 
 func UploadFileToSupabaseStorage(

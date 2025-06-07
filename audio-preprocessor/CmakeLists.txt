@@ -3,9 +3,6 @@ project(audio_preprocessor)
 
 set(CMAKE_CXX_STANDARD 17)
 
-# подключаем сгенерированные Conan cmake модули
-list(APPEND CMAKE_PREFIX_PATH "${CMAKE_BINARY_DIR}")
-
 # подключаем зависимости через CMakeDeps
 find_package(SndFile REQUIRED)
 find_package(soxr REQUIRED)

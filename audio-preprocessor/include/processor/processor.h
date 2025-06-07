@@ -1,38 +1,44 @@
 #pragma once
 
+#include "config.h"
+
 #include <vector>
 #include <string>
 
 namespace audioproc {
 
 class AudioProcessor {
-private:
-    float threshold;
-    int margin;
-    float cutoff;
-    int sample_rate;
-
+public:
+    AudioProcessor();
+    ~AudioProcessor();
+    
+    void processWav(
+        const std::string& input_path,
+        const std::string& output_path,
+        ProcessingConfig& config
+    );
+    
+    std::vector<float> processBuffer(
+        const std::vector<float>& buffer,
+        const ProcessingConfig& config
+    );
+    
     std::vector<float> readWav(const std::string& path, int& sr);
     void writeWav(const std::string& path, const std::vector<float>& audio, int sr);
     
     void normalize(std::vector<float>& audio);
-    void trimSilence(std::vector<float>& audio);
-    void HPS(std::vector<float>& audio);
+    void trimSilence(std::vector<float>& audio, const float threshold, const int margin);
 
-public:
-    AudioProcessor(
-        float threshold = 0.01f,
-        int margin = 128,
-        float cutoff = 50.0f,
-        int sample_rate = 44100
+    void highPassFilter(std::vector<float>& audio, const float cut_off, const int sample_rate);
+    void lowPassFilter(std::vector<float>& audio, const float cut_off, const int sample_rate);
+    void bandPassFilter(
+        std::vector<float>& audio,
+        const float highHz,
+        const float lowHz,
+        const int sample_rate
     );
 
-    void processWav(
-        const std::string& inputPath,
-        const std::string& outputPath
-    );
-
-    std::vector<float> processBuffer(const std::vector<float>& buffer, int sr);
+    void fadeInOut(std::vector<float>& audio, int samples = 512);
 };
 
 } // namespace audioproc

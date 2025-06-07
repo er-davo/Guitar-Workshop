@@ -9,10 +9,22 @@ int main(int argc, char* argv[]) {
 
     try {
         auto proc = audioproc::AudioProcessor();
+        audioproc::ProcessingConfig config;
         auto input_file = argv[1],
             output_file = argv[2];
+      
+        config.sample_rate = 44100;
+        config.threshold = 0.01f;
+        config.margin = 128;
+        config.use_bandpass = true;
+        config.band_low = 70.0f;
+        config.band_high = 1500.0f;
 
-        proc.processWav(input_file, output_file);
+        proc.processWav(
+            input_file,
+            output_file,
+            config
+        );
 
         std::cout << "Audio processed successfully.\n";
     } catch (const std::exception& e) {

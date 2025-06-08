@@ -1,0 +1,30 @@
+syntax = "proto3";
+
+package audioproc;
+
+option go_package = "internal/audioprocproto";
+
+service AudioProcessorService {
+    rpc ProcessAudio(ProcessAudioRequest) returns (ProcessAudioResponse);
+}
+
+message AudioProcessingConfig {
+    float threshold = 1;
+    int32 margin = 2;
+    float high_pass = 3;
+    bool use_bandpass = 4;
+    float band_low = 5;
+    float band_high = 6;
+    int32 fade_samples = 7;
+    int32 sample_rate = 8;
+}
+
+message ProcessAudioRequest {
+    bytes wav_data = 1;
+    string file_name = 2;
+    AudioProcessingConfig config = 3;
+}
+
+message ProcessAudioResponse {
+    bytes wav_data = 1;
+}

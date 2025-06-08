@@ -1,10 +1,14 @@
 #include "processor/processor.h"
+#include "server/audio_processor_server.h"
+#include "config/config.h"
 #include <iostream>
 
-#define DEBUG
-
 int main(int argc, char* argv[]) {
+
 #ifdef DEBUG
+
+    // CLI
+
     if (argc != 3) {
         std::cerr << "Usage: audio-preprocessor input.wav output.wav\n";
         return 1;
@@ -36,9 +40,13 @@ int main(int argc, char* argv[]) {
     }
 
 #else
-
     // gRPC server
 
+    auto config = audioproc::loadConfig();
+
+    audioproc::RunServer("0.0.0.0:" + config.port);
+
 #endif
+
     return 0;
 }

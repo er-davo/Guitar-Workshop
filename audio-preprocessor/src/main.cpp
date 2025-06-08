@@ -1,7 +1,10 @@
 #include "processor/processor.h"
 #include <iostream>
 
+#define DEBUG
+
 int main(int argc, char* argv[]) {
+#ifdef DEBUG
     if (argc != 3) {
         std::cerr << "Usage: audio-preprocessor input.wav output.wav\n";
         return 1;
@@ -32,5 +35,10 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
+#else
+
+    // gRPC server
+
+#endif
     return 0;
 }

@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+package separator;
+
+service AudioSeparator {
+    rpc SeparateAudio (SeparateRequest) returns (SeparateResponse);
+}
+
+message SeparateRequest {
+    AudioFileData audio_data = 1;
+}
+
+message SeparateResponse {
+    map<string, AudioFileData> stems = 1;
+}
+
+message AudioFileData {
+    string file_name = 1;
+    bytes audio_bytes = 2;
+}

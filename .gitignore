@@ -3,6 +3,7 @@
 venv
 
 generated
+temp
 
 # Visual Studio 2022
 .vs

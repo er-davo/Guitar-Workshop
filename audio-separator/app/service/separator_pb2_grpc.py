@@ -3,9 +3,9 @@
 import grpc
 import warnings
 
-import riff_pb2 as riff__pb2
+import separator_pb2 as separator__pb2
 
-GRPC_GENERATED_VERSION = '1.71.0'
+GRPC_GENERATED_VERSION = '1.73.0'
 GRPC_VERSION = grpc.__version__
 _version_not_supported = False
 
@@ -18,14 +18,14 @@ except ImportError:
 if _version_not_supported:
     raise RuntimeError(
         f'The grpc package installed is at version {GRPC_VERSION},'
-        + f' but the generated code in riff_pb2_grpc.py depends on'
+        + f' but the generated code in separator_pb2_grpc.py depends on'
         + f' grpcio>={GRPC_GENERATED_VERSION}.'
         + f' Please upgrade your grpc module to grpcio>={GRPC_GENERATED_VERSION}'
         + f' or downgrade your generated code using grpcio-tools<={GRPC_VERSION}.'
     )
 
 
-class RiffGeneratorStub(object):
+class AudioSeparatorStub(object):
     """Missing associated documentation comment in .proto file."""
 
     def __init__(self, channel):
@@ -34,43 +34,43 @@ class RiffGeneratorStub(object):
         Args:
             channel: A grpc.Channel.
         """
-        self.GenerateRiff = channel.unary_unary(
-                '/riff.RiffGenerator/GenerateRiff',
-                request_serializer=riff__pb2.RiffRequest.SerializeToString,
-                response_deserializer=riff__pb2.RiffResponse.FromString,
+        self.SeparateAudio = channel.unary_unary(
+                '/separator.AudioSeparator/SeparateAudio',
+                request_serializer=separator__pb2.SeparateRequest.SerializeToString,
+                response_deserializer=separator__pb2.SeparateResponse.FromString,
                 _registered_method=True)
 
 
-class RiffGeneratorServicer(object):
+class AudioSeparatorServicer(object):
     """Missing associated documentation comment in .proto file."""
 
-    def GenerateRiff(self, request, context):
+    def SeparateAudio(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
 
-def add_RiffGeneratorServicer_to_server(servicer, server):
+def add_AudioSeparatorServicer_to_server(servicer, server):
     rpc_method_handlers = {
-            'GenerateRiff': grpc.unary_unary_rpc_method_handler(
-                    servicer.GenerateRiff,
-                    request_deserializer=riff__pb2.RiffRequest.FromString,
-                    response_serializer=riff__pb2.RiffResponse.SerializeToString,
+            'SeparateAudio': grpc.unary_unary_rpc_method_handler(
+                    servicer.SeparateAudio,
+                    request_deserializer=separator__pb2.SeparateRequest.FromString,
+                    response_serializer=separator__pb2.SeparateResponse.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
-            'riff.RiffGenerator', rpc_method_handlers)
+            'separator.AudioSeparator', rpc_method_handlers)
     server.add_generic_rpc_handlers((generic_handler,))
-    server.add_registered_method_handlers('riff.RiffGenerator', rpc_method_handlers)
+    server.add_registered_method_handlers('separator.AudioSeparator', rpc_method_handlers)
 
 
  # This class is part of an EXPERIMENTAL API.
-class RiffGenerator(object):
+class AudioSeparator(object):
     """Missing associated documentation comment in .proto file."""
 
     @staticmethod
-    def GenerateRiff(request,
+    def SeparateAudio(request,
             target,
             options=(),
             channel_credentials=None,
@@ -83,9 +83,9 @@ class RiffGenerator(object):
         return grpc.experimental.unary_unary(
             request,
             target,
-            '/riff.RiffGenerator/GenerateRiff',
-            riff__pb2.RiffRequest.SerializeToString,
-            riff__pb2.RiffResponse.FromString,
+            '/separator.AudioSeparator/SeparateAudio',
+            separator__pb2.SeparateRequest.SerializeToString,
+            separator__pb2.SeparateResponse.FromString,
             options,
             channel_credentials,
             insecure,

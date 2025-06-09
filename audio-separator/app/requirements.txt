@@ -1,0 +1,6 @@
+torchaudio
+numpy
+protobuf
+grpcio
+grpcio-tools
+soundfile

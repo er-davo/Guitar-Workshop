@@ -1,0 +1,28 @@
+syntax = "proto3";
+
+package onsetsframes;
+
+option go_package = "internal/onsetsframesproto";
+
+service OnsetsAndFrames {
+    rpc Analyze (OAFRequest) returns (OAFResponse);
+}
+
+message OAFRequest {
+    AudioFileData audio_data = 1;
+}
+
+message OAFResponse {
+    repeated NoteEvent notes = 1;
+}
+
+message AudioFileData {
+    string file_name = 1;
+    bytes audio_bytes = 2;
+}
+
+message NoteEvent {
+    float onset_seconds = 1;  // Время начала ноты
+    int32 midi_pitch = 2;     // Например, 40 = E2, 64 = E4 и т.д.
+    float velocity = 3;       // Громкость/интенсивность (если доступно)
+}

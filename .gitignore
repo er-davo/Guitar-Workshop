@@ -2,6 +2,8 @@
 .env
 venv
 
+node_modules
+
 generated
 temp
 

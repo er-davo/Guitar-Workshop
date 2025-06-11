@@ -39,7 +39,7 @@ grpc::Status AudioProcessorServiceImpl::ProcessAudio(
     input_file.write(request->wav_data().data(), request->wav_data().size());
     input_file.close();
 
-    ProcessingConfig cfg;
+    audio::ProcessingConfig cfg;
     cfg.threshold = request->config().threshold();
     cfg.margin = request->config().margin();
     cfg.high_pass = request->config().high_pass();
@@ -49,7 +49,7 @@ grpc::Status AudioProcessorServiceImpl::ProcessAudio(
     cfg.fade_samples = request->config().fade_samples();
     cfg.sample_rate = request->config().sample_rate();
 
-    AudioProcessor proc;
+    audio::AudioProcessor proc;
 
     try {
         proc.processWav(input_path, output_path, cfg);

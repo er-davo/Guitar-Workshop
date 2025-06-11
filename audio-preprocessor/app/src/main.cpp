@@ -1,4 +1,4 @@
-#include "processor/processor.h"
+#include "core/processor/AudioProcessor.h"
 #include "server/audio_processor_server.h"
 #include "config/config.h"
 #include <iostream>

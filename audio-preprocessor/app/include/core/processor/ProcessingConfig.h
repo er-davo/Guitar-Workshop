@@ -1,6 +1,6 @@
 #pragma once
 
-namespace audioproc {
+namespace audio {
 
 struct ProcessingConfig {
     float threshold = 0.01f;

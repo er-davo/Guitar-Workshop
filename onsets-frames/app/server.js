@@ -31,7 +31,7 @@ async function main() {
 
     server.bindAsync(`0.0.0.0:${config.PORT}`, grpc.ServerCredentials.createInsecure(), (err, port) => {
         if (err) throw err;
-        console.log(`🚀 gRPC сервер работает на порту ${port}`);
+        console.log(`gRPC сервер работает на порту ${port}`);
     });
 }
 

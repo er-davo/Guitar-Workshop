@@ -1,7 +1,7 @@
 #pragma once
 
 #include "audio_processor.grpc.pb.h"
-#include "processor/processor.h"
+#include "core/processor/AudioProcessor.h"
 
 #include <grpcpp/grpcpp.h>
 

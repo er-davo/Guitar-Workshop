@@ -6,13 +6,11 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 #add_compile_definitions(DEBUG)
 
-# подключаем зависимости через CMakeDeps
 find_package(SndFile REQUIRED)
 find_package(soxr REQUIRED)
 find_package(Protobuf REQUIRED)
 find_package(gRPC REQUIRED)
 
-# исходники
 file(GLOB_RECURSE SOURCES CONFIGURE_DEPENDS src/*.cpp)
 
 list(APPEND SOURCES

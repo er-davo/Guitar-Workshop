@@ -1,11 +1,11 @@
-#include "processor/processor.h"
+#include "core/processor/AudioProcessor.h"
 
 #include <sndfile.h>
 #include <soxr.h>
 #include <cmath>
 #include <stdexcept>
 
-namespace audioproc {
+namespace audio {
 
 AudioProcessor::AudioProcessor() {}
 AudioProcessor::~AudioProcessor() {}
@@ -44,41 +44,71 @@ std::vector<float> AudioProcessor::processBuffer(
     return audio;
 }
 
+std::vector<std::vector<float>> AudioProcessor::splitIntoChunks(
+    const std::vector<float>& audio,
+    const int sample_rate,
+    const float chunk_duration_sec,
+    const float overlap_duration_sec
+) {
+    std::vector<std::vector<float>> chunks;
 
-std::vector<float> AudioProcessor::readWav(const std::string& path, int& sr) {
-    SF_INFO info;
-    SNDFILE* file = sf_open(path.c_str(), SFM_READ, &info);
-    if (!file)
-        throw std::runtime_error("Failed to open input WAV");
+    const size_t chunk_size = static_cast<size_t>(chunk_duration_sec * sample_rate);
+    const size_t overlap_size = static_cast<size_t>(overlap_duration_sec * sample_rate);
+    const size_t step_size = chunk_size - overlap_size;
 
-    sr = info.samplerate;
-    std::vector<float> buffer(info.frames * info.channels);
-    sf_readf_float(file, buffer.data(), info.frames);
-    sf_close(file);
+    if (chunk_size == 0 || chunk_size <= overlap_size)
+        throw std::invalid_argument("Invalid chunk or overlap size: chunk must be > overlap");
+    
+    size_t total_samples = audio.size();
+    size_t pos = 0;
 
-    // моно (если stereo — усредняем)
-    if (info.channels == 2) {
-        std::vector<float> mono(info.frames);
-        for (int i = 0; i < info.frames; ++i)
-            mono[i] = 0.5f * (buffer[2*i] + buffer[2*i + 1]);
-        return mono;
+    while (pos < total_samples) {
+        size_t end = std::min(pos + chunk_size, total_samples);
+        std::vector<float> chunk(audio.begin() + pos, audio.begin() + end);
+
+        chunks.push_back(std::move(chunk));
+        pos += step_size;
     }
+    
 
-    return buffer;
+    return chunks;
 }
 
-void AudioProcessor::writeWav(const std::string& path, const std::vector<float>& audio, int sr) {
-    SF_INFO info = {};
-    info.samplerate = sr;
-    info.channels = 1;
-    info.format = SF_FORMAT_WAV | SF_FORMAT_PCM_16;
+std::vector<std::vector<float>> AudioProcessor::splitIntoChunksWithQuietPriority(
+    const std::vector<float>& audio,
+    const int sample_rate,
+    const float threshold,
+    const float chunk_min_duration_sec,
+    const float chunk_max_duration_sec,
+    const float overlap_duration_sec = 0.0f
+) {
+    std::vector<std::vector<float>> chunks, prechunks;
 
-    SNDFILE* file = sf_open(path.c_str(), SFM_WRITE, &info);
-    if (!file)
-        throw std::runtime_error("Failed to open output WAV");
-    
-    sf_writef_float(file, audio.data(), audio.size());
-    sf_close(file);
+    const size_t chunk_min_size = static_cast<size_t>(chunk_min_duration_sec * sample_rate);
+    const size_t chunk_max_size = static_cast<size_t>(chunk_max_duration_sec * sample_rate);
+    const size_t overlap_size = static_cast<size_t>(overlap_duration_sec * sample_rate);
+    const size_t step_size = chunk_max_size - overlap_size;
+
+    size_t start = 0;
+    for (size_t i = 0; i < audio.size(); i++) {
+        if (std::abs(audio[i]) < threshold) {
+            std::vector<float> chunk(audio.begin() + start, audio.begin() + i);
+            prechunks.push_back(std::move(chunk));
+
+            while (i < audio.size() && std::abs(audio[i]) < threshold)
+                i++;
+        }
+    }
+
+    for (auto& chunk : prechunks) {
+        auto final_chunks = this->splitIntoChunks(chunk, sample_rate, chunk_max_duration_sec, overlap_duration_sec); 
+
+        for (auto& final_chunk : final_chunks) {
+            chunks.push_back(std::move(final_chunk));
+        }
+    }
+
+    return chunks;
 }
 
 void AudioProcessor::normalize(std::vector<float>& audio) {

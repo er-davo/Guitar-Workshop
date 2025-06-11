@@ -1,13 +1,14 @@
 #pragma once
 
-#include "config.h"
+#include "ProcessingConfig.h"
+#include "core/audio_file/AudioFileIO.h"
 
 #include <vector>
 #include <string>
 
-namespace audioproc {
+namespace audio {
 
-class AudioProcessor {
+class AudioProcessor : public core::AudioFileIO {
 public:
     AudioProcessor();
     ~AudioProcessor();
@@ -22,10 +23,23 @@ public:
         const std::vector<float>& buffer,
         const ProcessingConfig& config
     );
-    
-    std::vector<float> readWav(const std::string& path, int& sr);
-    void writeWav(const std::string& path, const std::vector<float>& audio, int sr);
-    
+
+    std::vector<std::vector<float>> splitIntoChunks(
+        const std::vector<float>& audio,
+        const int sample_rate,
+        const float chunk_duration_sec,
+        const float overlap_duration_sec = 0.0f
+    );
+
+    std::vector<std::vector<float>> splitIntoChunksWithQuietPriority(
+        const std::vector<float>& audio,
+        const int sample_rate,
+        const float threshold,
+        const float chunk_min_duration_sec,
+        const float chunk_max_duration_sec,
+        const float overlap_duration_sec = 0.0f
+    );
+  
     void normalize(std::vector<float>& audio);
     void trimSilence(std::vector<float>& audio, const float threshold, const int margin);
 

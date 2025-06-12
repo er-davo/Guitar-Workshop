@@ -14,20 +14,18 @@ find_package(gRPC REQUIRED)
 file(GLOB_RECURSE SOURCES CONFIGURE_DEPENDS src/*.cpp)
 
 list(APPEND SOURCES
-    proto/audio_processor.pb.cc
-    proto/audio_processor.grpc.pb.cc
+    proto/processor.pb.cc
+    proto/processor.grpc.pb.cc
 )
 
 add_executable(audio-preprocessor ${SOURCES})
 
-# инклюды
 target_include_directories(audio-preprocessor 
     PRIVATE 
     include
     proto
 )
 
-# линковка
 target_link_libraries(audio-preprocessor
     PRIVATE
     SndFile::sndfile

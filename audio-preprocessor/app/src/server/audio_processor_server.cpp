@@ -5,6 +5,8 @@
 #include <iostream>
 #include <string>
 #include <cctype>
+#include <utility>
+#include <vector>
 
 namespace audioproc {
 
@@ -21,6 +23,15 @@ std::string  sanitizeFilename(const std::string file_name) {
     }
 
     return sanitizad_name;
+}
+
+audio::ChunkingConfig parseChunkingConfig(const audioproc::ChunkingConfig& proto_config) {
+    audio::ChunkingConfig config;
+    config.threshold = proto_config.threshold();
+    config.chunk_min_duration_sec = proto_config.chunk_min_duration_sec();
+    config.chunk_max_duration_sec = proto_config.chunk_max_duration_sec();
+    config.overlap_duration_sec = proto_config.overlap_duration_sec();
+    return config;
 }
 
 grpc::Status AudioProcessorServiceImpl::ProcessAudio(
@@ -70,6 +81,47 @@ grpc::Status AudioProcessorServiceImpl::ProcessAudio(
     response->set_wav_data(std::move(buffer));
 
     std::remove(output_path.c_str());
+
+    return grpc::Status::OK;
+}
+
+grpc::Status AudioProcessorServiceImpl::SplitIntoChunks(
+    grpc::ServerContext* context,
+    const SplitAudioRequest* request,
+    SplitAudioResponse* response
+) {
+    std::string file_name = sanitizeFilename(request->file_name());
+    std::string input_path = "temp/" + file_name;
+
+    std::ofstream input_file(input_path, std::ios::binary);
+    if (!input_file.is_open()) {
+        return grpc::Status(grpc::StatusCode::INTERNAL, "Failed to write input file");
+    }
+    input_file.write(request->wav_data().data(), request->wav_data().size());
+    input_file.close();
+
+
+    audio::AudioProcessor proc;
+
+    auto cfg = parseChunkingConfig(request->config());
+    auto audio = proc.readWav(input_path, cfg.sample_rate);
+    std::vector<std::pair<float, std::vector<float>>> chunks;
+
+    try {
+        chunks = proc.splitIntoChunks(audio, cfg);
+    } catch (std::exception& e) {
+        return grpc::Status(grpc::StatusCode::INTERNAL, e.what());
+    }
+
+    std::remove(input_path.c_str());
+
+    for (const auto& [start_time, chunk_data] : chunks) {
+        audioproc::AudioChunk* chunk = response->add_chunks();
+        chunk->set_start_time(start_time);
+
+        std::string raw(reinterpret_cast<const char*>(chunk_data.data()), chunk_data.size() * sizeof(float));
+        chunk->set_audio_data(raw);
+    }
 
     return grpc::Status::OK;
 }

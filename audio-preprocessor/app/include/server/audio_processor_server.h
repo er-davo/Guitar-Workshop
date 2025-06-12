@@ -1,6 +1,6 @@
 #pragma once
 
-#include "audio_processor.grpc.pb.h"
+#include "processor.grpc.pb.h"
 #include "core/processor/AudioProcessor.h"
 
 #include <grpcpp/grpcpp.h>
@@ -14,6 +14,10 @@ public:
     grpc::Status ProcessAudio(grpc::ServerContext* context,
                                const ProcessAudioRequest* request,
                                ProcessAudioResponse* response) override;
+    
+    grpc::Status SplitIntoChunks(grpc::ServerContext* context,
+                               const SplitAudioRequest* request,
+                               SplitAudioResponse* response) override;
 
 };
 

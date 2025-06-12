@@ -4,6 +4,8 @@
 #include <soxr.h>
 #include <cmath>
 #include <stdexcept>
+#include <utility>
+#include <vector>
 
 namespace audio {
 
@@ -44,68 +46,53 @@ std::vector<float> AudioProcessor::processBuffer(
     return audio;
 }
 
-std::vector<std::vector<float>> AudioProcessor::splitIntoChunks(
+std::vector<std::pair<float, std::vector<float>>> AudioProcessor::splitIntoChunks(
     const std::vector<float>& audio,
-    const int sample_rate,
-    const float chunk_duration_sec,
-    const float overlap_duration_sec
+    const ChunkingConfig config
 ) {
-    std::vector<std::vector<float>> chunks;
+    std::vector<std::pair<float, std::vector<float>>> chunks;
 
-    const size_t chunk_size = static_cast<size_t>(chunk_duration_sec * sample_rate);
-    const size_t overlap_size = static_cast<size_t>(overlap_duration_sec * sample_rate);
-    const size_t step_size = chunk_size - overlap_size;
-
-    if (chunk_size == 0 || chunk_size <= overlap_size)
-        throw std::invalid_argument("Invalid chunk or overlap size: chunk must be > overlap");
-    
-    size_t total_samples = audio.size();
-    size_t pos = 0;
-
-    while (pos < total_samples) {
-        size_t end = std::min(pos + chunk_size, total_samples);
-        std::vector<float> chunk(audio.begin() + pos, audio.begin() + end);
-
-        chunks.push_back(std::move(chunk));
-        pos += step_size;
-    }
-    
-
-    return chunks;
-}
-
-std::vector<std::vector<float>> AudioProcessor::splitIntoChunksWithQuietPriority(
-    const std::vector<float>& audio,
-    const int sample_rate,
-    const float threshold,
-    const float chunk_min_duration_sec,
-    const float chunk_max_duration_sec,
-    const float overlap_duration_sec = 0.0f
-) {
-    std::vector<std::vector<float>> chunks, prechunks;
-
-    const size_t chunk_min_size = static_cast<size_t>(chunk_min_duration_sec * sample_rate);
-    const size_t chunk_max_size = static_cast<size_t>(chunk_max_duration_sec * sample_rate);
-    const size_t overlap_size = static_cast<size_t>(overlap_duration_sec * sample_rate);
+    const size_t chunk_min_size = static_cast<size_t>(config.chunk_min_duration_sec * config.sample_rate);
+    const size_t chunk_max_size = static_cast<size_t>(config.chunk_max_duration_sec * config.sample_rate);
+    const size_t overlap_size = static_cast<size_t>(config.overlap_duration_sec * config.sample_rate);
     const size_t step_size = chunk_max_size - overlap_size;
 
-    size_t start = 0;
+    size_t breakpoint = 0;
     for (size_t i = 0; i < audio.size(); i++) {
-        if (std::abs(audio[i]) < threshold) {
-            std::vector<float> chunk(audio.begin() + start, audio.begin() + i);
-            prechunks.push_back(std::move(chunk));
+        if (std::abs(audio[i]) < config.threshold && i - breakpoint >= chunk_min_size) {
+            float start_time = static_cast<float>(breakpoint) / config.sample_rate;
 
-            while (i < audio.size() && std::abs(audio[i]) < threshold)
+            chunks.emplace_back(
+                start_time,
+                std::vector<float>(audio.begin() + breakpoint, audio.begin() + i)
+            );
+
+            while (i < audio.size() && std::abs(audio[i]) < config.threshold)
                 i++;
+            
+            breakpoint = i;
+        } else if (i - breakpoint >= chunk_max_size) {
+            size_t end = breakpoint + chunk_max_size;
+            if (end > audio.size())
+                end = audio.size();
+
+            float start_time = static_cast<float>(breakpoint) / config.sample_rate;
+            chunks.emplace_back(
+                start_time,
+                std::vector<float>(audio.begin() + breakpoint, audio.begin() + end)
+            );
+
+            breakpoint = end - overlap_size;
+            i = breakpoint;
         }
     }
 
-    for (auto& chunk : prechunks) {
-        auto final_chunks = this->splitIntoChunks(chunk, sample_rate, chunk_max_duration_sec, overlap_duration_sec); 
-
-        for (auto& final_chunk : final_chunks) {
-            chunks.push_back(std::move(final_chunk));
-        }
+    if (breakpoint < audio.size()) {
+        float start_time = static_cast<float>(breakpoint) / config.sample_rate;
+        chunks.emplace_back(
+            start_time,
+            std::vector<float>(audio.begin() + breakpoint, audio.end())
+        );
     }
 
     return chunks;

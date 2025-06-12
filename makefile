@@ -47,7 +47,7 @@ proto-cpp-gen:
 	$(CONAN_PROTOC) --cpp_out=$(PREPROC_CPP_OUT) \
 	--grpc_out=$(PREPROC_CPP_GRPC_OUT) \
 	--plugin=protoc-gen-grpc=$(GRPC_PLUGIN) \
-	$(PROTO_DIR)/audio_processor.proto
+	$(PROTO_DIR)/processor.proto
 
 proto-py-gen-audio:
 	$(AUDIO_PY_VENV)/Scripts/python.exe \

@@ -1,10 +1,11 @@
 #pragma once
 
-#include "ProcessingConfig.h"
+#include "core/processor/AudioConfigs.h"
 #include "core/audio_file/AudioFileIO.h"
 
 #include <vector>
 #include <string>
+#include <utility>
 
 namespace audio {
 
@@ -24,20 +25,9 @@ public:
         const ProcessingConfig& config
     );
 
-    std::vector<std::vector<float>> splitIntoChunks(
+    std::vector<std::pair<float, std::vector<float>>> splitIntoChunks(
         const std::vector<float>& audio,
-        const int sample_rate,
-        const float chunk_duration_sec,
-        const float overlap_duration_sec = 0.0f
-    );
-
-    std::vector<std::vector<float>> splitIntoChunksWithQuietPriority(
-        const std::vector<float>& audio,
-        const int sample_rate,
-        const float threshold,
-        const float chunk_min_duration_sec,
-        const float chunk_max_duration_sec,
-        const float overlap_duration_sec = 0.0f
+        const ChunkingConfig config
     );
   
     void normalize(std::vector<float>& audio);

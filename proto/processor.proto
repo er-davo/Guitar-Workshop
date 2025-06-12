@@ -6,6 +6,7 @@ option go_package = "internal/audioprocproto";
 
 service AudioProcessorService {
     rpc ProcessAudio(ProcessAudioRequest) returns (ProcessAudioResponse);
+    rpc SplitIntoChunks (SplitAudioRequest) returns (SplitAudioResponse);
 }
 
 message AudioProcessingConfig {
@@ -27,4 +28,27 @@ message ProcessAudioRequest {
 
 message ProcessAudioResponse {
     bytes wav_data = 1;
+}
+
+message SplitAudioRequest {
+    bytes wav_data = 1;
+    string file_name = 2;
+    ChunkingConfig config = 3;
+}
+
+message ChunkingConfig {
+    int32 sample_rate = 1;
+    float threshold = 2;
+    float chunk_min_duration_sec = 3;
+    float chunk_max_duration_sec = 4;
+    float overlap_duration_sec = 5;
+}
+
+message SplitAudioResponse {
+    repeated AudioChunk chunks = 1;
+}
+
+message AudioChunk {
+    float start_time = 1;
+    bytes audio_data = 2;
 }

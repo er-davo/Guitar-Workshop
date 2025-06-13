@@ -2,6 +2,8 @@ syntax = "proto3";
 
 package separator;
 
+option go_package = "internal/proto/separator";
+
 service AudioSeparator {
     rpc SeparateAudio (SeparateRequest) returns (SeparateResponse);
 }

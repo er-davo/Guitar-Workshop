@@ -4,7 +4,7 @@
 // 	protoc        v6.30.2
 // source: tab.proto
 
-package tabproto
+package tab
 
 import (
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
@@ -21,56 +21,9 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
-type RequestType int32
-
-const (
-	RequestType_FILE    RequestType = 0
-	RequestType_YOUTUBE RequestType = 1
-)
-
-// Enum value maps for RequestType.
-var (
-	RequestType_name = map[int32]string{
-		0: "FILE",
-		1: "YOUTUBE",
-	}
-	RequestType_value = map[string]int32{
-		"FILE":    0,
-		"YOUTUBE": 1,
-	}
-)
-
-func (x RequestType) Enum() *RequestType {
-	p := new(RequestType)
-	*p = x
-	return p
-}
-
-func (x RequestType) String() string {
-	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
-}
-
-func (RequestType) Descriptor() protoreflect.EnumDescriptor {
-	return file_tab_proto_enumTypes[0].Descriptor()
-}
-
-func (RequestType) Type() protoreflect.EnumType {
-	return &file_tab_proto_enumTypes[0]
-}
-
-func (x RequestType) Number() protoreflect.EnumNumber {
-	return protoreflect.EnumNumber(x)
-}
-
-// Deprecated: Use RequestType.Descriptor instead.
-func (RequestType) EnumDescriptor() ([]byte, []int) {
-	return file_tab_proto_rawDescGZIP(), []int{0}
-}
-
 type TabRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	AudioUrl      string                 `protobuf:"bytes,1,opt,name=audio_url,json=audioUrl,proto3" json:"audio_url,omitempty"`
-	Type          RequestType            `protobuf:"varint,2,opt,name=type,proto3,enum=tab.RequestType" json:"type,omitempty"`
+	Chunks        []*AudioChunk          `protobuf:"bytes,1,rep,name=chunks,proto3" json:"chunks,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -105,18 +58,63 @@ func (*TabRequest) Descriptor() ([]byte, []int) {
 	return file_tab_proto_rawDescGZIP(), []int{0}
 }
 
-func (x *TabRequest) GetAudioUrl() string {
+func (x *TabRequest) GetChunks() []*AudioChunk {
 	if x != nil {
-		return x.AudioUrl
+		return x.Chunks
 	}
-	return ""
+	return nil
 }
 
-func (x *TabRequest) GetType() RequestType {
+type AudioChunk struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	StartTime     float32                `protobuf:"fixed32,1,opt,name=start_time,json=startTime,proto3" json:"start_time,omitempty"`
+	AudioData     []byte                 `protobuf:"bytes,2,opt,name=audio_data,json=audioData,proto3" json:"audio_data,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *AudioChunk) Reset() {
+	*x = AudioChunk{}
+	mi := &file_tab_proto_msgTypes[1]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *AudioChunk) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AudioChunk) ProtoMessage() {}
+
+func (x *AudioChunk) ProtoReflect() protoreflect.Message {
+	mi := &file_tab_proto_msgTypes[1]
 	if x != nil {
-		return x.Type
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
 	}
-	return RequestType_FILE
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use AudioChunk.ProtoReflect.Descriptor instead.
+func (*AudioChunk) Descriptor() ([]byte, []int) {
+	return file_tab_proto_rawDescGZIP(), []int{1}
+}
+
+func (x *AudioChunk) GetStartTime() float32 {
+	if x != nil {
+		return x.StartTime
+	}
+	return 0
+}
+
+func (x *AudioChunk) GetAudioData() []byte {
+	if x != nil {
+		return x.AudioData
+	}
+	return nil
 }
 
 type TabResponse struct {
@@ -128,7 +126,7 @@ type TabResponse struct {
 
 func (x *TabResponse) Reset() {
 	*x = TabResponse{}
-	mi := &file_tab_proto_msgTypes[1]
+	mi := &file_tab_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -140,7 +138,7 @@ func (x *TabResponse) String() string {
 func (*TabResponse) ProtoMessage() {}
 
 func (x *TabResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_tab_proto_msgTypes[1]
+	mi := &file_tab_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -153,7 +151,7 @@ func (x *TabResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use TabResponse.ProtoReflect.Descriptor instead.
 func (*TabResponse) Descriptor() ([]byte, []int) {
-	return file_tab_proto_rawDescGZIP(), []int{1}
+	return file_tab_proto_rawDescGZIP(), []int{2}
 }
 
 func (x *TabResponse) GetTab() string {
@@ -167,18 +165,20 @@ var File_tab_proto protoreflect.FileDescriptor
 
 const file_tab_proto_rawDesc = "" +
 	"\n" +
-	"\ttab.proto\x12\x03tab\"O\n" +
+	"\ttab.proto\x12\x03tab\"5\n" +
 	"\n" +
-	"TabRequest\x12\x1b\n" +
-	"\taudio_url\x18\x01 \x01(\tR\baudioUrl\x12$\n" +
-	"\x04type\x18\x02 \x01(\x0e2\x10.tab.RequestTypeR\x04type\"\x1f\n" +
+	"TabRequest\x12'\n" +
+	"\x06chunks\x18\x01 \x03(\v2\x0f.tab.AudioChunkR\x06chunks\"J\n" +
+	"\n" +
+	"AudioChunk\x12\x1d\n" +
+	"\n" +
+	"start_time\x18\x01 \x01(\x02R\tstartTime\x12\x1d\n" +
+	"\n" +
+	"audio_data\x18\x02 \x01(\fR\taudioData\"\x1f\n" +
 	"\vTabResponse\x12\x10\n" +
-	"\x03tab\x18\x01 \x01(\tR\x03tab*$\n" +
-	"\vRequestType\x12\b\n" +
-	"\x04FILE\x10\x00\x12\v\n" +
-	"\aYOUTUBE\x10\x012?\n" +
+	"\x03tab\x18\x01 \x01(\tR\x03tab2?\n" +
 	"\vTabGenerate\x120\n" +
-	"\vGenerateTab\x12\x0f.tab.TabRequest\x1a\x10.tab.TabResponseB\x13Z\x11internal/tabprotob\x06proto3"
+	"\vGenerateTab\x12\x0f.tab.TabRequest\x1a\x10.tab.TabResponseB\x14Z\x12internal/proto/tabb\x06proto3"
 
 var (
 	file_tab_proto_rawDescOnce sync.Once
@@ -192,16 +192,15 @@ func file_tab_proto_rawDescGZIP() []byte {
 	return file_tab_proto_rawDescData
 }
 
-var file_tab_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
-var file_tab_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
+var file_tab_proto_msgTypes = make([]protoimpl.MessageInfo, 3)
 var file_tab_proto_goTypes = []any{
-	(RequestType)(0),    // 0: tab.RequestType
-	(*TabRequest)(nil),  // 1: tab.TabRequest
+	(*TabRequest)(nil),  // 0: tab.TabRequest
+	(*AudioChunk)(nil),  // 1: tab.AudioChunk
 	(*TabResponse)(nil), // 2: tab.TabResponse
 }
 var file_tab_proto_depIdxs = []int32{
-	0, // 0: tab.TabRequest.type:type_name -> tab.RequestType
-	1, // 1: tab.TabGenerate.GenerateTab:input_type -> tab.TabRequest
+	1, // 0: tab.TabRequest.chunks:type_name -> tab.AudioChunk
+	0, // 1: tab.TabGenerate.GenerateTab:input_type -> tab.TabRequest
 	2, // 2: tab.TabGenerate.GenerateTab:output_type -> tab.TabResponse
 	2, // [2:3] is the sub-list for method output_type
 	1, // [1:2] is the sub-list for method input_type
@@ -220,14 +219,13 @@ func file_tab_proto_init() {
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_tab_proto_rawDesc), len(file_tab_proto_rawDesc)),
-			NumEnums:      1,
-			NumMessages:   2,
+			NumEnums:      0,
+			NumMessages:   3,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
 		GoTypes:           file_tab_proto_goTypes,
 		DependencyIndexes: file_tab_proto_depIdxs,
-		EnumInfos:         file_tab_proto_enumTypes,
 		MessageInfos:      file_tab_proto_msgTypes,
 	}.Build()
 	File_tab_proto = out.File

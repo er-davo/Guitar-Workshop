@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package onsetsframes;
 
-option go_package = "internal/onsetsframesproto";
+option go_package = "internal/proto/onsets-frames";
 
 service OnsetsAndFrames {
     rpc Analyze (OAFRequest) returns (OAFResponse);

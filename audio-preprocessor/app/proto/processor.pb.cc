@@ -3,7 +3,7 @@
 // source: proto/processor.proto
 // Protobuf C++ Version: 5.27.0
 
-#include "processor.pb.h"
+#include "proto/processor.pb.h"
 
 #include <algorithm>
 #include <type_traits>
@@ -324,13 +324,13 @@ const char descriptor_table_protodef_proto_2fprocessor_2eproto[] ABSL_ATTRIBUTE_
     "udioRequest\032\037.audioproc.ProcessAudioResp"
     "onse\022N\n\017SplitIntoChunks\022\034.audioproc.Spli"
     "tAudioRequest\032\035.audioproc.SplitAudioResp"
-    "onseB\031Z\027internal/audioprocprotob\006proto3"
+    "onseB\032Z\030internal/proto/audioprocb\006proto3"
 };
 static ::absl::once_flag descriptor_table_proto_2fprocessor_2eproto_once;
 PROTOBUF_CONSTINIT const ::_pbi::DescriptorTable descriptor_table_proto_2fprocessor_2eproto = {
     false,
     false,
-    959,
+    960,
     descriptor_table_protodef_proto_2fprocessor_2eproto,
     "proto/processor.proto",
     &descriptor_table_proto_2fprocessor_2eproto_once,

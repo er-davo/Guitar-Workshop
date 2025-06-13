@@ -10,6 +10,9 @@ import (
 )
 
 func main() {
+	handlers.InitClients()
+	defer handlers.CloseClients()
+
 	e := echo.New()
 
 	e.Static("/static", "static")

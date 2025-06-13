@@ -2,10 +2,10 @@ syntax = "proto3";
 
 package audioproc;
 
-option go_package = "internal/audioprocproto";
+option go_package = "internal/proto/audioproc";
 
 service AudioProcessorService {
-    rpc ProcessAudio(ProcessAudioRequest) returns (ProcessAudioResponse);
+    rpc ProcessAudio  (ProcessAudioRequest) returns (ProcessAudioResponse);
     rpc SplitIntoChunks (SplitAudioRequest) returns (SplitAudioResponse);
 }
 

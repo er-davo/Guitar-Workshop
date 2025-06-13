@@ -2,8 +2,8 @@
 // If you make any local change, they will be lost.
 // source: proto/processor.proto
 
-#include "processor.pb.h"
-#include "processor.grpc.pb.h"
+#include "proto/processor.pb.h"
+#include "proto/processor.grpc.pb.h"
 
 #include <functional>
 #include <grpcpp/support/async_stream.h>

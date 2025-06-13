@@ -4,7 +4,7 @@
 // - protoc             v6.30.2
 // source: tab.proto
 
-package tabproto
+package tab
 
 import (
 	context "context"

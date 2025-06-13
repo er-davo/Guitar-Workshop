@@ -2,20 +2,19 @@ syntax = "proto3";
 
 package tab;
 
-option go_package = "internal/tabproto";
+option go_package = "internal/proto/tab";
 
 service TabGenerate {
     rpc GenerateTab (TabRequest) returns (TabResponse);
 }
 
-enum RequestType {
-    FILE = 0;
-    YOUTUBE = 1;
+message TabRequest {
+    repeated AudioChunk chunks = 1;
 }
 
-message TabRequest {
-    string audio_url = 1;
-    RequestType type = 2;
+message AudioChunk {
+    float start_time = 1;
+    bytes audio_data = 2;
 }
 
 message TabResponse {

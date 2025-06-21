@@ -2,8 +2,6 @@ package models
 
 import (
 	"slices"
-
-	audiopb "tabgen/internal/audioproto"
 )
 
 type noteEvent struct {
@@ -12,16 +10,6 @@ type noteEvent struct {
 	mainNote string
 	octave   int
 	notes    []string
-}
-
-func createNoteEvent(event *audiopb.AudioEvent) *noteEvent {
-	return &noteEvent{
-		time:     event.Time,
-		pitch:    event.Pitch,
-		mainNote: event.MainNote,
-		octave:   int(event.Octave),
-		notes:    event.ChromaNotes,
-	}
 }
 
 func (n *noteEvent) equalsTo(other noteEvent, timeDiff float32) bool {

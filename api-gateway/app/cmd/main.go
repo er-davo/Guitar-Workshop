@@ -1,9 +1,10 @@
 package main
 
 import (
+	"fmt"
+
 	"api-gateway/internal/config"
 	"api-gateway/internal/handlers"
-	"fmt"
 
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"

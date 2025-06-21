@@ -7,6 +7,8 @@ node_modules
 generated
 temp
 
+output_stems
+
 # Visual Studio 2022
 .vs
 out

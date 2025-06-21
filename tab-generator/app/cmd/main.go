@@ -4,16 +4,19 @@ import (
 	"fmt"
 	"net"
 
+	"tabgen/internal/clients"
 	"tabgen/internal/config"
 	"tabgen/internal/logger"
+	"tabgen/internal/proto/tab"
 	"tabgen/internal/service"
-	tabpb "tabgen/internal/tabproto"
 
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 )
 
 func main() {
+	clients.InitClients()
+	defer clients.CloseClients()
 	defer logger.Log.Sync()
 
 	lis, err := net.Listen("tcp", fmt.Sprintf(":%s", config.Load().PORT))
@@ -22,7 +25,7 @@ func main() {
 	}
 
 	s := grpc.NewServer()
-	tabpb.RegisterTabGenerateServer(s, &service.TabService{})
+	tab.RegisterTabGenerateServer(s, &service.TabService{})
 
 	logger.Log.Info("gRPC server running on " + fmt.Sprintf(":%s", config.Load().PORT))
 	if err := s.Serve(lis); err != nil {

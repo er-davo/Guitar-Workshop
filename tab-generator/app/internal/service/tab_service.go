@@ -3,45 +3,50 @@ package service
 import (
 	"context"
 
-	audiopb "tabgen/internal/audioproto"
-	"tabgen/internal/logger"
+	"tabgen/internal/clients"
 	"tabgen/internal/models"
-	tabpb "tabgen/internal/tabproto"
-
-	"go.uber.org/zap"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
+	"tabgen/internal/music"
+	onsets_frames "tabgen/internal/proto/onsets-frames"
+	"tabgen/internal/proto/tab"
 )
 
 type TabService struct {
-	tabpb.UnimplementedTabGenerateServer
+	tab.UnimplementedTabGenerateServer
 }
 
-func (s *TabService) GenerateTab(ctx context.Context, req *tabpb.TabRequest) (*tabpb.TabResponse, error) {
-	conn, err := grpc.NewClient(
-		"audio-analyzer:50051",
-		grpc.WithTransportCredentials(insecure.NewCredentials()),
-	)
-	if err != nil {
-		logger.Log.Fatal("gRPC connection failed", zap.Error(err))
+func (s *TabService) GenerateTab(ctx context.Context, req *tab.TabRequest) (*tab.TabResponse, error) {
+	rawNoteSeq := music.NoteSequence{}
+	for _, chunk := range req.Chunks {
+		OandFReq := onsets_frames.OAFRequest{
+			AudioData: &onsets_frames.AudioFileData{
+				FileName:   "temp",
+				AudioBytes: chunk.AudioData,
+			},
+		}
+		notes, err := clients.OnsetsAndFramesClient.Analyze(context.Background(), &OandFReq)
+		if err != nil {
+			return nil, err
+		}
+
+		seq := music.NewNoteSequence(len(notes.Notes))
+
+		for i, note := range notes.Notes {
+			name, octave := music.MidiToNote(int(note.MidiPitch))
+			seq.Notes[i] = music.NoteEvent{
+				Name:      name,
+				Octave:    octave,
+				StartTime: note.OnsetSeconds + chunk.StartTime,
+				Velocity:  note.Velocity,
+			}
+		}
+
+		rawNoteSeq.Merge(seq)
 	}
-	defer conn.Close()
 
-	client := audiopb.NewAudioAnalyzerClient(conn)
-
-	audioResp, err := client.ProcessAudio(context.Background(), &audiopb.AudioRequest{
-		AudioPath: req.AudioUrl,
-		Type:      audiopb.RequestType(req.Type),
-	})
+	tabs, err := models.GenerateTab(audioResp)
 	if err != nil {
-		logger.Log.Error("error on process audio", zap.Error(err))
 		return nil, err
 	}
 
-	tab, err := models.GenerateTab(audioResp)
-	if err != nil {
-		return nil, err
-	}
-
-	return &tabpb.TabResponse{Tab: tab}, nil
+	return &tab.TabResponse{Tab: tabs}, nil
 }

@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"context"
-	"fmt"
 	"io"
 	"net/http"
 	"slices"
@@ -12,7 +11,6 @@ import (
 	"api-gateway/internal/proto/audioproc"
 	"api-gateway/internal/proto/separator"
 	"api-gateway/internal/proto/tab"
-	"api-gateway/internal/storage"
 
 	"github.com/labstack/echo"
 )
@@ -42,6 +40,7 @@ func TabGenerate(c echo.Context) error {
 		if err != nil {
 			return c.JSON(http.StatusBadRequest, map[string]string{"error": "No file uploaded"})
 		}
+
 		file, err := fileHeader.Open()
 		if err != nil {
 			return c.JSON(http.StatusBadRequest, map[string]string{"error": "Could not open file"})
@@ -72,17 +71,17 @@ func TabGenerate(c echo.Context) error {
 		// TODO: add unique  file name generation
 		audioURL = fileHeader.Filename
 
-		err = storage.UploadFileToSupabaseStorage(
-			"audio-bucket",
-			audioURL,
-			file,
-			fileHeader.Header.Get("Content-Type"),
-		)
-		if err != nil {
-			return c.JSON(http.StatusInternalServerError, map[string]string{
-				"error": fmt.Sprintf("Upload failed: %v", err),
-			})
-		}
+		// err = storage.UploadFileToSupabaseStorage(
+		// 	"audio-bucket",
+		// 	audioURL,
+		// 	file,
+		// 	fileHeader.Header.Get("Content-Type"),
+		// )
+		// if err != nil {
+		// 	return c.JSON(http.StatusInternalServerError, map[string]string{
+		// 		"error": fmt.Sprintf("Upload failed: %v", err),
+		// 	})
+		// }
 
 	case YOUTUBE:
 		//TODO

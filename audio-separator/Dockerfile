@@ -1,15 +1,16 @@
-# Используем базовый образ с Python
 FROM python:3.10-slim
 
 RUN apt-get update && \
-    apt-get install -y ffmpeg git && \
-    pip install --upgrade pip
-
-COPY app /app
-
+    apt-get install -y ffmpeg
+    
 WORKDIR /app
 
-RUN pip install -r requirements.txt && \
-    pip install demucs
+RUN pip install demucs
+
+COPY app/requirements.txt /app/
+
+RUN pip install -r requirements.txt
+
+COPY app/ /app/
 
 CMD [ "python", "main.py" ]

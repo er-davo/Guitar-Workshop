@@ -1,23 +1,39 @@
-FROM conanio/gcc12-ubuntu16.04 AS builder
+FROM ubuntu:22.04 AS builder
+
+RUN apt-get update && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+    build-essential \
+    cmake \
+    python3 \
+    python3-pip
+#    libssl-dev \
+#    zlib1g-dev && \
+#    rm -rf /var/lib/apt/lists/*
+
+RUN pip3 install conan
 
 WORKDIR /audio-preprocessor
 
-COPY app/ .
+COPY conanfile.* /audio-preprocessor/
 
-RUN conan profile detect && \
-    conan install . --output-folder=build --build=missing
+RUN conan profile detect --force
 
-RUN cmake -B build -DCMAKE_BUILD_TYPE=Release && \
+RUN conan install . --output-folder=build --build=missing
+
+COPY app/ /audio-preprocessor/
+
+RUN cmake -S . -B build -DCMAKE_TOOLCHAIN_FILE=build/conan_toolchain.cmake -DCMAKE_BUILD_TYPE=Release && \
     cmake --build build --target audio-preprocessor -j$(nproc)
 
-FROM alpine
+
+FROM alpine:latest
+
+RUN apk add --no-cache libstdc++ zlib libssl3
 
 WORKDIR /app
 
-RUN apk add --no-cache libstdc++
+COPY --from=builder /audio-preprocessor/build/audio-preprocessor /app
 
-COPY --from=builder /audio-preprocessor/build/audio-preprocessor .
+RUN mkdir -p temp
 
-RUN mkdir temp
-
-CMD [ "./audio-preprocessor" ]
+CMD [ "audio-preprocessor" ]

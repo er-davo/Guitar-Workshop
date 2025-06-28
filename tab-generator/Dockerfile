@@ -1,11 +1,14 @@
 FROM golang:alpine AS builder
 
+RUN apk --no-cache add bash gcc musl-dev
+
 WORKDIR /tab-generator
 
-COPY app /tab-generator
+COPY app/go.mod /tab-generator/
 
 RUN go mod download
-RUN apk --no-cache add bash gcc musl-dev
+
+COPY app/ /tab-generator/
 
 RUN go build -o main cmd/main.go
 

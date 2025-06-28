@@ -1,11 +1,14 @@
 FROM golang:alpine AS builder
 
+RUN apk --no-cache add bash gcc musl-dev
+
 WORKDIR /api-gateway
 
-COPY app /api-gateway
+COPY app/go.mod /api-gateway/
 
 RUN go mod download
-RUN apk --no-cache add bash gcc musl-dev
+
+COPY app/ /api-gateway/
 
 RUN go build -o main cmd/main.go
 
@@ -16,4 +19,4 @@ WORKDIR /app
 COPY --from=builder /api-gateway/main /app/main
 COPY --from=builder /api-gateway/static /app/static
 
-CMD [ "/app/main" ]
+CMD [ "/main" ]

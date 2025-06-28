@@ -6,7 +6,24 @@ services:
     ports:
       - "8080:8080"
     depends_on:
+      - audio-separator
+      - audio-processor
       - tab-generator
+  
+  audio-processor:
+    build: ./audio-preprocessor
+    env_file:
+      - /audio-preprocessor/.env
+    ports:
+      - "50053:50053"
+  
+  audio-separator:
+    build: ./audio-separator
+    env_file:
+      - /audio-separator/.env
+    ports:
+      - "50054:50054"
+    
   tab-generator:
     build: ./tab-generator
     env_file:
@@ -14,11 +31,11 @@ services:
     ports:
       - "50052:50052"
     depends_on:
-      - audio-analyzer
+      - onsets-frames
   
-  audio-analyzer:
-    build: ./audio-analyzer
+  onsets-frames:
+    build: ./onsets-frames
     env_file:
-      - /audio-analyzer/.env
+      - ./onsets-frames/.env
     ports:
-      - "50051:50051"
+      - "50055:50055"

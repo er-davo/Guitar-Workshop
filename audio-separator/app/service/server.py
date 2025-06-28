@@ -1,8 +1,7 @@
 from concurrent import futures
 import grpc
-import separator_pb2_grpc
-
 import service
+import separator_pb2_grpc
 
 def run_server(port: str):
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=4))

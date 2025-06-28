@@ -7,8 +7,8 @@ AUDIO_GRPC_PY_OUT = audio-analyzer/app
 
 SEPARATOR_PY_VENV = audio-separator/venv
 
-SEPARATOR_PY_OUT = audio-separator/app/service
-SEPARATOR_GRPC_PY_OUT = audio-separator/app/service
+SEPARATOR_PY_OUT = audio-separator/app
+SEPARATOR_GRPC_PY_OUT = audio-separator/app
 
 TABGEN_GO_OUT = tab-generator/app
 TABGEN_GO_GRPC_OUT = tab-generator/app

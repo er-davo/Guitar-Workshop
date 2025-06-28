@@ -4,7 +4,6 @@ import (
 	"context"
 
 	"tabgen/internal/clients"
-	"tabgen/internal/models"
 	"tabgen/internal/music"
 	onsets_frames "tabgen/internal/proto/onsets-frames"
 	"tabgen/internal/proto/tab"
@@ -35,6 +34,7 @@ func (s *TabService) GenerateTab(ctx context.Context, req *tab.TabRequest) (*tab
 			seq.Notes[i] = music.NoteEvent{
 				Name:      name,
 				Octave:    octave,
+				MidiPitch: int(note.MidiPitch),
 				StartTime: note.OnsetSeconds + chunk.StartTime,
 				Velocity:  note.Velocity,
 			}
@@ -43,7 +43,7 @@ func (s *TabService) GenerateTab(ctx context.Context, req *tab.TabRequest) (*tab
 		rawNoteSeq.Merge(seq)
 	}
 
-	tabs, err := models.GenerateTab(audioResp)
+	tabs, err := music.GenerateTab(rawNoteSeq)
 	if err != nil {
 		return nil, err
 	}

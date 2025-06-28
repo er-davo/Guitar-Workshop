@@ -2,6 +2,8 @@ package music
 
 import (
 	"fmt"
+
+	"github.com/er-davo/guitar"
 )
 
 var noteNames = [...]string{"C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"}
@@ -20,6 +22,7 @@ func MidiToNote(pitch int) (string, int) {
 type NoteEvent struct {
 	Name      string
 	Octave    int
+	MidiPitch int
 	StartTime float32
 	Velocity  float32
 }
@@ -62,4 +65,29 @@ func (n *NoteSequence) Merge(seq NoteSequence) {
 	}
 
 	n.Append(seq.Notes[overlap:]...)
+}
+
+func (n *NoteSequence) guitarSequence() [][]guitar.Playable {
+	frames := [][]guitar.Playable{}
+
+	var curTime float32 = -1.0
+
+	for timeIndex := 0; timeIndex < len(n.Notes); timeIndex++ {
+		curTime = n.Notes[timeIndex].StartTime
+		frame := []guitar.Playable{}
+
+		for curTime == n.Notes[timeIndex].StartTime {
+			note := n.Notes[timeIndex]
+			frame = append(frame, guitar.Note{
+				Name:   note.Name,
+				Octave: note.Octave,
+				Time:   note.StartTime,
+			})
+			timeIndex++
+		}
+
+		frames = append(frames, frame)
+	}
+
+	return frames
 }

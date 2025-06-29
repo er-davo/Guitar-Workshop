@@ -1,6 +1,4 @@
-const onsetsFramesService = require('../services/onsets-frames')
-const tf = require('@tensorflow/tfjs-node');
-const mm = require('@magenta/music');
+import * as wavDecoder from 'wav-decoder';
 
 function createAnalyzer(model) {
   return async function analyzer(call, callback) {
@@ -8,7 +6,7 @@ function createAnalyzer(model) {
       const { audio_bytes } = call.request.audio_data;
       const audioBuffer = Buffer.from(audio_bytes);
 
-      const decoded = await require('wav-decoder').decode(audioBuffer);
+      const decoded = await wavDecoder.decode(audioBuffer);
       const audioData = decoded.channelData[0];
 
       const notes = await model.transcribeFromAudio(audioData);
@@ -27,4 +25,4 @@ function createAnalyzer(model) {
   };
 }
 
-module.exports = createAnalyzer;
+export default createAnalyzer;

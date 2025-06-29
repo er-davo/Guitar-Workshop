@@ -18,6 +18,4 @@ WORKDIR /app
 
 COPY --from=builder /tab-generator/main /app/main
 
-RUN apk --no-cache add curl
-
 CMD [ "/app/main" ]

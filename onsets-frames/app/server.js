@@ -1,9 +1,9 @@
-const grpc = require('@grpc/grpc-js');
-const protoLoader = require('@grpc/proto-loader');
-const path = require('path');
-const config = require('./config');
-const mm = require('@magenta/music');
-const createAnalyzer = require('./controllers/analyze');
+import * as grpc from '@grpc/grpc-js';
+import * as protoLoader from '@grpc/proto-loader';
+import path from 'path';
+import config from './config.js';
+import * as magenta from '@magenta/music';
+import createAnalyzer from './controllers/analyze.js'; 
 
 const PROTO_PATH = path.join(__dirname, 'proto/onsetsframes.proto');
 
@@ -19,7 +19,7 @@ const protoDescriptor = grpc.loadPackageDefinition(packageDefinition);
 const onsetsframes = protoDescriptor.onsetsframes;
 
 async function main() {
-    const model = new mm.OnsetsAndFrames();
+    const model = new magenta.OnsetsAndFrames();
     await model.initialize();
     console.log('O&F модель загружена');
 

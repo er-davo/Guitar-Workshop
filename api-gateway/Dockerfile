@@ -19,4 +19,4 @@ WORKDIR /app
 COPY --from=builder /api-gateway/main /app/main
 COPY --from=builder /api-gateway/static /app/static
 
-CMD [ "/main" ]
+CMD [ "/app/main" ]

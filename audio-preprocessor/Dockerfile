@@ -14,7 +14,7 @@ RUN pip3 install conan
 
 WORKDIR /audio-preprocessor
 
-COPY conanfile.* /audio-preprocessor/
+COPY app/conanfile.txt /audio-preprocessor/
 
 RUN conan profile detect --force
 
@@ -25,15 +25,16 @@ COPY app/ /audio-preprocessor/
 RUN cmake -S . -B build -DCMAKE_TOOLCHAIN_FILE=build/conan_toolchain.cmake -DCMAKE_BUILD_TYPE=Release && \
     cmake --build build --target audio-preprocessor -j$(nproc)
 
+# RUN mkdir -p temp
 
-FROM alpine:latest
+# CMD [ "/build/Release/audio-preprocessor" ]
 
-RUN apk add --no-cache libstdc++ zlib libssl3
+FROM debian:bookworm-slim
 
 WORKDIR /app
 
-COPY --from=builder /audio-preprocessor/build/audio-preprocessor /app
+COPY --from=builder /audio-preprocessor/build/audio-preprocessor /app/
 
 RUN mkdir -p temp
 
-CMD [ "audio-preprocessor" ]
+CMD [ "/app/audio-preprocessor" ]

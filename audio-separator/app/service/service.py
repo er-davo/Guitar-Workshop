@@ -2,7 +2,7 @@ from separator.core import Separator
 import separator_pb2, separator_pb2_grpc
 
 class AudioSeparatorService(separator_pb2_grpc.AudioSeparatorServicer):
-    def __init__(self, path_to_temp_dir):
+    def __init__(self, path_to_temp_dir: str):
         super().__init__()
         self.temp_dir = path_to_temp_dir
         self.separator = Separator(self.temp_dir)

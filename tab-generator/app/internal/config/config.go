@@ -6,9 +6,9 @@ import (
 )
 
 type Config struct {
-	PORT                string
-	OnsetsAndFramesPort string
-	OnsetsAndFramesHost string
+	PORT         string
+	AnalyzerPort string
+	AnalyzerHost string
 }
 
 var (
@@ -19,8 +19,8 @@ var (
 func Load() *Config {
 	once.Do(func() {
 		config.PORT = os.Getenv("PORT")
-		config.OnsetsAndFramesPort = os.Getenv("ONSETS_AND_FRAMES_PORT")
-		config.OnsetsAndFramesHost = os.Getenv("ONSETS_AND_FRAMES_HOST")
+		config.AnalyzerPort = os.Getenv("ANALYZER_PORT")
+		config.AnalyzerHost = os.Getenv("ANALYZER_HOST")
 	})
 
 	return &config

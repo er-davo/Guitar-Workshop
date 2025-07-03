@@ -19,7 +19,7 @@ func InitClients() {
 	var err error
 
 	OnsetsAndFramesConn, err = grpc.NewClient(
-		config.Load().OnsetsAndFramesHost+":"+config.Load().OnsetsAndFramesPort,
+		config.Load().AnalyzerHost+":"+config.Load().AnalyzerPort,
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 	)
 	if err != nil {

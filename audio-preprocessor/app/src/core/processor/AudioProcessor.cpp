@@ -2,6 +2,8 @@
 
 #include <sndfile.h>
 #include <soxr.h>
+#include <spdlog/spdlog.h>
+
 #include <cmath>
 #include <stdexcept>
 #include <utility>
@@ -17,13 +19,14 @@ void AudioProcessor::processWav(
     const std::string& output_path,
     ProcessingConfig& config
 ) {
+    spdlog::info("Processing WAV: input={}, output={}, sample_rate={}", input_path, output_path, config.sample_rate);
     auto audio = this->readWav(input_path, config.sample_rate);
     if (config.use_bandpass)
         this->bandPassFilter(audio, config.band_high, config.band_low, config.sample_rate);
     else
         this->highPassFilter(audio, config.high_pass, config.sample_rate);
 
-    this->trimSilence(audio, config.threshold, config.margin);
+    //this->trimSilence(audio, config.threshold, config.margin);
     this->normalize(audio);
     this->fadeInOut(audio, config.fade_samples);
     this->writeWav(output_path, audio, config.sample_rate);
@@ -40,7 +43,7 @@ std::vector<float> AudioProcessor::processBuffer(
     else
         this->highPassFilter(audio, config.high_pass, config.sample_rate);
 
-    this->trimSilence(audio, config.threshold, config.margin);
+    //this->trimSilence(audio, config.threshold, config.margin);
     this->normalize(audio);
     this->fadeInOut(audio, config.fade_samples);
     return audio;

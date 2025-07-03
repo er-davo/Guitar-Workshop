@@ -1,5 +1,7 @@
 #include "server/audio_processor_server.h"
 
+#include <spdlog/spdlog.h>
+
 #include <fstream>
 #include <sstream>
 #include <iostream>
@@ -42,6 +44,9 @@ grpc::Status AudioProcessorServiceImpl::ProcessAudio(
     std::string file_name = sanitizeFilename(request->file_name());
     std::string input_path = "temp/" + file_name;
     std::string output_path = "temp/_processed_" + file_name;
+
+    spdlog::info("ProcessAudio called for file: {}", file_name);
+    spdlog::debug("WAV data size: {}", request->wav_data().size());
 
     std::ofstream input_file(input_path, std::ios::binary);
     if (!input_file.is_open()) {
@@ -95,17 +100,20 @@ grpc::Status AudioProcessorServiceImpl::SplitIntoChunks(
 
     std::ofstream input_file(input_path, std::ios::binary);
     if (!input_file.is_open()) {
+        spdlog::error("Failed to open input file for writing: {}", input_path);
         return grpc::Status(grpc::StatusCode::INTERNAL, "Failed to write input file");
     }
     input_file.write(request->wav_data().data(), request->wav_data().size());
     input_file.close();
-
 
     audio::AudioProcessor proc;
 
     auto cfg = parseChunkingConfig(request->config());
     auto audio = proc.readWav(input_path, cfg.sample_rate);
     std::vector<std::pair<float, std::vector<float>>> chunks;
+
+    spdlog::info("SplitIntoChunks called for file: {}", file_name);
+    spdlog::debug("Audio size: {} samples", audio.size());
 
     try {
         chunks = proc.splitIntoChunks(audio, cfg);
@@ -132,9 +140,11 @@ void RunServer(const std::string& address) {
     grpc::ServerBuilder builder;
     builder.AddListeningPort(address, grpc::InsecureServerCredentials());
     builder.RegisterService(&service);
+    builder.SetMaxReceiveMessageSize(100 * 1024 * 1024); // 100 MB
+    builder.SetMaxSendMessageSize(100 * 1024 * 1024);
 
     std::unique_ptr<grpc::Server> server(builder.BuildAndStart());
-    std::cout << "AudioProcessorService listening on " << address << '\n';
+    spdlog::info("Starting AudioProcessorService on {}", address);
 
     server->Wait();
 }

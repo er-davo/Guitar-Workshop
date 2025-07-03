@@ -28,6 +28,10 @@ func InitClients() {
 	tabGenConn, err = grpc.NewClient(
 		config.Load().TabgenHost+":"+config.Load().TabgenPort,
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
+		grpc.WithDefaultCallOptions(
+			grpc.MaxCallRecvMsgSize(100*1024*1024), // 100 MB
+			grpc.MaxCallSendMsgSize(100*1024*1024),
+		),
 	)
 	if err != nil {
 		logger.Log.Fatal("tab-generator gRPC connection failed", zap.Error(err))
@@ -36,6 +40,10 @@ func InitClients() {
 	audioProcessorConn, err = grpc.NewClient(
 		config.Load().AudioProcHost+":"+config.Load().AudioProcPort,
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
+		grpc.WithDefaultCallOptions(
+			grpc.MaxCallRecvMsgSize(100*1024*1024), // 100 MB
+			grpc.MaxCallSendMsgSize(100*1024*1024),
+		),
 	)
 	if err != nil {
 		logger.Log.Fatal("audio-processor gRPC connection failed", zap.Error(err))
@@ -44,6 +52,10 @@ func InitClients() {
 	audioSeparatorConn, err = grpc.NewClient(
 		config.Load().AudioSeparatorHost+":"+config.Load().AudioSeparatorPort,
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
+		grpc.WithDefaultCallOptions(
+			grpc.MaxCallRecvMsgSize(100*1024*1024), // 100 MB
+			grpc.MaxCallSendMsgSize(100*1024*1024),
+		),
 	)
 	if err != nil {
 		logger.Log.Fatal("audio-separator gRPC connection failed", zap.Error(err))

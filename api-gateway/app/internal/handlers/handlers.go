@@ -7,7 +7,6 @@ import (
 	"slices"
 	"strconv"
 
-	"api-gateway/internal/convertor"
 	"api-gateway/internal/proto/audioproc"
 	"api-gateway/internal/proto/separator"
 	"api-gateway/internal/proto/tab"
@@ -47,26 +46,16 @@ func TabGenerate(c echo.Context) error {
 		}
 		defer file.Close()
 
-		contentType := fileHeader.Header.Get("Content-Type")
-
-		if contentType == "audio/mpeg" { // .mp3
-			wavData, err = convertor.MP3ToWAVInMemory(file)
-			if err != nil {
-				return c.JSON(http.StatusBadRequest, map[string]string{"error": "Could not convert from .mp3 to .wav"})
-			}
-		} else if contentType != "audio/wav" && contentType != "audio/x-wav" {
-			return c.JSON(http.StatusBadRequest, map[string]string{"error": "usupported file format"})
-		} else {
-			wavData, err = io.ReadAll(file)
-			if err != nil {
-				return c.JSON(http.StatusBadRequest, map[string]string{"error": "Could not read file"})
-			}
-		}
-
 		if slices.Contains(testFiles, fileHeader.Filename) {
 			audioURL = fileHeader.Filename
 			break
 		}
+
+		data, err := io.ReadAll(file)
+		if err != nil {
+			return c.JSON(http.StatusBadRequest, map[string]string{"error": "Failed to read file data"})
+		}
+		wavData = data
 
 		// TODO: add unique  file name generation
 		audioURL = fileHeader.Filename

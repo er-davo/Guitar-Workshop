@@ -10,6 +10,7 @@ find_package(SndFile REQUIRED)
 find_package(soxr REQUIRED)
 find_package(Protobuf REQUIRED)
 find_package(gRPC REQUIRED)
+find_package(spdlog REQUIRED)
 
 file(GLOB_RECURSE SOURCES CONFIGURE_DEPENDS src/*.cpp)
 
@@ -32,4 +33,5 @@ target_link_libraries(audio-preprocessor
     soxr::soxr
     protobuf::libprotobuf
     gRPC::grpc++
+    spdlog::spdlog
 )

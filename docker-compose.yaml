@@ -31,11 +31,11 @@ services:
     ports:
       - "50052:50052"
     depends_on:
-      - onsets-frames
+      - analyzer
   
-  onsets-frames:
-    build: ./onsets-frames
+  analyzer:
+    build: ./analyzer
     env_file:
-      - ./onsets-frames/.env
+      - ./analyzer/.env
     ports:
-      - "50055:50055"
+      - "50051:50051"

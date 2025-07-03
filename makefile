@@ -1,9 +1,9 @@
 PROTO_DIR = proto
 
-AUDIO_PY_VENV = audio-analyzer/venv
+ANALYZER_PY_VENV = analyzer/venv
 
-AUDIO_PY_OUT = audio-analyzer/app
-AUDIO_GRPC_PY_OUT = audio-analyzer/app
+ANALYZER_PY_OUT = analyzer/app
+ANALYZER_GRPC_PY_OUT = analyzer/app
 
 SEPARATOR_PY_VENV = audio-separator/venv
 
@@ -22,22 +22,20 @@ CONAN_PROTOC = C:\Users\Lenovo\.conan2\p\proto1344852724c4b\p\bin\protoc.exe
 
 GRPC_PLUGIN = C:\Users\Lenovo\.conan2\p\grpc2a6788fd4476e\p\bin\grpc_cpp_plugin.exe
 
-PROTO_ONSETS_AND_FRAMES_DIR = onsets-frames/app/proto
-
 proto-gen: proto-go-gen proto-py-gen proto-cpp-gen
 
-proto-py-gen: proto-py-gen-separator
+proto-py-gen: proto-py-gen-separator proto-py-gen-analyzer
 
-proto-go-gen:  proto-go-gen-api proto-go-gen-tabgen
+proto-go-gen: proto-go-gen-api proto-go-gen-tabgen
 
 proto-go-gen-api: proto-go-gen-api-tab proto-go-gen-api-separator proto-go-gen-api-processor
 
-proto-go-gen-tabgen: proto-go-gen-tabgen-O&F proto-go-gen-tabgen-tab
+proto-go-gen-tabgen: proto-go-gen-tabgen-analyzer proto-go-gen-tabgen-tab
 
-proto-go-gen-tabgen-O&F:
+proto-go-gen-tabgen-analyzer:
 	protoc --go_out=$(TABGEN_GO_OUT) \
 	--go-grpc_out=$(TABGEN_GO_GRPC_OUT) \
-	-I$(PROTO_ONSETS_AND_FRAMES_DIR) $(PROTO_ONSETS_AND_FRAMES_DIR)/onsets_and_frames.proto
+	-Iproto $(PROTO_DIR)/note_analyzer.proto
 
 proto-go-gen-tabgen-tab:
 	protoc --go_out=$(TABGEN_GO_OUT) \
@@ -72,3 +70,11 @@ proto-py-gen-separator:
 	--pyi_out=$(SEPARATOR_PY_OUT) \
 	--grpc_python_out=$(SEPARATOR_GRPC_PY_OUT) \
 	$(PROTO_DIR)/separator.proto
+
+proto-py-gen-analyzer:
+	$(ANALYZER_PY_VENV)/Scripts/python.exe \
+	-m grpc_tools.protoc -I proto \
+	--python_out=$(ANALYZER_PY_OUT) \
+	--pyi_out=$(ANALYZER_PY_OUT) \
+	--grpc_python_out=$(ANALYZER_GRPC_PY_OUT) \
+	$(PROTO_DIR)/note_analyzer.proto

@@ -1,6 +1,7 @@
 #include "core/processor/AudioProcessor.h"
 #include "server/audio_processor_server.h"
 #include "config/config.h"
+
 #include <iostream>
 
 int main(int argc, char* argv[]) {

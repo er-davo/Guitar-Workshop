@@ -36,8 +36,8 @@ class NoteAnalyzerStub(object):
         """
         self.Analyze = channel.unary_unary(
                 '/noteanlyzer.NoteAnalyzer/Analyze',
-                request_serializer=note__analyzer__pb2.OAFRequest.SerializeToString,
-                response_deserializer=note__analyzer__pb2.OAFResponse.FromString,
+                request_serializer=note__analyzer__pb2.AudioRequest.SerializeToString,
+                response_deserializer=note__analyzer__pb2.NoteResponse.FromString,
                 _registered_method=True)
 
 
@@ -55,8 +55,8 @@ def add_NoteAnalyzerServicer_to_server(servicer, server):
     rpc_method_handlers = {
             'Analyze': grpc.unary_unary_rpc_method_handler(
                     servicer.Analyze,
-                    request_deserializer=note__analyzer__pb2.OAFRequest.FromString,
-                    response_serializer=note__analyzer__pb2.OAFResponse.SerializeToString,
+                    request_deserializer=note__analyzer__pb2.AudioRequest.FromString,
+                    response_serializer=note__analyzer__pb2.NoteResponse.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -84,8 +84,8 @@ class NoteAnalyzer(object):
             request,
             target,
             '/noteanlyzer.NoteAnalyzer/Analyze',
-            note__analyzer__pb2.OAFRequest.SerializeToString,
-            note__analyzer__pb2.OAFResponse.FromString,
+            note__analyzer__pb2.AudioRequest.SerializeToString,
+            note__analyzer__pb2.NoteResponse.FromString,
             options,
             channel_credentials,
             insecure,

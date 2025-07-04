@@ -4,9 +4,12 @@ import (
 	"context"
 
 	"tabgen/internal/clients"
+	"tabgen/internal/logger"
 	"tabgen/internal/music"
-	onsets_frames "tabgen/internal/proto/onsets-frames"
+	note_analyzer "tabgen/internal/proto/note-analyzer"
 	"tabgen/internal/proto/tab"
+
+	"go.uber.org/zap"
 )
 
 type TabService struct {
@@ -14,36 +17,32 @@ type TabService struct {
 }
 
 func (s *TabService) GenerateTab(ctx context.Context, req *tab.TabRequest) (*tab.TabResponse, error) {
-	rawNoteSeq := music.NoteSequence{}
-	for _, chunk := range req.Chunks {
-		OandFReq := onsets_frames.OAFRequest{
-			AudioData: &onsets_frames.AudioFileData{
-				FileName:   "temp",
-				AudioBytes: chunk.AudioData,
-			},
-		}
-		notes, err := clients.OnsetsAndFramesClient.Analyze(context.Background(), &OandFReq)
-		if err != nil {
-			return nil, err
-		}
-
-		seq := music.NewNoteSequence(len(notes.Notes))
-
-		for i, note := range notes.Notes {
-			name, octave := music.MidiToNote(int(note.MidiPitch))
-			seq.Notes[i] = music.NoteEvent{
-				Name:      name,
-				Octave:    octave,
-				MidiPitch: int(note.MidiPitch),
-				StartTime: note.OnsetSeconds + chunk.StartTime,
-				Velocity:  note.Velocity,
-			}
-		}
-
-		rawNoteSeq.Merge(seq)
+	AudioReq := note_analyzer.AudioRequest{
+		AudioData: &note_analyzer.AudioFileData{
+			FileName:   req.Audio.FileName,
+			AudioBytes: req.Audio.AudioBytes,
+		},
+	}
+	logger.Debug("analyzing for audio", zap.Int("size", len(AudioReq.AudioData.AudioBytes)))
+	notes, err := clients.NoteAnalyzerClient.Analyze(context.Background(), &AudioReq)
+	if err != nil {
+		return nil, err
 	}
 
-	tabs, err := music.GenerateTab(rawNoteSeq)
+	seq := music.NewNoteSequence(len(notes.Notes))
+
+	for i, note := range notes.Notes {
+		name, octave := music.MidiToNote(int(note.MidiPitch))
+		seq.Notes[i] = music.NoteEvent{
+			Name:      name,
+			Octave:    octave,
+			MidiPitch: int(note.MidiPitch),
+			StartTime: note.StartSeconds,
+			Velocity:  note.Velocity,
+		}
+	}
+
+	tabs, err := music.GenerateTab(seq)
 	if err != nil {
 		return nil, err
 	}

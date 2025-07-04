@@ -3,7 +3,7 @@ package clients
 import (
 	"tabgen/internal/config"
 	"tabgen/internal/logger"
-	onsets_frames "tabgen/internal/proto/onsets-frames"
+	"tabgen/internal/proto/note-analyzer"
 
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
@@ -11,26 +11,30 @@ import (
 )
 
 var (
-	OnsetsAndFramesClient onsets_frames.OnsetsAndFramesClient
-	OnsetsAndFramesConn   *grpc.ClientConn
+	NoteAnalyzerClient note_analyzer.NoteAnalyzerClient
+	NoteAnalyzerConn   *grpc.ClientConn
 )
 
 func InitClients() {
 	var err error
 
-	OnsetsAndFramesConn, err = grpc.NewClient(
+	NoteAnalyzerConn, err = grpc.NewClient(
 		config.Load().AnalyzerHost+":"+config.Load().AnalyzerPort,
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
+		grpc.WithDefaultCallOptions(
+			grpc.MaxCallRecvMsgSize(100*1024*1024), // 100 MB
+			grpc.MaxCallSendMsgSize(100*1024*1024),
+		),
 	)
 	if err != nil {
 		logger.Log.Fatal("onsets-frames gRPC connection failed", zap.Error(err))
 	}
 
-	OnsetsAndFramesClient = onsets_frames.NewOnsetsAndFramesClient(OnsetsAndFramesConn)
+	NoteAnalyzerClient = note_analyzer.NewNoteAnalyzerClient(NoteAnalyzerConn)
 }
 
 func CloseClients() {
-	if OnsetsAndFramesConn != nil {
-		OnsetsAndFramesConn.Close()
+	if NoteAnalyzerConn != nil {
+		NoteAnalyzerConn.Close()
 	}
 }

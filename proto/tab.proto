@@ -9,14 +9,14 @@ service TabGenerate {
 }
 
 message TabRequest {
-    repeated AudioChunk chunks = 1;
-}
-
-message AudioChunk {
-    float start_time = 1;
-    bytes audio_data = 2;
+    AudioFileData audio = 1;
 }
 
 message TabResponse {
     string tab = 1;
+}
+
+message AudioFileData {
+    string file_name = 1;
+    bytes audio_bytes = 2;
 }

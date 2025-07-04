@@ -23,7 +23,7 @@ const (
 
 type TabRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Chunks        []*AudioChunk          `protobuf:"bytes,1,rep,name=chunks,proto3" json:"chunks,omitempty"`
+	Audio         *AudioFileData         `protobuf:"bytes,1,opt,name=audio,proto3" json:"audio,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -58,61 +58,9 @@ func (*TabRequest) Descriptor() ([]byte, []int) {
 	return file_tab_proto_rawDescGZIP(), []int{0}
 }
 
-func (x *TabRequest) GetChunks() []*AudioChunk {
+func (x *TabRequest) GetAudio() *AudioFileData {
 	if x != nil {
-		return x.Chunks
-	}
-	return nil
-}
-
-type AudioChunk struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	StartTime     float32                `protobuf:"fixed32,1,opt,name=start_time,json=startTime,proto3" json:"start_time,omitempty"`
-	AudioData     []byte                 `protobuf:"bytes,2,opt,name=audio_data,json=audioData,proto3" json:"audio_data,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *AudioChunk) Reset() {
-	*x = AudioChunk{}
-	mi := &file_tab_proto_msgTypes[1]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *AudioChunk) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*AudioChunk) ProtoMessage() {}
-
-func (x *AudioChunk) ProtoReflect() protoreflect.Message {
-	mi := &file_tab_proto_msgTypes[1]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use AudioChunk.ProtoReflect.Descriptor instead.
-func (*AudioChunk) Descriptor() ([]byte, []int) {
-	return file_tab_proto_rawDescGZIP(), []int{1}
-}
-
-func (x *AudioChunk) GetStartTime() float32 {
-	if x != nil {
-		return x.StartTime
-	}
-	return 0
-}
-
-func (x *AudioChunk) GetAudioData() []byte {
-	if x != nil {
-		return x.AudioData
+		return x.Audio
 	}
 	return nil
 }
@@ -126,7 +74,7 @@ type TabResponse struct {
 
 func (x *TabResponse) Reset() {
 	*x = TabResponse{}
-	mi := &file_tab_proto_msgTypes[2]
+	mi := &file_tab_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -138,7 +86,7 @@ func (x *TabResponse) String() string {
 func (*TabResponse) ProtoMessage() {}
 
 func (x *TabResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_tab_proto_msgTypes[2]
+	mi := &file_tab_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -151,7 +99,7 @@ func (x *TabResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use TabResponse.ProtoReflect.Descriptor instead.
 func (*TabResponse) Descriptor() ([]byte, []int) {
-	return file_tab_proto_rawDescGZIP(), []int{2}
+	return file_tab_proto_rawDescGZIP(), []int{1}
 }
 
 func (x *TabResponse) GetTab() string {
@@ -161,22 +109,72 @@ func (x *TabResponse) GetTab() string {
 	return ""
 }
 
+type AudioFileData struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	FileName      string                 `protobuf:"bytes,1,opt,name=file_name,json=fileName,proto3" json:"file_name,omitempty"`
+	AudioBytes    []byte                 `protobuf:"bytes,2,opt,name=audio_bytes,json=audioBytes,proto3" json:"audio_bytes,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *AudioFileData) Reset() {
+	*x = AudioFileData{}
+	mi := &file_tab_proto_msgTypes[2]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *AudioFileData) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AudioFileData) ProtoMessage() {}
+
+func (x *AudioFileData) ProtoReflect() protoreflect.Message {
+	mi := &file_tab_proto_msgTypes[2]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use AudioFileData.ProtoReflect.Descriptor instead.
+func (*AudioFileData) Descriptor() ([]byte, []int) {
+	return file_tab_proto_rawDescGZIP(), []int{2}
+}
+
+func (x *AudioFileData) GetFileName() string {
+	if x != nil {
+		return x.FileName
+	}
+	return ""
+}
+
+func (x *AudioFileData) GetAudioBytes() []byte {
+	if x != nil {
+		return x.AudioBytes
+	}
+	return nil
+}
+
 var File_tab_proto protoreflect.FileDescriptor
 
 const file_tab_proto_rawDesc = "" +
 	"\n" +
-	"\ttab.proto\x12\x03tab\"5\n" +
+	"\ttab.proto\x12\x03tab\"6\n" +
 	"\n" +
-	"TabRequest\x12'\n" +
-	"\x06chunks\x18\x01 \x03(\v2\x0f.tab.AudioChunkR\x06chunks\"J\n" +
-	"\n" +
-	"AudioChunk\x12\x1d\n" +
-	"\n" +
-	"start_time\x18\x01 \x01(\x02R\tstartTime\x12\x1d\n" +
-	"\n" +
-	"audio_data\x18\x02 \x01(\fR\taudioData\"\x1f\n" +
+	"TabRequest\x12(\n" +
+	"\x05audio\x18\x01 \x01(\v2\x12.tab.AudioFileDataR\x05audio\"\x1f\n" +
 	"\vTabResponse\x12\x10\n" +
-	"\x03tab\x18\x01 \x01(\tR\x03tab2?\n" +
+	"\x03tab\x18\x01 \x01(\tR\x03tab\"M\n" +
+	"\rAudioFileData\x12\x1b\n" +
+	"\tfile_name\x18\x01 \x01(\tR\bfileName\x12\x1f\n" +
+	"\vaudio_bytes\x18\x02 \x01(\fR\n" +
+	"audioBytes2?\n" +
 	"\vTabGenerate\x120\n" +
 	"\vGenerateTab\x12\x0f.tab.TabRequest\x1a\x10.tab.TabResponseB\x14Z\x12internal/proto/tabb\x06proto3"
 
@@ -194,14 +192,14 @@ func file_tab_proto_rawDescGZIP() []byte {
 
 var file_tab_proto_msgTypes = make([]protoimpl.MessageInfo, 3)
 var file_tab_proto_goTypes = []any{
-	(*TabRequest)(nil),  // 0: tab.TabRequest
-	(*AudioChunk)(nil),  // 1: tab.AudioChunk
-	(*TabResponse)(nil), // 2: tab.TabResponse
+	(*TabRequest)(nil),    // 0: tab.TabRequest
+	(*TabResponse)(nil),   // 1: tab.TabResponse
+	(*AudioFileData)(nil), // 2: tab.AudioFileData
 }
 var file_tab_proto_depIdxs = []int32{
-	1, // 0: tab.TabRequest.chunks:type_name -> tab.AudioChunk
+	2, // 0: tab.TabRequest.audio:type_name -> tab.AudioFileData
 	0, // 1: tab.TabGenerate.GenerateTab:input_type -> tab.TabRequest
-	2, // 2: tab.TabGenerate.GenerateTab:output_type -> tab.TabResponse
+	1, // 2: tab.TabGenerate.GenerateTab:output_type -> tab.TabResponse
 	2, // [2:3] is the sub-list for method output_type
 	1, // [1:2] is the sub-list for method input_type
 	1, // [1:1] is the sub-list for extension type_name

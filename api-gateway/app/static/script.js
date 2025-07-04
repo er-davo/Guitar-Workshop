@@ -108,7 +108,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             
             const data = await response.json();
-            displayTab(data.tab || 'Табулатура успешно сгенерирована!');
+            displayTab(data.tab);
             copyButton.disabled = false;
         } catch (err) {
             resultDiv.innerHTML = `<div class="error-message">Ошибка: ${err.message}</div>`;
@@ -144,7 +144,7 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
     
-        // Очищаем контейнер
+        // Очищаем контейнер  
         resultDiv.innerHTML = '';
         
         // Разделяем строки и добавляем их как отдельные div

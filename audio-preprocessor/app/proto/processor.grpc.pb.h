@@ -4,7 +4,7 @@
 #ifndef GRPC_proto_2fprocessor_2eproto__INCLUDED
 #define GRPC_proto_2fprocessor_2eproto__INCLUDED
 
-#include "processor.pb.h"
+#include "proto/processor.pb.h"
 
 #include <functional>
 #include <grpcpp/generic/async_generic_service.h>

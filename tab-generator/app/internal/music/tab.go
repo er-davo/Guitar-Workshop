@@ -1,6 +1,8 @@
 package music
 
-import "github.com/er-davo/guitar"
+import (
+	"github.com/er-davo/guitar"
+)
 
 func GenerateTab(notes NoteSequence) (string, error) {
 	tun, err := guitar.ParseTuning(guitar.StandardTuning)
@@ -11,7 +13,10 @@ func GenerateTab(notes NoteSequence) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	tab, err := guitar.NewTabWriter(tun.NoteNames())
+	tab, err := guitar.NewTabWriter(
+		tun.NoteNames(),
+		guitar.WithTimeStep(0.01),
+	)
 	if err != nil {
 		return "", err
 	}

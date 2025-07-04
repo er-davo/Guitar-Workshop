@@ -6,13 +6,13 @@ from typing import ClassVar as _ClassVar, Optional as _Optional, Union as _Union
 
 DESCRIPTOR: _descriptor.FileDescriptor
 
-class OAFRequest(_message.Message):
+class AudioRequest(_message.Message):
     __slots__ = ("audio_data",)
     AUDIO_DATA_FIELD_NUMBER: _ClassVar[int]
     audio_data: AudioFileData
     def __init__(self, audio_data: _Optional[_Union[AudioFileData, _Mapping]] = ...) -> None: ...
 
-class OAFResponse(_message.Message):
+class NoteResponse(_message.Message):
     __slots__ = ("notes",)
     NOTES_FIELD_NUMBER: _ClassVar[int]
     notes: _containers.RepeatedCompositeFieldContainer[NoteEvent]

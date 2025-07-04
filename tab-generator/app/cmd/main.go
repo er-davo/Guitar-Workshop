@@ -24,7 +24,10 @@ func main() {
 		logger.Log.Fatal("Failed to listen", zap.Error(err))
 	}
 
-	s := grpc.NewServer()
+	s := grpc.NewServer(
+		grpc.MaxRecvMsgSize(100*1024*1024), // 100 MB
+		grpc.MaxSendMsgSize(100*1024*1024), // 100 MB
+	)
 	tab.RegisterTabGenerateServer(s, &service.TabService{})
 
 	logger.Log.Info("gRPC server running on " + fmt.Sprintf(":%s", config.Load().PORT))

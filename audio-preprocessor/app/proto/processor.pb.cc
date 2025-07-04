@@ -3,7 +3,7 @@
 // source: proto/processor.proto
 // Protobuf C++ Version: 5.27.0
 
-#include "processor.pb.h"
+#include "proto/processor.pb.h"
 
 #include <algorithm>
 #include <type_traits>

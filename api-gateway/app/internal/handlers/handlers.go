@@ -2,12 +2,13 @@ package handlers
 
 import (
 	"context"
+	"fmt"
 	"io"
 	"net/http"
 	"slices"
 	"strconv"
 
-	"api-gateway/internal/proto/audioproc"
+	"api-gateway/internal/logger"
 	"api-gateway/internal/proto/separator"
 	"api-gateway/internal/proto/tab"
 
@@ -95,55 +96,61 @@ func TabGenerate(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Missing 'other' stem"})
 	}
 
-	procConfig := audioproc.AudioProcessingConfig{
-		Threshold:   0.01,
-		Margin:      300,
-		HighPass:    80.0,
-		UseBandpass: true,
-		BandLow:     80.0,
-		BandHigh:    1300.0,
-		FadeSamples: 2048,
-		SampleRate:  44100,
-	}
+	// procConfig := audioproc.AudioProcessingConfig{
+	// 	Threshold:   0.01,
+	// 	Margin:      300,
+	// 	HighPass:    80.0,
+	// 	UseBandpass: true,
+	// 	BandLow:     80.0,
+	// 	BandHigh:    1300.0,
+	// 	FadeSamples: 2048,
+	// 	SampleRate:  44100,
+	// }
 
-	procAudio, err := AudioProcessorClient.ProcessAudio(context.Background(), &audioproc.ProcessAudioRequest{
-		WavData:  otherStem.AudioBytes,
-		FileName: audioURL,
-		Config:   &procConfig,
-	})
+	// procAudio, err := AudioProcessorClient.ProcessAudio(context.Background(), &audioproc.ProcessAudioRequest{
+	// 	WavData:  otherStem.AudioBytes,
+	// 	FileName: audioURL,
+	// 	Config:   &procConfig,
+	// })
+	// if err != nil {
+	// 	return c.JSON(http.StatusBadRequest, map[string]string{"error": err.Error()})
+	// }
+
+	// chunkConfig := audioproc.ChunkingConfig{
+	// 	SampleRate:          44100,
+	// 	Threshold:           0.01,
+	// 	ChunkMinDurationSec: 8,
+	// 	ChunkMaxDurationSec: 15,
+	// 	OverlapDurationSec:  1,
+	// }
+
+	// audioChunks, err := AudioProcessorClient.SplitIntoChunks(context.Background(), &audioproc.SplitAudioRequest{
+	// 	WavData:  procAudio.WavData,
+	// 	FileName: "tempname",
+	// 	Config:   &chunkConfig,
+	// })
+	// if err != nil {
+	// 	return c.JSON(http.StatusBadRequest, map[string]string{"error": err.Error()})
+	// }
+
+	// chunks := make([]*tab.AudioChunk, len(audioChunks.Chunks))
+	// for i, chunk := range audioChunks.Chunks {
+	// 	chunks[i] = &tab.AudioChunk{
+	// 		StartTime: chunk.StartTime,
+	// 		AudioData: chunk.AudioData,
+	// 	}
+	// }
+
+	tabResp, err := TabGenClient.GenerateTab(context.Background(), &tab.TabRequest{
+		Audio: &tab.AudioFileData{
+			FileName: otherStem.FileName, AudioBytes: otherStem.AudioBytes,
+		}},
+	)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": err.Error()})
 	}
 
-	chunkConfig := audioproc.ChunkingConfig{
-		SampleRate:          44100,
-		Threshold:           0.01,
-		ChunkMinDurationSec: 8,
-		ChunkMaxDurationSec: 15,
-		OverlapDurationSec:  1,
-	}
+	logger.Debug(fmt.Sprintf("got tabs %s", tabResp.Tab))
 
-	audioChunks, err := AudioProcessorClient.SplitIntoChunks(context.Background(), &audioproc.SplitAudioRequest{
-		WavData:  procAudio.WavData,
-		FileName: "tempname",
-		Config:   &chunkConfig,
-	})
-	if err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{"error": err.Error()})
-	}
-
-	chunks := make([]*tab.AudioChunk, len(audioChunks.Chunks))
-	for i, chunk := range audioChunks.Chunks {
-		chunks[i] = &tab.AudioChunk{
-			StartTime: chunk.StartTime,
-			AudioData: chunk.AudioData,
-		}
-	}
-
-	tabResp, err := TabGenClient.GenerateTab(context.Background(), &tab.TabRequest{Chunks: chunks})
-	if err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{"error": err.Error()})
-	}
-
-	return c.JSON(http.StatusOK, tabResp.Tab)
+	return c.JSON(http.StatusOK, map[string]string{"tab": tabResp.Tab})
 }

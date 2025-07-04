@@ -41,8 +41,14 @@ void AudioFileIO::writeWav(const std::string& path, const std::vector<float>& au
     SNDFILE* file = sf_open(path.c_str(), SFM_WRITE, &info);
     if (!file)
         throw std::runtime_error("Failed to open output WAV");
-    
-    sf_writef_float(file, audio.data(), audio.size());
+
+    sf_count_t frames_written = sf_writef_float(file, audio.data(), audio.size() / info.channels);
+
+    if (frames_written != static_cast<sf_count_t>(audio.size() / info.channels)) {
+        sf_close(file);
+        throw std::runtime_error("Failed to write full WAV file");
+    }
+
     sf_close(file);
 }
 

@@ -7,15 +7,7 @@ services:
       - "8080:8080"
     depends_on:
       - audio-separator
-      - audio-processor
       - tab-generator
-  
-  audio-processor:
-    build: ./audio-preprocessor
-    env_file:
-      - /audio-preprocessor/.env
-    ports:
-      - "50053:50053"
   
   audio-separator:
     build: ./audio-separator

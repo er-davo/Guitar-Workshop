@@ -2,6 +2,7 @@ package music
 
 import (
 	"fmt"
+	"slices"
 
 	"github.com/er-davo/guitar"
 )
@@ -70,13 +71,23 @@ func (n *NoteSequence) Merge(seq NoteSequence) {
 func (n *NoteSequence) guitarSequence() [][]guitar.Playable {
 	frames := [][]guitar.Playable{}
 
-	var curTime float32 = -1.0
+	slices.SortFunc(n.Notes, func(left, right NoteEvent) int {
+		if left.StartTime < right.StartTime {
+			return -1
+		}
+		if left.StartTime > right.StartTime {
+			return 1
+		}
+		return 0
+	})
 
-	for timeIndex := 0; timeIndex < len(n.Notes); timeIndex++ {
-		curTime = n.Notes[timeIndex].StartTime
+	var timeIndex int
+	const eps = 0.01
+	for timeIndex < len(n.Notes) {
+		curTime := n.Notes[timeIndex].StartTime
 		frame := []guitar.Playable{}
 
-		for curTime == n.Notes[timeIndex].StartTime {
+		for timeIndex < len(n.Notes) && n.Notes[timeIndex].StartTime-curTime < eps {
 			note := n.Notes[timeIndex]
 			frame = append(frame, guitar.Note{
 				Name:   note.Name,

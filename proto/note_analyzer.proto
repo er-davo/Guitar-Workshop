@@ -22,8 +22,8 @@ message AudioFileData {
 }
 
 message NoteEvent {
-    float start_seconds = 1;  // Время начала ноты
+    double start_seconds = 1;  // Время начала ноты
     int32 midi_pitch = 2;     // Например, 40 = E2, 64 = E4 и т.д.
-    float velocity = 3;       // Громкость/интенсивность (если доступно)
-    float duration_seconds = 4;
+    double velocity = 3;       // Громкость/интенсивность (если доступно)
+    double duration_seconds = 4;
 }

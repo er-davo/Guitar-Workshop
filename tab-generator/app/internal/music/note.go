@@ -2,6 +2,7 @@ package music
 
 import (
 	"fmt"
+	"math"
 	"slices"
 
 	"github.com/er-davo/guitar"
@@ -15,7 +16,7 @@ func MidiToNote(pitch int) (string, int) {
 	}
 
 	note := noteNames[pitch%12]
-	octave := pitch / 12
+	octave := pitch/12 - 1
 
 	return note, octave
 }
@@ -24,8 +25,9 @@ type NoteEvent struct {
 	Name      string
 	Octave    int
 	MidiPitch int
-	StartTime float32
-	Velocity  float32
+	StartTime float64
+	EndTime   float64
+	Velocity  float64
 }
 
 type NoteSequence struct {
@@ -57,7 +59,7 @@ func (n *NoteSequence) Merge(seq NoteSequence) {
 		return
 	}
 
-	const timeEps float32 = 0.01
+	const timeEps = 0.01
 
 	overlap := 0
 	for overlap < len(seq.Notes) &&
@@ -66,6 +68,50 @@ func (n *NoteSequence) Merge(seq NoteSequence) {
 	}
 
 	n.Append(seq.Notes[overlap:]...)
+}
+
+func (n *NoteSequence) MergeRepeatedNotes() *NoteSequence {
+	if len(n.Notes) == 0 {
+		return &NoteSequence{}
+	}
+
+	slices.SortFunc(n.Notes, func(left, right NoteEvent) int {
+		if left.StartTime < right.StartTime {
+			return -1
+		}
+		if left.StartTime > right.StartTime {
+			return 1
+		}
+		return 0
+	})
+
+	merged := NoteSequence{
+		Notes: make([]NoteEvent, 0, len(n.Notes)),
+	}
+	merged.Append(n.Notes[0])
+
+	velocityDiffThreshold := 0.1
+	timeDiffThreshold := 0.05
+
+	for i := 1; i < len(n.Notes); i++ {
+		last := &merged.Notes[len(merged.Notes)-1]
+
+		midiIsEqual := last.MidiPitch == n.Notes[i].MidiPitch
+		timeIsAlmostEqual := last.EndTime-
+			n.Notes[i].StartTime < timeDiffThreshold
+		velocityIsAlmostEqual := math.Abs(last.Velocity-
+			n.Notes[i].Velocity) < velocityDiffThreshold
+
+		if midiIsEqual && timeIsAlmostEqual && velocityIsAlmostEqual {
+			last.EndTime = n.Notes[i].EndTime
+			last.Velocity = (last.Velocity + n.Notes[i].Velocity) / 2
+			continue
+		}
+
+		merged.Append(n.Notes[i])
+	}
+
+	return &merged
 }
 
 func (n *NoteSequence) guitarSequence() [][]guitar.Playable {

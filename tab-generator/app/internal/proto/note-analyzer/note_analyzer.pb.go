@@ -163,10 +163,10 @@ func (x *AudioFileData) GetAudioBytes() []byte {
 
 type NoteEvent struct {
 	state           protoimpl.MessageState `protogen:"open.v1"`
-	StartSeconds    float32                `protobuf:"fixed32,1,opt,name=start_seconds,json=startSeconds,proto3" json:"start_seconds,omitempty"` // Время начала ноты
+	StartSeconds    float64                `protobuf:"fixed64,1,opt,name=start_seconds,json=startSeconds,proto3" json:"start_seconds,omitempty"` // Время начала ноты
 	MidiPitch       int32                  `protobuf:"varint,2,opt,name=midi_pitch,json=midiPitch,proto3" json:"midi_pitch,omitempty"`           // Например, 40 = E2, 64 = E4 и т.д.
-	Velocity        float32                `protobuf:"fixed32,3,opt,name=velocity,proto3" json:"velocity,omitempty"`                             // Громкость/интенсивность (если доступно)
-	DurationSeconds float32                `protobuf:"fixed32,4,opt,name=duration_seconds,json=durationSeconds,proto3" json:"duration_seconds,omitempty"`
+	Velocity        float64                `protobuf:"fixed64,3,opt,name=velocity,proto3" json:"velocity,omitempty"`                             // Громкость/интенсивность (если доступно)
+	DurationSeconds float64                `protobuf:"fixed64,4,opt,name=duration_seconds,json=durationSeconds,proto3" json:"duration_seconds,omitempty"`
 	unknownFields   protoimpl.UnknownFields
 	sizeCache       protoimpl.SizeCache
 }
@@ -201,7 +201,7 @@ func (*NoteEvent) Descriptor() ([]byte, []int) {
 	return file_note_analyzer_proto_rawDescGZIP(), []int{3}
 }
 
-func (x *NoteEvent) GetStartSeconds() float32 {
+func (x *NoteEvent) GetStartSeconds() float64 {
 	if x != nil {
 		return x.StartSeconds
 	}
@@ -215,14 +215,14 @@ func (x *NoteEvent) GetMidiPitch() int32 {
 	return 0
 }
 
-func (x *NoteEvent) GetVelocity() float32 {
+func (x *NoteEvent) GetVelocity() float64 {
 	if x != nil {
 		return x.Velocity
 	}
 	return 0
 }
 
-func (x *NoteEvent) GetDurationSeconds() float32 {
+func (x *NoteEvent) GetDurationSeconds() float64 {
 	if x != nil {
 		return x.DurationSeconds
 	}
@@ -244,11 +244,11 @@ const file_note_analyzer_proto_rawDesc = "" +
 	"\vaudio_bytes\x18\x02 \x01(\fR\n" +
 	"audioBytes\"\x96\x01\n" +
 	"\tNoteEvent\x12#\n" +
-	"\rstart_seconds\x18\x01 \x01(\x02R\fstartSeconds\x12\x1d\n" +
+	"\rstart_seconds\x18\x01 \x01(\x01R\fstartSeconds\x12\x1d\n" +
 	"\n" +
 	"midi_pitch\x18\x02 \x01(\x05R\tmidiPitch\x12\x1a\n" +
-	"\bvelocity\x18\x03 \x01(\x02R\bvelocity\x12)\n" +
-	"\x10duration_seconds\x18\x04 \x01(\x02R\x0fdurationSeconds2O\n" +
+	"\bvelocity\x18\x03 \x01(\x01R\bvelocity\x12)\n" +
+	"\x10duration_seconds\x18\x04 \x01(\x01R\x0fdurationSeconds2O\n" +
 	"\fNoteAnalyzer\x12?\n" +
 	"\aAnalyze\x12\x19.noteanlyzer.AudioRequest\x1a\x19.noteanlyzer.NoteResponseB\x1eZ\x1cinternal/proto/note-analyzerb\x06proto3"
 

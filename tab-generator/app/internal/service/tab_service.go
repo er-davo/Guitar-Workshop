@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"fmt"
 
 	"tabgen/internal/clients"
 	"tabgen/internal/logger"
@@ -38,11 +39,22 @@ func (s *TabService) GenerateTab(ctx context.Context, req *tab.TabRequest) (*tab
 			Octave:    octave,
 			MidiPitch: int(note.MidiPitch),
 			StartTime: note.StartSeconds,
+			EndTime:   note.DurationSeconds,
 			Velocity:  note.Velocity,
 		}
 	}
 
-	tabs, err := music.GenerateTab(seq)
+	processedSeq := seq.MergeRepeatedNotes()
+
+	noti := ""
+
+	for _, note := range processedSeq.Notes {
+		noti += fmt.Sprintf("%+v\n", note)
+	}
+
+	logger.Debug(noti)
+
+	tabs, err := music.GenerateTab(*processedSeq)
 	if err != nil {
 		return nil, err
 	}

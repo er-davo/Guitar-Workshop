@@ -2,23 +2,15 @@ package handlers
 
 import (
 	"context"
-	"fmt"
 	"io"
 	"net/http"
-	"slices"
 	"strconv"
 
-	"api-gateway/internal/logger"
 	"api-gateway/internal/proto/separator"
 	"api-gateway/internal/proto/tab"
 
 	"github.com/labstack/echo"
 )
-
-var testFiles = []string{
-	"nothing-else-matters.wav",
-	"chords.wav",
-}
 
 const (
 	FILE = iota
@@ -47,11 +39,6 @@ func TabGenerate(c echo.Context) error {
 		}
 		defer file.Close()
 
-		if slices.Contains(testFiles, fileHeader.Filename) {
-			audioURL = fileHeader.Filename
-			break
-		}
-
 		data, err := io.ReadAll(file)
 		if err != nil {
 			return c.JSON(http.StatusBadRequest, map[string]string{"error": "Failed to read file data"})
@@ -60,18 +47,6 @@ func TabGenerate(c echo.Context) error {
 
 		// TODO: add unique  file name generation
 		audioURL = fileHeader.Filename
-
-		// err = storage.UploadFileToSupabaseStorage(
-		// 	"audio-bucket",
-		// 	audioURL,
-		// 	file,
-		// 	fileHeader.Header.Get("Content-Type"),
-		// )
-		// if err != nil {
-		// 	return c.JSON(http.StatusInternalServerError, map[string]string{
-		// 		"error": fmt.Sprintf("Upload failed: %v", err),
-		// 	})
-		// }
 
 	case YOUTUBE:
 		//TODO
@@ -96,51 +71,6 @@ func TabGenerate(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Missing 'other' stem"})
 	}
 
-	// procConfig := audioproc.AudioProcessingConfig{
-	// 	Threshold:   0.01,
-	// 	Margin:      300,
-	// 	HighPass:    80.0,
-	// 	UseBandpass: true,
-	// 	BandLow:     80.0,
-	// 	BandHigh:    1300.0,
-	// 	FadeSamples: 2048,
-	// 	SampleRate:  44100,
-	// }
-
-	// procAudio, err := AudioProcessorClient.ProcessAudio(context.Background(), &audioproc.ProcessAudioRequest{
-	// 	WavData:  otherStem.AudioBytes,
-	// 	FileName: audioURL,
-	// 	Config:   &procConfig,
-	// })
-	// if err != nil {
-	// 	return c.JSON(http.StatusBadRequest, map[string]string{"error": err.Error()})
-	// }
-
-	// chunkConfig := audioproc.ChunkingConfig{
-	// 	SampleRate:          44100,
-	// 	Threshold:           0.01,
-	// 	ChunkMinDurationSec: 8,
-	// 	ChunkMaxDurationSec: 15,
-	// 	OverlapDurationSec:  1,
-	// }
-
-	// audioChunks, err := AudioProcessorClient.SplitIntoChunks(context.Background(), &audioproc.SplitAudioRequest{
-	// 	WavData:  procAudio.WavData,
-	// 	FileName: "tempname",
-	// 	Config:   &chunkConfig,
-	// })
-	// if err != nil {
-	// 	return c.JSON(http.StatusBadRequest, map[string]string{"error": err.Error()})
-	// }
-
-	// chunks := make([]*tab.AudioChunk, len(audioChunks.Chunks))
-	// for i, chunk := range audioChunks.Chunks {
-	// 	chunks[i] = &tab.AudioChunk{
-	// 		StartTime: chunk.StartTime,
-	// 		AudioData: chunk.AudioData,
-	// 	}
-	// }
-
 	tabResp, err := TabGenClient.GenerateTab(context.Background(), &tab.TabRequest{
 		Audio: &tab.AudioFileData{
 			FileName: otherStem.FileName, AudioBytes: otherStem.AudioBytes,
@@ -149,8 +79,6 @@ func TabGenerate(c echo.Context) error {
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": err.Error()})
 	}
-
-	logger.Debug(fmt.Sprintf("got tabs %s", tabResp.Tab))
 
 	return c.JSON(http.StatusOK, map[string]string{"tab": tabResp.Tab})
 }

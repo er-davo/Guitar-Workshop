@@ -44,7 +44,7 @@ func (s *TabService) GenerateTab(ctx context.Context, req *tab.TabRequest) (*tab
 		}
 	}
 
-	processedSeq := seq.MergeRepeatedNotes()
+	processedSeq := seq.Processed()
 
 	noti := ""
 

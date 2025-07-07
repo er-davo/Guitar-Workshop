@@ -15,7 +15,7 @@ func GenerateTab(notes NoteSequence) (string, error) {
 	}
 	tab, err := guitar.NewTabWriter(
 		tun.NoteNames(),
-		guitar.WithTimeStep(0.01),
+		guitar.WithTimeStep(0.2),
 	)
 	if err != nil {
 		return "", err

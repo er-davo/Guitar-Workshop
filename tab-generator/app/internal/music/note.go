@@ -70,11 +70,7 @@ func (n *NoteSequence) Merge(seq NoteSequence) {
 	n.Append(seq.Notes[overlap:]...)
 }
 
-func (n *NoteSequence) MergeRepeatedNotes() *NoteSequence {
-	if len(n.Notes) == 0 {
-		return &NoteSequence{}
-	}
-
+func (n *NoteSequence) Sort() {
 	slices.SortFunc(n.Notes, func(left, right NoteEvent) int {
 		if left.StartTime < right.StartTime {
 			return -1
@@ -84,13 +80,19 @@ func (n *NoteSequence) MergeRepeatedNotes() *NoteSequence {
 		}
 		return 0
 	})
+}
+
+func (n *NoteSequence) MergeRepeatedNotes() *NoteSequence {
+	if len(n.Notes) < 2 {
+		return n
+	}
 
 	merged := NoteSequence{
 		Notes: make([]NoteEvent, 0, len(n.Notes)),
 	}
 	merged.Append(n.Notes[0])
 
-	velocityDiffThreshold := 0.1
+	velocityDiffThreshold := 0.2
 	timeDiffThreshold := 0.05
 
 	for i := 1; i < len(n.Notes); i++ {
@@ -112,6 +114,60 @@ func (n *NoteSequence) MergeRepeatedNotes() *NoteSequence {
 	}
 
 	return &merged
+}
+
+// octave diff: 1, duration: 0.15, velocity: 0.43
+// octave diff: 3, duration: 0.31, velocity: 0.34
+// octave diff: 3, duration: 0.15, velocity: 0.41
+// octave diff: 3, duration: 0.35, velocity: 0.34
+//
+
+func abs(val int) int {
+	if val < 0 {
+		return -val
+	}
+	return val
+}
+
+func (n *NoteSequence) RemoveNoisyNotes() *NoteSequence {
+	if len(n.Notes) < 2 {
+		return n
+	}
+
+	velocityThreshold := 0.45
+	durationThreshold := 0.35
+
+	seq := NoteSequence{
+		Notes: make([]NoteEvent, 0, len(n.Notes)),
+	}
+	seq.Append(n.Notes[0])
+
+	for i := 1; i < len(n.Notes); i++ {
+		last := seq.Notes[len(seq.Notes)-1]
+		note := &n.Notes[i]
+		noiseValue := 0
+
+		if abs(last.Octave-note.Octave) > 2 {
+			noiseValue++
+		}
+		if note.EndTime-note.StartTime < durationThreshold {
+			noiseValue++
+		}
+		if note.Velocity < velocityThreshold {
+			noiseValue++
+		}
+
+		if noiseValue < 2 {
+			seq.Append(*note)
+		}
+	}
+
+	return &seq
+}
+
+func (n *NoteSequence) Processed() *NoteSequence {
+	n.Sort()
+	return n.RemoveNoisyNotes().MergeRepeatedNotes()
 }
 
 func (n *NoteSequence) guitarSequence() [][]guitar.Playable {

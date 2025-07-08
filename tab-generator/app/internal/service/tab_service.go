@@ -52,7 +52,7 @@ func (s *TabService) GenerateTab(ctx context.Context, req *tab.TabRequest) (*tab
 		noti += fmt.Sprintf("%+v\n", note)
 	}
 
-	logger.Debug(noti)
+	// logger.Debug(noti)
 
 	tabs, err := music.GenerateTab(*processedSeq)
 	if err != nil {

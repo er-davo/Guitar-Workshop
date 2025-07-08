@@ -2,10 +2,12 @@ package handlers
 
 import (
 	"context"
+	"fmt"
 	"io"
 	"net/http"
 	"strconv"
 
+	"api-gateway/internal/logger"
 	"api-gateway/internal/proto/separator"
 	"api-gateway/internal/proto/tab"
 
@@ -55,25 +57,35 @@ func TabGenerate(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "invalid type"})
 	}
 
-	audioData := separator.AudioFileData{
-		FileName:   audioURL,
-		AudioBytes: wavData,
-	}
+	separationEnabled := c.FormValue("separation")
 
-	separatedFiles, err := AudioSeparatorClient.SeparateAudio(context.Background(), &separator.SeparateRequest{
-		AudioData: &audioData,
-	})
-	if err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{"error": err.Error()})
-	}
-	otherStem, ok := separatedFiles.Stems["other"]
-	if !ok {
-		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Missing 'other' stem"})
+	logger.Debug(fmt.Sprintf("gotseparation value: %s", separationEnabled))
+
+	if separationEnabled == "1" {
+		logger.Log.Info("separating audio")
+		audioData := separator.AudioFileData{
+			FileName:   audioURL,
+			AudioBytes: wavData,
+		}
+
+		separatedFiles, err := AudioSeparatorClient.SeparateAudio(context.Background(), &separator.SeparateRequest{
+			AudioData: &audioData,
+		})
+		if err != nil {
+			return c.JSON(http.StatusBadRequest, map[string]string{"error": err.Error()})
+		}
+		otherStem, ok := separatedFiles.Stems["other"]
+		if !ok {
+			return c.JSON(http.StatusBadRequest, map[string]string{"error": "Missing 'other' stem"})
+		}
+
+		audioURL = otherStem.FileName
+		wavData = otherStem.AudioBytes
 	}
 
 	tabResp, err := TabGenClient.GenerateTab(context.Background(), &tab.TabRequest{
 		Audio: &tab.AudioFileData{
-			FileName: otherStem.FileName, AudioBytes: otherStem.AudioBytes,
+			FileName: audioURL, AudioBytes: wavData,
 		}},
 	)
 	if err != nil {

@@ -3,10 +3,11 @@
     --secondary-color: #6b8cae;
     --accent-color: #ff6b6b;
     --light-color: #f8f9fa;
-    --dark-color: #343a40;
+    --dark-color: #f8f9fa; /* светлый текст для темной темы */
+    --background-color: #121212; /* тёмный фон */
     --success-color: #4caf50;
     --border-radius: 8px;
-    --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.6);
     --transition: all 0.3s ease;
 }
 
@@ -18,7 +19,7 @@
 
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background-color: #f5f7fa;
+    background-color: var(--background-color);
     color: var(--dark-color);
     line-height: 1.6;
     padding: 20px;
@@ -50,17 +51,18 @@ h1 i {
 }
 
 .card {
-    background: white;
+    background: #222; /* темный фон карточек */
     border-radius: var(--border-radius);
     box-shadow: var(--box-shadow);
     padding: 25px;
     margin-bottom: 20px;
+    color: var(--light-color);
 }
 
 .tabs {
     display: flex;
     margin-bottom: 20px;
-    border-bottom: 1px solid #eee;
+    border-bottom: 1px solid #444;
 }
 
 .tab-button {
@@ -85,7 +87,7 @@ h1 i {
 }
 
 .tab-button:hover:not(.active) {
-    color: var(--dark-color);
+    color: var(--light-color);
 }
 
 .tab-content {
@@ -98,18 +100,19 @@ h1 i {
 }
 
 .file-upload {
-    border: 2px dashed #ddd;
+    border: 2px dashed #555;
     border-radius: var(--border-radius);
     padding: 30px;
     text-align: center;
     cursor: pointer;
     transition: var(--transition);
     margin-bottom: 15px;
+    color: var(--light-color);
 }
 
 .file-upload:hover {
     border-color: var(--primary-color);
-    background-color: rgba(74, 111, 165, 0.05);
+    background-color: rgba(74, 111, 165, 0.15);
 }
 
 .file-label {
@@ -162,17 +165,24 @@ h1 i {
 
 .text-input {
     padding: 12px 15px 12px 45px;
-    border: 1px solid #ddd;
+    border: 1px solid #555;
     border-radius: var(--border-radius);
     width: 100%;
     font-size: 1rem;
+    background-color: #333;
+    color: var(--light-color);
     transition: var(--transition);
+}
+
+.text-input::placeholder {
+    color: #aaa;
 }
 
 .text-input:focus {
     outline: none;
     border-color: var(--primary-color);
-    box-shadow: 0 0 0 2px rgba(74, 111, 165, 0.2);
+    box-shadow: 0 0 0 2px rgba(74, 111, 165, 0.3);
+    background-color: #222;
 }
 
 .submit-button {
@@ -216,37 +226,30 @@ h1 i {
 .result-container {
     position: relative;
     min-height: 200px;
+    overflow-x: auto;
+    overflow-y: hidden;
 }
 
-#tabResult {
-    background: #f8f9fa;
+.tablature {
+    font-family: 'Courier New', Courier, monospace;
+    background: #222;
     padding: 15px;
     border-radius: var(--border-radius);
-    white-space: pre-wrap;
-    font-family: 'Courier New', Courier, monospace;
-    line-height: 1.5;
-    border: 1px solid #eee;
+    border: 1px solid #444;
     min-height: 200px;
     max-height: 400px;
     overflow-y: auto;
+    line-height: 1.5;
+    width: max-content; /* чтобы ширина подстраивалась под содержимое */
+    min-width: 100%;
+    color: var(--light-color);
 }
 
-.loading {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(255, 255, 255, 0.8);
-    display: none;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    border-radius: var(--border-radius);
-}
-
-.loading.active {
-    display: flex;
+.tab-line {
+    white-space: nowrap;
+    padding-bottom: 2px;
+    margin-bottom: 2px;
+    overflow-x: visible; /* убираем скролл у каждой строки */
 }
 
 .spinner {
@@ -263,6 +266,24 @@ h1 i {
     to { transform: rotate(360deg); }
 }
 
+.loading {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(18, 18, 18, 0.85);
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--border-radius);
+}
+
+.loading.active {
+    display: flex;
+}
+
 .loading-text {
     color: var(--primary-color);
     font-weight: 600;
@@ -271,9 +292,9 @@ h1 i {
 .copy-button {
     margin-top: 15px;
     padding: 10px 15px;
-    background-color: var(--light-color);
-    color: var(--dark-color);
-    border: 1px solid #ddd;
+    background-color: #333;
+    color: var(--light-color);
+    border: 1px solid #555;
     border-radius: var(--border-radius);
     font-size: 0.9rem;
     cursor: pointer;
@@ -285,7 +306,7 @@ h1 i {
 }
 
 .copy-button:hover {
-    background-color: #e9ecef;
+    background-color: #444;
 }
 
 .copy-button:disabled {
@@ -301,7 +322,7 @@ h1 i {
 
 .progress-container {
     width: 100%;
-    background-color: #e9ecef;
+    background-color: #333;
     border-radius: var(--border-radius);
     margin-top: 10px;
     display: none;
@@ -328,96 +349,7 @@ h1 i {
     text-shadow: 0 0 2px rgba(0,0,0,0.5);
 }
 
-/* Удаляем старые стили для #tabResult и добавляем новые: */
-
-.result-container {
-    position: relative;
-    width: 100%;
-    overflow: hidden;
-}
-
-.tablature {
-    font-family: 'Courier New', Courier, monospace;
-    background: #f8f9fa;
-    padding: 15px;
-    border-radius: var(--border-radius);
-    border: 1px solid #eee;
-    display: flex;
-    flex-direction: column;
-    width: fit-content;
-    min-width: 100%;
-}
-
-.tab-line {
-    white-space: nowrap;
-    overflow-x: visible;
-    padding: 2px 0;
-    min-height: 1.5em;
-    line-height: 1.5;
-}
-
-/* Горизонтальный скролл для всего контейнера табулатуры */
-.result-container {
-    overflow-x: auto;
-    overflow-y: hidden;
-}
-
-/* Стили для скроллбара */
-.result-container::-webkit-scrollbar {
-    height: 8px;
-}
-
-.result-container::-webkit-scrollbar-track {
-    background: #f1f1f1;
-    border-radius: 4px;
-}
-
-.result-container::-webkit-scrollbar-thumb {
-    background: var(--primary-color);
-    border-radius: 4px;
-}
-
-.result-container::-webkit-scrollbar-thumb:hover {
-    background: #3a5a8f;
-}
-
-/* Подсветка нот */
 .note {
-    color: var(--accent-color);
-    font-weight: bold;
-}
-
-/* Стили для табулатуры */
-.tablature {
-    font-family: 'Courier New', Courier, monospace;
-    background: #f8f9fa;
-    padding: 15px;
-    border-radius: var(--border-radius);
-    border: 1px solid #eee;
-    min-height: 200px;
-    max-height: 400px;
-    overflow-y: auto;
-    line-height: 1.5;
-}
-
-.tab-line {
-    margin-bottom: 2px;
-    white-space: nowrap;
-    overflow-x: auto;
-    padding-bottom: 2px;
-}
-
-.tab-line::-webkit-scrollbar {
-    height: 4px;
-}
-
-.tab-line::-webkit-scrollbar-thumb {
-    background: var(--primary-color);
-    border-radius: 2px;
-}
-
-/* Подсветка нот в табулатуре */
-.tab-line span.note {
     color: var(--accent-color);
     font-weight: bold;
     position: relative;
@@ -447,11 +379,10 @@ h1 i {
     min-height: 200px;
 }
 
-/* Анимация для копирования */
 @keyframes fadeCopy {
-    0% { background-color: var(--light-color); }
+    0% { background-color: #333; }
     50% { background-color: var(--success-color); color: white; }
-    100% { background-color: var(--light-color); }
+    100% { background-color: #333; }
 }
 
 .copy-button.copied {
@@ -470,4 +401,36 @@ h1 i {
     h1 {
         font-size: 1.8rem;
     }
+}
+
+/* ============================== */
+/* Скроллбар для result-container */
+.result-container::-webkit-scrollbar {
+    height: 8px;
+    background-color: #1e1e1e; /* темный фон скроллбара */
+}
+
+.result-container::-webkit-scrollbar-track {
+    background: #2a2a2a; /* чуть светлее трек */
+    border-radius: 4px;
+}
+
+.result-container::-webkit-scrollbar-thumb {
+    background: var(--primary-color);
+    border-radius: 4px;
+}
+
+.result-container::-webkit-scrollbar-thumb:hover {
+    background: #3a5a8f;
+}
+
+/* Скроллбар для каждой строки табулатуры, если будет */
+.tab-line::-webkit-scrollbar {
+    height: 4px;
+    background-color: #1e1e1e;
+}
+
+.tab-line::-webkit-scrollbar-thumb {
+    background: var(--primary-color);
+    border-radius: 2px;
 }

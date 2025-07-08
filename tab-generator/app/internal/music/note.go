@@ -134,7 +134,8 @@ func (n *NoteSequence) RemoveNoisyNotes() *NoteSequence {
 		return n
 	}
 
-	velocityThreshold := 0.45
+	octaveDiffThreshold := 2
+	velocityThreshold := 0.5
 	durationThreshold := 0.35
 
 	seq := NoteSequence{
@@ -147,7 +148,7 @@ func (n *NoteSequence) RemoveNoisyNotes() *NoteSequence {
 		note := &n.Notes[i]
 		noiseValue := 0
 
-		if abs(last.Octave-note.Octave) > 2 {
+		if abs(last.Octave-note.Octave) > octaveDiffThreshold {
 			noiseValue++
 		}
 		if note.EndTime-note.StartTime < durationThreshold {

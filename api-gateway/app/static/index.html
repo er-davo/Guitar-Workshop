@@ -1,73 +1,115 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Генератор табулатур</title>
-    <link rel="stylesheet" href="static/style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Guitar Workshop</title>
+    <link rel="stylesheet" href="static/style.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
 </head>
 <body>
     <div class="container">
         <header>
-            <h1><i class="fas fa-guitar"></i> Генератор гитарных табулатур</h1>
-            <p class="subtitle">Преобразуйте музыку в ноты для гитары</p>
+            <h1><i class="fas fa-guitar"></i> Guitar Workshop</h1>
+            <p class="subtitle">Преобразуйте музыку в табулатуры или разделите её на дорожки</p>
         </header>
 
         <div class="card">
             <div class="tabs">
-                <button class="tab-button active" data-tab="file">
-                    <i class="fas fa-file-audio"></i> Из файла
+                <button class="tab-button active" data-tab="tab-generator">
+                    <i class="fas fa-magic"></i> Генерация табов
                 </button>
-                <button class="tab-button" data-tab="youtube">
-                    <i class="fab fa-youtube"></i> Из YouTube
+                <button class="tab-button" data-tab="audio-separation">
+                    <i class="fas fa-sliders-h"></i> Разделение аудио
                 </button>
             </div>
 
-            <form id="uploadForm">
-                <div class="tab-content active" id="file-tab">
-                    <div class="file-upload">
-                        <label for="audioFile" class="file-label">
-                            <i class="fas fa-cloud-upload-alt"></i>
-                            <span class="file-text">Выберите или перетащите аудиофайл</span>
-                            <span class="file-types">(MP3, WAV)</span>
-                        </label>
-                        <input type="file" id="audioFile" accept=".wav,.mp3" class="file-input">
-                        <div id="fileName" class="file-name"></div>
-                        <div id="uploadProgress" class="progress-container">
-                            <div class="progress-bar"></div>
-                            <span class="progress-text">0%</span>
+            <!-- Вкладка: Генерация табулатур -->
+            <div class="tab-content active" id="tab-generator-tab">
+                <form id="uploadForm">
+                    <div class="tab-inner">
+                        <div class="file-upload">
+                            <label for="audioFile" class="file-label">
+                                <i class="fas fa-cloud-upload-alt"></i>
+                                <span class="file-text">Выберите или перетащите аудиофайл</span>
+                                <span class="file-types">(MP3, WAV)</span>
+                            </label>
+                            <input type="file" id="audioFile" accept=".wav,.mp3" class="file-input" />
+                            <div id="fileName" class="file-name"></div>
+                            <div id="uploadProgress" class="progress-container">
+                                <div class="progress-bar"></div>
+                                <span class="progress-text">0%</span>
+                            </div>
+                        </div>
+
+                        <div class="input-group">
+                            <i class="fab fa-youtube input-icon"></i>
+                            <input type="text" id="youtubeUrl" placeholder="https://www.youtube.com/watch?v=..." class="text-input" />
+                        </div>
+                        
+                         <div class="option-row">
+                            <label class="checkbox-option">
+                                <input type="checkbox" id="enableSeparation">
+                                Разделить аудио перед обработкой (вокал, перкуссия и бас будут убраны)
+                            </label>
+                        </div>
+
+                        <button type="submit" class="submit-button">
+                            <i class="fas fa-magic"></i> Сгенерировать табулатуру
+                        </button>
+                    </div>
+                </form>
+
+                <div class="card result-card">
+                    <h3><i class="fas fa-music"></i> Результат:</h3>
+                    <div class="result-container">
+                        <div id="tabResult" class="tablature"></div>
+                        <div id="loading" class="loading">
+                            <div class="spinner"></div>
+                            <div class="loading-text">Обработка...</div>
                         </div>
                     </div>
-                </div>
-                
-                <div class="tab-content" id="youtube-tab">
-                    <div class="input-group">
-                        <i class="fab fa-youtube input-icon"></i>
-                        <input type="text" id="youtubeUrl" placeholder="https://www.youtube.com/watch?v=..." class="text-input">
-                    </div>
-                </div>
-
-                <button type="submit" class="submit-button">
-                    <i class="fas fa-magic"></i> Сгенерировать табулатуру
-                </button>
-            </form>
-        </div>
-
-        <div class="card result-card">
-            <h3><i class="fas fa-music"></i> Результат:</h3>
-            <div class="result-container">
-                <div id="tabResult" class="tablature">
-                    
-                </div>
-                <div id="loading" class="loading">
-                    <div class="spinner"></div>
-                    <div class="loading-text">Обработка...</div>
+                    <button id="copyButton" class="copy-button" disabled>
+                        <i class="far fa-copy"></i> Копировать
+                    </button>
                 </div>
             </div>
-            <button id="copyButton" class="copy-button" disabled>
-                <i class="far fa-copy"></i> Копировать
-            </button>
+
+            <!-- Вкладка: Разделение аудио -->
+            <div class="tab-content" id="audio-separation-tab">
+                <form id="separationForm">
+                    <div class="file-upload">
+                        <label for="separationFile" class="file-label">
+                            <i class="fas fa-cloud-upload-alt"></i>
+                            <span class="file-text">Загрузите аудиофайл для разделения</span>
+                            <span class="file-types">(MP3, WAV)</span>
+                        </label>
+                        <input type="file" id="separationFile" accept=".wav,.mp3" class="file-input" />
+                        <div id="separationFileName" class="file-name"></div>
+                    </div>
+
+                    <div class="option-row">
+                        <p class="option-title">Какие дорожки оставить:</p>
+                        <label><input type="checkbox" name="stems" value="guitar" checked /> Гитара</label>
+                        <label><input type="checkbox" name="stems" value="bass" /> Бас</label>
+                        <label><input type="checkbox" name="stems" value="drums" /> Перкуссия</label>
+                        <label><input type="checkbox" name="stems" value="vocals" /> Вокал</label>
+                    </div>
+
+                    <button type="submit" class="submit-button">
+                        <i class="fas fa-sliders-h"></i> Разделить аудио
+                    </button>
+                </form>
+
+                <div class="card result-card">
+                    <h3><i class="fas fa-wave-square"></i> Результирующие дорожки:</h3>
+                    <div id="separationLoading" class="loading">
+                        <div class="spinner"></div>
+                        <div class="loading-text">Разделение аудио...</div>
+                    </div>
+                    <div id="separationResult" class="separation-result"></div>
+                </div>
+            </div>
         </div>
     </div>
 

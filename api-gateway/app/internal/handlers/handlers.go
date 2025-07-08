@@ -7,9 +7,8 @@ import (
 	"net/http"
 	"strconv"
 
+	"api-gateway/internal/clients"
 	"api-gateway/internal/logger"
-	"api-gateway/internal/proto/separator"
-	"api-gateway/internal/proto/tab"
 
 	"github.com/labstack/echo"
 )
@@ -63,18 +62,12 @@ func TabGenerate(c echo.Context) error {
 
 	if separationEnabled == "1" {
 		logger.Log.Info("separating audio")
-		audioData := separator.AudioFileData{
-			FileName:   audioURL,
-			AudioBytes: wavData,
-		}
 
-		separatedFiles, err := AudioSeparatorClient.SeparateAudio(context.Background(), &separator.SeparateRequest{
-			AudioData: &audioData,
-		})
+		separatedFiles, err := clients.SeparateAudio(context.Background(), audioURL, wavData)
 		if err != nil {
 			return c.JSON(http.StatusBadRequest, map[string]string{"error": err.Error()})
 		}
-		otherStem, ok := separatedFiles.Stems["other"]
+		otherStem, ok := separatedFiles["other"]
 		if !ok {
 			return c.JSON(http.StatusBadRequest, map[string]string{"error": "Missing 'other' stem"})
 		}
@@ -83,11 +76,7 @@ func TabGenerate(c echo.Context) error {
 		wavData = otherStem.AudioBytes
 	}
 
-	tabResp, err := TabGenClient.GenerateTab(context.Background(), &tab.TabRequest{
-		Audio: &tab.AudioFileData{
-			FileName: audioURL, AudioBytes: wavData,
-		}},
-	)
+	tabResp, err := clients.GenerateTab(context.Background(), audioURL, wavData)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": err.Error()})
 	}

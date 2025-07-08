@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 
+	"api-gateway/internal/clients"
 	"api-gateway/internal/config"
 	"api-gateway/internal/handlers"
 
@@ -11,8 +12,7 @@ import (
 )
 
 func main() {
-	handlers.InitClients()
-	defer handlers.CloseClients()
+	defer clients.CloseClients()
 
 	e := echo.New()
 

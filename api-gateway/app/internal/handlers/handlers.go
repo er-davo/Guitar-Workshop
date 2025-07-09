@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"context"
+	"encoding/base64"
 	"fmt"
 	"io"
 	"net/http"
@@ -82,4 +83,37 @@ func TabGenerate(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, map[string]string{"tab": tabResp.Tab})
+}
+
+func SeparateAudio(c echo.Context) error {
+	fileHeader, err := c.FormFile("audio_file")
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "не удалось прочитать файл"})
+	}
+
+	file, err := fileHeader.Open()
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "ошибка открытия файла"})
+	}
+	defer file.Close()
+
+	audioBytes, err := io.ReadAll(file)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "не удалось прочитать байты файла"})
+	}
+
+	stems, err := clients.SeparateAudio(c.Request().Context(), fileHeader.Filename, audioBytes)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "разделение не удалось: " + err.Error()})
+	}
+
+	resp := make(map[string]string)
+	for name, data := range stems {
+		encoded := base64.StdEncoding.EncodeToString(data.AudioBytes)
+		resp[name] = "data:audio/wav;base64," + encoded
+	}
+
+	return c.JSON(http.StatusOK, map[string]interface{}{
+		"stems": resp,
+	})
 }

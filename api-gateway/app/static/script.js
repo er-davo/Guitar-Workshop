@@ -213,7 +213,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    function base64ToBlobUrl(base64, mimeType = 'audio/wav') {
+    function base64ToBlobUrl(base64String, mimeType = 'audio/wav') {
+        const base64 = base64String.split(',')[1];
         const byteCharacters = atob(base64);
         const byteNumbers = new Array(byteCharacters.length);
         for(let i = 0; i < byteCharacters.length; i++) {

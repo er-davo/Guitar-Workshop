@@ -3,7 +3,7 @@ from service.service import AudioSeparatorService
 import grpc
 import separator_pb2_grpc
 
-MAX_MESSAGE_LENGTH = 100 * 1024 * 1024  # 100 MB
+MAX_MESSAGE_LENGTH = 250 * 1024 * 1024  # 250 MB
 
 def run_server(port: str):
     server = grpc.server(

@@ -27,7 +27,7 @@ func main() {
 
 	e.POST("/generate-tab", handlers.TabGenerate)
 
-	e.POST("/separate-audio", func(ctx echo.Context) error { return nil })
+	e.POST("/separate-audio", handlers.SeparateAudio)
 
 	e.Logger.Fatal(e.Start(fmt.Sprintf(":%s", config.Load().PORT)))
 }

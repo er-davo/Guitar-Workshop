@@ -23,10 +23,11 @@ var (
 )
 
 func init() {
+	cfg := config.Load()
 	var err error
 
 	tabGenConn, err = grpc.NewClient(
-		config.Load().TabgenHost+":"+config.Load().TabgenPort,
+		cfg.TabgenHost+":"+cfg.TabgenPort,
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 		grpc.WithDefaultCallOptions(
 			grpc.MaxCallRecvMsgSize(100*1024*1024), // 100 MB
@@ -50,11 +51,11 @@ func init() {
 	// }
 
 	audioSeparatorConn, err = grpc.NewClient(
-		config.Load().AudioSeparatorHost+":"+config.Load().AudioSeparatorPort,
+		cfg.AudioSeparatorHost+":"+cfg.AudioSeparatorPort,
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 		grpc.WithDefaultCallOptions(
-			grpc.MaxCallRecvMsgSize(100*1024*1024), // 100 MB
-			grpc.MaxCallSendMsgSize(100*1024*1024),
+			grpc.MaxCallRecvMsgSize(250<<20), // 250 MB
+			grpc.MaxCallSendMsgSize(250<<20),
 		),
 	)
 	if err != nil {

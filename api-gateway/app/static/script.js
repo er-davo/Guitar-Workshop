@@ -83,17 +83,15 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Отправка формы таб-генератора
     uploadForm.addEventListener('submit', async (e) => {
         e.preventDefault();
 
         const activeTab = document.querySelector('.tab-button.active').getAttribute('data-tab');
-        if (activeTab !== 'tab-generator') return; // защита от отправки, если неактивна вкладка
+        if (activeTab !== 'tab-generator') return;
 
         let formData = new FormData();
         const endpoint = 'http://localhost:8080/generate-tab';
 
-        // Показываем индикатор загрузки
         loadingDiv.classList.add('active');
         resultDiv.innerHTML = 
             '<div class="tab-line">e|---------------------------------------------------------</div>' +
@@ -104,7 +102,6 @@ document.addEventListener('DOMContentLoaded', () => {
             '<div class="tab-line">E|---------------------------------------------------------</div>';
 
         try {
-            // Если выбран файл
             if (fileInput.files.length) {
                 // Показываем прогресс-бар
                 progressContainer.style.display = 'block';
@@ -113,7 +110,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 simulateUploadProgress();
 
-                formData.append('audio_url', fileInput.files[0]);
+                formData.append('audio_file', fileInput.files[0]);
                 formData.append('type', TYPE_FILE);
             } else {
                 // Иначе берём YouTube ссылку
@@ -150,7 +147,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Отправка формы разделения аудио
     separationForm.addEventListener('submit', async (e) => {
         e.preventDefault();
 
@@ -188,14 +184,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const data = await response.json();
 
-            // data.stems — ожидаем объект вида {"guitar": url, "bass": url, ...}
             separationResultDiv.innerHTML = '';
 
             for (const [stem, url] of Object.entries(data.stems)) {
                 const div = document.createElement('div');
                 div.className = 'stem-item';
 
-                const blobUrl = base64ToBlobUrl(url); // преобразуем base64 в blob URL
+                const blobUrl = base64ToBlobUrl(url);
 
                 div.innerHTML = `
                     <h4>${stem.charAt(0).toUpperCase() + stem.slice(1)}</h4>

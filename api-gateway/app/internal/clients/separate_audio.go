@@ -21,7 +21,7 @@ func SeparateAudio(ctx context.Context, fileName string, audioData []byte) (map[
 		AudioBytes: audioData,
 	}
 
-	resp, err := audioSeparatorClient.SeparateAudio(ctx, &separator.SeparateRequest{
+	resp, err := AudioSeparatorClient.SeparateAudio(ctx, &separator.SeparateRequest{
 		AudioData: fileData,
 	})
 	if err != nil {

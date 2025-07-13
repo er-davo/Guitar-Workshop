@@ -21,7 +21,7 @@ func TestGenerateTab_Success(t *testing.T) {
 		}), mock.Anything).
 		Return(expectedResp, nil)
 
-	tabGenClient = mockClient
+	TabGenClient = mockClient
 
 	resp, err := GenerateTab(context.Background(), "test.wav", []byte("data"))
 
@@ -38,7 +38,7 @@ func TestGenerateTab_Error(t *testing.T) {
 		On("GenerateTab", mock.Anything, mock.AnythingOfType("*tab.TabRequest"), mock.Anything).
 		Return((*tab.TabResponse)(nil), assert.AnError)
 
-	tabGenClient = mockClient
+	TabGenClient = mockClient
 
 	resp, err := GenerateTab(context.Background(), "test.wav", []byte("data"))
 

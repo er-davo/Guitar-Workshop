@@ -32,7 +32,7 @@ func TestSeparateAudio_Success(t *testing.T) {
 		}), mock.Anything).
 		Return(expectedResp, nil)
 
-	audioSeparatorClient = mockClient
+	AudioSeparatorClient = mockClient
 
 	resp, err := SeparateAudio(context.Background(), fileName, audioData)
 
@@ -50,7 +50,7 @@ func TestSeparateAudio_Error(t *testing.T) {
 		On("SeparateAudio", mock.Anything, mock.Anything, mock.Anything).
 		Return((*separator.SeparateResponse)(nil), assert.AnError)
 
-	audioSeparatorClient = mockClient
+	AudioSeparatorClient = mockClient
 
 	resp, err := SeparateAudio(context.Background(), "badfile.wav", []byte("bad_audio"))
 
@@ -67,7 +67,7 @@ func TestSeparateAudio_EmptyResponse(t *testing.T) {
 		On("SeparateAudio", mock.Anything, mock.Anything, mock.Anything).
 		Return(&separator.SeparateResponse{Stems: nil}, nil)
 
-	audioSeparatorClient = mockClient
+	AudioSeparatorClient = mockClient
 
 	resp, err := SeparateAudio(context.Background(), "file.wav", []byte("data"))
 

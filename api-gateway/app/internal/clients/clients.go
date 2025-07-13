@@ -13,9 +13,9 @@ import (
 )
 
 var (
-	tabGenClient TabGenerator
+	TabGenClient TabGenerator
 	//	audioProcessorClient audioproc.AudioProcessorServiceClient
-	audioSeparatorClient AudioSeparator
+	AudioSeparatorClient AudioSeparator
 
 	tabGenConn         *grpc.ClientConn
 	audioProcessorConn *grpc.ClientConn
@@ -62,9 +62,9 @@ func init() {
 		logger.Log.Fatal("audio-separator gRPC connection failed", zap.Error(err))
 	}
 
-	tabGenClient = tab.NewTabGenerateClient(tabGenConn)
+	TabGenClient = tab.NewTabGenerateClient(tabGenConn)
 	//	audioProcessorClient = audioproc.NewAudioProcessorServiceClient(audioProcessorConn)
-	audioSeparatorClient = separator.NewAudioSeparatorClient(audioSeparatorConn)
+	AudioSeparatorClient = separator.NewAudioSeparatorClient(audioSeparatorConn)
 
 }
 

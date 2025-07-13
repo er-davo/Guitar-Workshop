@@ -3,7 +3,7 @@ package clients
 import (
 	"api-gateway/internal/config"
 	"api-gateway/internal/logger"
-	"api-gateway/internal/proto/audioproc"
+
 	"api-gateway/internal/proto/separator"
 	"api-gateway/internal/proto/tab"
 
@@ -13,9 +13,9 @@ import (
 )
 
 var (
-	tabGenClient         tab.TabGenerateClient
-	audioProcessorClient audioproc.AudioProcessorServiceClient
-	audioSeparatorClient separator.AudioSeparatorClient
+	tabGenClient TabGenerator
+	//	audioProcessorClient audioproc.AudioProcessorServiceClient
+	audioSeparatorClient AudioSeparator
 
 	tabGenConn         *grpc.ClientConn
 	audioProcessorConn *grpc.ClientConn
@@ -63,14 +63,14 @@ func init() {
 	}
 
 	tabGenClient = tab.NewTabGenerateClient(tabGenConn)
-	audioProcessorClient = audioproc.NewAudioProcessorServiceClient(audioProcessorConn)
+	//	audioProcessorClient = audioproc.NewAudioProcessorServiceClient(audioProcessorConn)
 	audioSeparatorClient = separator.NewAudioSeparatorClient(audioSeparatorConn)
 
 }
 
 // func InitClients() {
 // 	var err error
-
+//
 // 	tabGenConn, err = grpc.NewClient(
 // 		config.Load().TabgenHost+":"+config.Load().TabgenPort,
 // 		grpc.WithTransportCredentials(insecure.NewCredentials()),
@@ -82,7 +82,7 @@ func init() {
 // 	if err != nil {
 // 		logger.Log.Fatal("tab-generator gRPC connection failed", zap.Error(err))
 // 	}
-
+//
 // 	// audioProcessorConn, err = grpc.NewClient(
 // 	// 	config.Load().AudioProcHost+":"+config.Load().AudioProcPort,
 // 	// 	grpc.WithTransportCredentials(insecure.NewCredentials()),
@@ -94,7 +94,7 @@ func init() {
 // 	// if err != nil {
 // 	// 	logger.Log.Fatal("audio-processor gRPC connection failed", zap.Error(err))
 // 	// }
-
+//
 // 	audioSeparatorConn, err = grpc.NewClient(
 // 		config.Load().AudioSeparatorHost+":"+config.Load().AudioSeparatorPort,
 // 		grpc.WithTransportCredentials(insecure.NewCredentials()),
@@ -106,7 +106,7 @@ func init() {
 // 	if err != nil {
 // 		logger.Log.Fatal("audio-separator gRPC connection failed", zap.Error(err))
 // 	}
-
+//
 // 	TabGenClient = tab.NewTabGenerateClient(tabGenConn)
 // 	AudioProcessorClient = audioproc.NewAudioProcessorServiceClient(audioProcessorConn)
 // 	AudioSeparatorClient = separator.NewAudioSeparatorClient(audioSeparatorConn)

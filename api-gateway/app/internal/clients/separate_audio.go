@@ -1,13 +1,19 @@
 package clients
 
 import (
-	"api-gateway/internal/logger"
-	"api-gateway/internal/proto/separator"
 	"context"
 	"errors"
 
+	"api-gateway/internal/logger"
+	"api-gateway/internal/proto/separator"
+
 	"go.uber.org/zap"
+	"google.golang.org/grpc"
 )
+
+type AudioSeparator interface {
+	SeparateAudio(ctx context.Context, in *separator.SeparateRequest, opts ...grpc.CallOption) (*separator.SeparateResponse, error)
+}
 
 func SeparateAudio(ctx context.Context, fileName string, audioData []byte) (map[string]*separator.AudioFileData, error) {
 	fileData := &separator.AudioFileData{

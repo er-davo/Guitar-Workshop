@@ -15,7 +15,6 @@ import (
 )
 
 func main() {
-	clients.InitClients()
 	defer clients.CloseClients()
 	defer logger.Log.Sync()
 

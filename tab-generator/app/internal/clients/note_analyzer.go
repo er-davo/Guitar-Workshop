@@ -1,9 +1,10 @@
 package clients
 
 import (
+	"context"
 	"tabgen/internal/config"
 	"tabgen/internal/logger"
-	"tabgen/internal/proto/note-analyzer"
+	note_analyzer "tabgen/internal/proto/note-analyzer"
 
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
@@ -11,11 +12,11 @@ import (
 )
 
 var (
-	NoteAnalyzerClient note_analyzer.NoteAnalyzerClient
+	NoteAnalyzerClient NoteAnalyzer
 	NoteAnalyzerConn   *grpc.ClientConn
 )
 
-func InitClients() {
+func init() {
 	var err error
 
 	NoteAnalyzerConn, err = grpc.NewClient(
@@ -31,6 +32,10 @@ func InitClients() {
 	}
 
 	NoteAnalyzerClient = note_analyzer.NewNoteAnalyzerClient(NoteAnalyzerConn)
+}
+
+type NoteAnalyzer interface {
+	Analyze(ctx context.Context, in *note_analyzer.AudioRequest, opts ...grpc.CallOption) (*note_analyzer.NoteResponse, error)
 }
 
 func CloseClients() {

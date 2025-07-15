@@ -1,4 +1,4 @@
-name: Guitar Workshop CI (Go)
+name: Test & Build (Go)
 
 on:
   push:

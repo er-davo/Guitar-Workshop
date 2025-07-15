@@ -22,6 +22,20 @@ document.addEventListener('DOMContentLoaded', () => {
     const separationResultDiv = document.getElementById('separationResult');
     const separationLoading = document.getElementById('separationLoading');
 
+    setLanguage('ru');
+
+    document.getElementById("langRu").addEventListener("click", () => {
+        setLanguage("ru");
+        document.getElementById("langRu").classList.add("active");
+        document.getElementById("langEn").classList.remove("active");
+    });
+
+    document.getElementById("langEn").addEventListener("click", () => {
+        setLanguage("en");
+        document.getElementById("langEn").classList.add("active");
+        document.getElementById("langRu").classList.remove("active");
+    });
+
     // Переключение вкладок
     tabButtons.forEach(button => {
         button.addEventListener('click', () => {
@@ -274,3 +288,25 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 200);
     }
 });
+
+
+function setLanguage(lang) {
+    const dict = translations[lang];
+    if (!dict) return;
+
+    document.querySelectorAll("[data-i18n]").forEach(el => {
+        const key = el.getAttribute("data-i18n");
+        if (dict[key]) {
+            el.textContent = dict[key];
+        }
+    });
+
+    const ytInput = document.getElementById("youtubeUrl");
+    if (ytInput) ytInput.placeholder = dict.youtubePlaceholder;
+
+    const loadingText = document.querySelector("#loading .loading-text");
+    if (loadingText) loadingText.textContent = dict.loading;
+
+    const separationLoadingText = document.querySelector("#separationLoading .loading-text");
+    if (separationLoadingText) separationLoadingText.textContent = dict.loadingSeparation;
+}

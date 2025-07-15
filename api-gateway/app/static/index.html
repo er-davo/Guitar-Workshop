@@ -3,24 +3,29 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>Guitar Workshop</title>
+    <title data-i18n="title">Guitar Workshop</title>
     <link rel="stylesheet" href="static/style.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+    <script src="static/lang.js"></script>
 </head>
 <body>
     <div class="container">
         <header>
-            <h1><i class="fas fa-guitar"></i> Guitar Workshop</h1>
-            <p class="subtitle">Преобразуйте музыку в табулатуры или разделите её на дорожки</p>
+            <h1><i class="fas fa-guitar"></i> <span data-i18n="title">Guitar Workshop</span></h1>
+            <p class="subtitle" data-i18n="subtitle">Преобразуйте музыку в табулатуры или разделите её на дорожки</p>
+            <div class="lang-switcher">
+                <button id="langRu" class="lang-btn active">RU</button>
+                <button id="langEn" class="lang-btn">EN</button>
+            </div>
         </header>
 
         <div class="card">
             <div class="tabs">
                 <button class="tab-button active" data-tab="tab-generator">
-                    <i class="fas fa-magic"></i> Генерация табов
+                    <i class="fas fa-magic"></i> <span data-i18n="tabGen">Генерация табов</span>
                 </button>
                 <button class="tab-button" data-tab="audio-separation">
-                    <i class="fas fa-sliders-h"></i> Разделение аудио
+                    <i class="fas fa-sliders-h"></i> <span data-i18n="audioSep">Разделение аудио</span>
                 </button>
             </div>
 
@@ -31,8 +36,8 @@
                         <div class="file-upload">
                             <label for="audioFile" class="file-label">
                                 <i class="fas fa-cloud-upload-alt"></i>
-                                <span class="file-text">Выберите или перетащите аудиофайл</span>
-                                <span class="file-types">(MP3, WAV)</span>
+                                <span class="file-text" data-i18n="chooseFile">Выберите или перетащите аудиофайл</span>
+                                <span class="file-types" data-i18n="fileTypes">(MP3, WAV)</span>
                             </label>
                             <input type="file" id="audioFile" accept=".wav,.mp3" class="file-input" />
                             <div id="fileName" class="file-name"></div>
@@ -50,27 +55,27 @@
                          <div class="option-row">
                             <label class="checkbox-option">
                                 <input type="checkbox" id="enableSeparation">
-                                Разделить аудио перед обработкой (вокал, перкуссия и бас будут убраны)
+                                <span data-i18n="separateOption">Разделить аудио перед обработкой (вокал, перкуссия и бас будут убраны)</span>
                             </label>
                         </div>
 
                         <button type="submit" class="submit-button">
-                            <i class="fas fa-magic"></i> Сгенерировать табулатуру
+                            <i class="fas fa-magic"></i> <span data-i18n="generateTab">Сгенерировать табулатуру</span>
                         </button>
                     </div>
                 </form>
 
                 <div class="card result-card">
-                    <h3><i class="fas fa-music"></i> Результат:</h3>
+                    <h3><i class="fas fa-music"></i> <span data-i18n="result">Результат:</span></h3>
                     <div class="result-container">
                         <div id="tabResult" class="tablature"></div>
                         <div id="loading" class="loading">
                             <div class="spinner"></div>
-                            <div class="loading-text">Обработка...</div>
+                            <div class="loading-text" data-i18n="loading">Обработка...</div>
                         </div>
                     </div>
                     <button id="copyButton" class="copy-button" disabled>
-                        <i class="far fa-copy"></i> Копировать
+                        <i class="far fa-copy"></i> <span data-i18n="copy">Копировать</span>
                     </button>
                 </div>
             </div>
@@ -81,31 +86,31 @@
                     <div class="file-upload">
                         <label for="separationFile" class="file-label">
                             <i class="fas fa-cloud-upload-alt"></i>
-                            <span class="file-text">Загрузите аудиофайл для разделения</span>
-                            <span class="file-types">(MP3, WAV)</span>
+                            <span class="file-text" data-i18n="separationChoose">Загрузите аудиофайл для разделения</span>
+                            <span class="file-types" data-i18n="fileTypes">(MP3, WAV)</span>
                         </label>
                         <input type="file" id="separationFile" accept=".wav,.mp3" class="file-input" />
                         <div id="separationFileName" class="file-name"></div>
                     </div>
 
                     <div class="option-row">
-                        <p class="option-title">Какие дорожки оставить:</p>
-                        <label><input type="checkbox" name="stems" value="guitar" checked /> Гитара</label>
-                        <label><input type="checkbox" name="stems" value="bass" /> Бас</label>
-                        <label><input type="checkbox" name="stems" value="drums" /> Перкуссия</label>
-                        <label><input type="checkbox" name="stems" value="vocals" /> Вокал</label>
+                        <p class="option-title" data-i18n="stemTitle">Какие дорожки оставить:</p>
+                        <label><input type="checkbox" name="stems" value="guitar" checked /> <span data-i18n="stemGuitar">Гитара</span></label>
+                        <label><input type="checkbox" name="stems" value="bass" /> <span data-i18n="stemBass">Бас</span></label>
+                        <label><input type="checkbox" name="stems" value="drums" /> <span data-i18n="stemDrums">Перкуссия</span></label>
+                        <label><input type="checkbox" name="stems" value="vocals" /> <span data-i18n="stemVocals">Вокал</span></label>
                     </div>
 
                     <button type="submit" class="submit-button">
-                        <i class="fas fa-sliders-h"></i> Разделить аудио
+                        <i class="fas fa-sliders-h"></i> <span data-i18n="separateButton">Разделить аудио</span>
                     </button>
                 </form>
 
                 <div class="card result-card">
-                    <h3><i class="fas fa-wave-square"></i> Результирующие дорожки:</h3>
+                    <h3><i class="fas fa-wave-square"></i> <span data-i18n="separationResult">Результирующие дорожки:</span></h3>
                     <div id="separationLoading" class="loading">
                         <div class="spinner"></div>
-                        <div class="loading-text">Разделение аудио...</div>
+                        <div class="loading-text" data-i18n="loadingSeparation">Разделение аудио...</div>
                     </div>
                     <div id="separationResult" class="separation-result"></div>
                 </div>

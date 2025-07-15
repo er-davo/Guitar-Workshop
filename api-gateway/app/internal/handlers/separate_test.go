@@ -1,9 +1,6 @@
 package handlers
 
 import (
-	"api-gateway/internal/clients"
-	"api-gateway/internal/mocks"
-	"api-gateway/internal/proto/separator"
 	"bytes"
 	"encoding/base64"
 	"encoding/json"
@@ -11,6 +8,10 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	"api-gateway/internal/clients"
+	"api-gateway/internal/mocks"
+	"api-gateway/internal/proto/separator"
 
 	"github.com/labstack/echo"
 	"github.com/stretchr/testify/mock"

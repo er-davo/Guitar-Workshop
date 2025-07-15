@@ -35,6 +35,41 @@ header {
     margin-bottom: 30px;
 }
 
+.lang-switcher {
+    display: inline-flex;
+    border: 2px solid var(--primary-color);
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    margin-bottom: 20px;
+    user-select: none;
+}
+
+.lang-btn {
+    background-color: transparent;
+    border: none;
+    color: var(--primary-color);
+    padding: 8px 18px;
+    font-weight: 600;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: background-color 0.3s ease, color 0.3s ease;
+    outline: none;
+    flex: 1 1 auto;
+    text-align: center;
+}
+
+.lang-btn:not(.active):hover {
+    background-color: var(--primary-color);
+    color: var(--light-color);
+}
+
+.lang-btn.active {
+    background-color: var(--primary-color);
+    color: var(--light-color);
+    cursor: default;
+    font-weight: 700;
+}
+
 h1 {
     color: var(--primary-color);
     margin-bottom: 10px;

@@ -1,5 +1,5 @@
 # 🎸 Guitar Workshop
-![CI](https://github.com/yourusername/guitar-workshop/actions/workflows/ci.yml/badge.svg)
+[![CI](https://github.com/yourusername/guitar-workshop/actions/workflows/ci.yml/badge.svg)](https://github.com/yourusername/guitar-workshop/actions/workflows/ci.yml)
 
 [On russian](./README.ru.md)
 

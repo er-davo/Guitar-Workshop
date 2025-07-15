@@ -1,4 +1,6 @@
 # 🎸 Guitar Workshop
+![CI](https://github.com/yourusername/guitar-workshop/actions/workflows/ci.yml/badge.svg)
+
 [On russian](./README.ru.md)
 
 **Guitar Workshop** is a microservice-based application written in Go that generates guitar tablatures from audio files. The project includes audio analysis, pitch detection, and generation of readable guitar tabs that can be played by hand.

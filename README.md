@@ -57,6 +57,6 @@ Example of isolating the guitar track from a full mix:
 # Tab Generation Algorithm
 The project uses my own Go library: [guitar](https://github.com/er-davo/guitar), which models the guitar fretboard and fingerings.
 
-1. Each detected note is mapped to all possible fretboard positions (Playable)
+1. Each detected note is mapped to all possible fretboard positions (`Playable`)
 2. Dynamic programming is used to find the optimal sequence of fingerings
 3. The algorithm minimizes the cost of transitions between notes (taking into account fret span, string switching, finger stretch)

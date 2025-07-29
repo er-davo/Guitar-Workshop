@@ -25,7 +25,7 @@ var (
 	audioSeparatorConn *grpc.ClientConn
 )
 
-func init() {
+func InitClients() {
 	cfg := config.Load()
 	var err error
 

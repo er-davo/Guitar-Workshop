@@ -12,6 +12,7 @@ import (
 )
 
 func main() {
+	clients.InitClients()
 	defer clients.CloseClients()
 
 	e := echo.New()

@@ -11,6 +11,8 @@ type Config struct {
 	SupabaseURL string
 	SupabaseKey string
 
+	DatabaseURL string
+
 	TabgenPort string
 	TabgenHost string
 
@@ -32,6 +34,8 @@ func Load() *Config {
 
 		config.SupabaseURL = os.Getenv("SUPABASE_URL")
 		config.SupabaseKey = os.Getenv("ACCESS_KEY")
+
+		config.DatabaseURL = os.Getenv("DATABASE_URL")
 
 		config.TabgenPort = os.Getenv("TABGEN_PORT")
 		config.TabgenHost = os.Getenv("TABGEN_HOST")

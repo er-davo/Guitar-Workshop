@@ -7,12 +7,15 @@ import (
 	"api-gateway/internal/proto/separator"
 	"api-gateway/internal/proto/tab"
 
+	"github.com/supabase-community/supabase-go"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )
 
 var (
+	Supabase *supabase.Client
+
 	TabGenClient TabGenerator
 	//	audioProcessorClient audioproc.AudioProcessorServiceClient
 	AudioSeparatorClient AudioSeparator
@@ -25,6 +28,11 @@ var (
 func init() {
 	cfg := config.Load()
 	var err error
+
+	Supabase, err = supabase.NewClient(cfg.SupabaseURL, cfg.SupabaseKey, &supabase.ClientOptions{})
+	if err != nil {
+		logger.Log.Fatal("supabase connection failed", zap.Error(err))
+	}
 
 	tabGenConn, err = grpc.NewClient(
 		cfg.TabgenHost+":"+cfg.TabgenPort,

@@ -49,3 +49,8 @@ func TabGenerate(c echo.Context) error {
 
 	return c.JSON(http.StatusOK, map[string]string{"tab": tabResp.Tab})
 }
+
+func SaveTab(c echo.Context) error {
+
+	return c.JSON(http.StatusOK, map[string]string{})
+}

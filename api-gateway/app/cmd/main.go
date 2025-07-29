@@ -25,7 +25,9 @@ func main() {
 		return c.File("static/index.html")
 	})
 
-	e.POST("/generate-tab", handlers.TabGenerate)
+	e.POST("/tab/generate", handlers.TabGenerate)
+
+	e.POST("/tab/save", handlers.SaveTab)
 
 	e.POST("/separate-audio", handlers.SeparateAudio)
 

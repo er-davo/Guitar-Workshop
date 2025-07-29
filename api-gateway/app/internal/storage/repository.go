@@ -8,6 +8,11 @@ import (
 	"api-gateway/internal/config"
 )
 
+func SaveTab(fileName string, file io.Reader) error {
+
+	return nil
+}
+
 func UploadFileToSupabaseStorage(
 	bucketName string, fileName string,
 	file io.Reader, contentType string,

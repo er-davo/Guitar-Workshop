@@ -104,7 +104,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (activeTab !== 'tab-generator') return;
 
         let formData = new FormData();
-        const endpoint = 'http://localhost:8080/generate-tab';
+        const endpoint = 'http://localhost:8080/tab/generate';
 
         loadingDiv.classList.add('active');
         resultDiv.innerHTML = 

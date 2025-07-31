@@ -297,6 +297,60 @@ h1 i {
     margin-bottom: 10px;
 }
 
+#saveSection {
+    display: none;
+    margin-top: 20px;
+    padding-top: 10px;
+    border-top: 1px solid #444;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+}
+
+#tabNameInput {
+    flex: 1;
+    padding: 10px;
+    font-size: 1rem;
+    border: 1px solid #555;
+    border-radius: var(--border-radius);
+    background-color: #333;
+    color: var(--light-color);
+    transition: var(--transition);
+}
+
+#tabNameInput::placeholder {
+    color: #aaa;
+}
+
+#tabNameInput:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 2px rgba(74, 111, 165, 0.3);
+}
+
+#saveTabButton {
+    padding: 10px 20px;
+    background-color: var(--success-color);
+    color: white;
+    border: none;
+    border-radius: var(--border-radius);
+    font-weight: bold;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+#saveTabButton:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+#saveTabButton:hover:enabled {
+    background-color: #3e8e41;
+}
+
+
 @keyframes spin {
     to { transform: rotate(360deg); }
 }

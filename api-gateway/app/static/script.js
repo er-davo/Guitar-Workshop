@@ -14,6 +14,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const progressBar = progressContainer.querySelector('.progress-bar');
     const progressText = progressContainer.querySelector('.progress-text');
     const loadingDiv = document.getElementById('loading');
+    const saveSection = document.getElementById('saveSection');
+    const tabNameInput = document.getElementById('tabNameInput');
+    const saveTabButton = document.getElementById('saveTabButton');
 
     // Элементы для разделения аудио
     const separationForm = document.getElementById('separationForm');
@@ -152,12 +155,48 @@ document.addEventListener('DOMContentLoaded', () => {
             const data = await response.json();
             displayTab(data.tab);
             copyButton.disabled = false;
+            saveSection.style.display = 'block';
+            saveTabButton.disabled = true;
         } catch (err) {
             resultDiv.innerHTML = `<div class="error-message">Ошибка: ${err.message}</div>`;
             console.error(err);
         } finally {
             loadingDiv.classList.remove('active');
             progressContainer.style.display = 'none';
+        }
+    });
+
+    tabNameInput.addEventListener('input', () => {
+        saveTabButton.disabled = !tabNameInput.value.trim();
+    });
+
+    saveTabButton.addEventListener('click', async () => {
+        const tabName = tabNameInput.value.trim();
+        if (!tabName) return alert('Введите имя для табулатуры');
+
+        // Получаем текст табулатуры из результата
+        const tabText = Array.from(resultDiv.querySelectorAll('.tab-line'))
+            .map(line => line.textContent)
+            .join('\n');
+
+        try {
+            const resp = await fetch('http://localhost:8080/tab/save', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name: tabName, body: tabText }),
+            });
+
+            if (!resp.ok) {
+            const errData = await resp.json();
+            throw new Error(errData.error || 'Ошибка сохранения');
+            }
+
+            alert('Табулатура успешно сохранена!');
+            saveTabButton.disabled = true;
+            tabNameInput.value = '';
+            saveSection.style.display = 'none';
+        } catch (err) {
+            alert('Ошибка: ' + err.message);
         }
     });
 

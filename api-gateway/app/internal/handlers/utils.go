@@ -4,8 +4,19 @@ import (
 	"fmt"
 	"io"
 
+	"api-gateway/internal/repository"
+
+	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/labstack/echo"
 )
+
+var (
+	tabRepo *repository.TabRepository
+)
+
+func Init(db *pgxpool.Pool) {
+	tabRepo = repository.NewTabRepository(db)
+}
 
 func parseAudioInput(c echo.Context) (string, []byte, error) {
 	fileHeader, err := c.FormFile("audio_file")

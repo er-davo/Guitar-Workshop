@@ -37,7 +37,7 @@ func (r *TabRepository) GetByID(ctx context.Context, id int64) (*models.Tab, err
 	return tab, nil
 }
 
-func (r *TabRepository) FindByName(ctx context.Context, name string) ([]*models.Tab, error) {
+func (r *TabRepository) FindByNameLike(ctx context.Context, name string) ([]*models.Tab, error) {
 	query := `SELECT id, name, tab_path FROM tabs WHERE name ILIKE '%' || $1 || '%'`
 	rows, err := r.db.Query(ctx, query, name)
 	if err != nil {

@@ -186,7 +186,7 @@ document.addEventListener('DOMContentLoaded', () => {
         separationResultDiv.innerHTML = '';
 
         try {
-            const response = await fetch('http://localhost:8080/separate-audio', {
+            const response = await fetch('http://localhost:8080/audio/separate', {
                 method: 'POST',
                 body: formData,
             });

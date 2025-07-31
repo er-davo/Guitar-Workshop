@@ -5,6 +5,7 @@ import (
 
 	"api-gateway/internal/clients"
 	"api-gateway/internal/config"
+	"api-gateway/internal/database"
 	"api-gateway/internal/handlers"
 
 	"github.com/labstack/echo"
@@ -14,6 +15,11 @@ import (
 func main() {
 	clients.InitClients()
 	defer clients.CloseClients()
+
+	cfg := config.Load()
+
+	db := database.Connect(cfg.DatabaseURL)
+	handlers.Init(db)
 
 	e := echo.New()
 
@@ -26,11 +32,14 @@ func main() {
 		return c.File("static/index.html")
 	})
 
-	e.POST("/tab/generate", handlers.TabGenerate)
+	tabGroup := e.Group("/tab")
 
-	e.POST("/tab/save", handlers.SaveTab)
+	tabGroup.POST("/generate", handlers.TabGenerate)
+	tabGroup.POST("/save", handlers.SaveTab)
+	tabGroup.GET("/search", handlers.SearchTabs)
+	tabGroup.GET("/:id", handlers.GetTab)
 
-	e.POST("/separate-audio", handlers.SeparateAudio)
+	e.POST("/audio/separate", handlers.SeparateAudio)
 
-	e.Logger.Fatal(e.Start(fmt.Sprintf(":%s", config.Load().PORT)))
+	e.Logger.Fatal(e.Start(fmt.Sprintf(":%s", cfg.PORT)))
 }

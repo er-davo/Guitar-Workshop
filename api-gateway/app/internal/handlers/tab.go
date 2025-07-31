@@ -1,12 +1,17 @@
 package handlers
 
 import (
+	"bytes"
 	"context"
+	"database/sql"
+	"errors"
 	"fmt"
 	"net/http"
+	"strconv"
 
 	"api-gateway/internal/clients"
 	"api-gateway/internal/logger"
+	"api-gateway/internal/models"
 
 	"github.com/labstack/echo"
 )
@@ -51,6 +56,56 @@ func TabGenerate(c echo.Context) error {
 }
 
 func SaveTab(c echo.Context) error {
+	tab := models.Tab{}
+	err := c.Bind(&tab)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": err.Error()})
+	}
+
+	tab.Path = "generated/" + tab.Name + ".txt"
+
+	tabRepo.Create(c.Request().Context(), &tab)
+
+	clients.Supabase.Storage.UploadFile(
+		"tabs",
+		tab.Path,
+		bytes.NewReader([]byte(tab.Body)),
+	)
 
 	return c.JSON(http.StatusOK, map[string]string{})
+}
+
+func SearchTabs(c echo.Context) error {
+	name := c.QueryParam("name")
+	if name == "" {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "name query param is required"})
+	}
+
+	tabs, err := tabRepo.FindByNameLike(c.Request().Context(), name)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
+	}
+	if len(tabs) == 0 {
+		return c.JSON(http.StatusNotFound, map[string]string{"error": "no tabs found"})
+	}
+
+	return c.JSON(http.StatusOK, tabs)
+}
+
+func GetTab(c echo.Context) error {
+	idParam := c.Param("id")
+	id, err := strconv.ParseInt(idParam, 10, 64)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "invalid id"})
+	}
+
+	tab, err := tabRepo.GetByID(c.Request().Context(), id)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return c.JSON(http.StatusNotFound, map[string]string{"error": "tab not found"})
+		}
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
+	}
+
+	return c.JSON(http.StatusOK, tab)
 }

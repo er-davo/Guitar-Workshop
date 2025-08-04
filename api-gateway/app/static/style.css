@@ -134,6 +134,21 @@ h1 i {
     display: block;
 }
 
+/* --- */
+
+.hidden {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+.error-text {
+  color: #ff4d4f;
+  font-weight: bold;
+}
+
+/* --- */
+
 .file-upload {
     border: 2px dashed #555;
     border-radius: var(--border-radius);
@@ -349,6 +364,55 @@ h1 i {
 #saveTabButton:hover:enabled {
     background-color: #3e8e41;
 }
+
+
+#searchInput {
+    width: 300px;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 16px;
+    margin-top: 20px;
+    margin-bottom: 10px;
+}
+
+#searchResults {
+    list-style: none;
+    padding: 0;
+    margin-top: 10px;
+}
+
+#searchResults li {
+    margin-bottom: 6px;
+}
+
+#searchResults a {
+    text-decoration: none;
+    color: #007bff;
+    font-weight: 500;
+    transition: color 0.2s;
+}
+
+#searchResults a:hover {
+    color: #0056b3;
+}
+
+button {
+    padding: 8px 14px;
+    border: none;
+    border-radius: 6px;
+    background-color: #28a745;
+    color: white;
+    font-size: 15px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    margin-left: 10px;
+}
+
+button:hover {
+    background-color: #218838;
+}
+
 
 
 @keyframes spin {

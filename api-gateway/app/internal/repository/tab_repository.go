@@ -5,32 +5,32 @@ import (
 
 	"api-gateway/internal/models"
 
-	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/jackc/pgx/v5"
 )
 
 type TabRepository struct {
-	db *pgxpool.Pool
+	db *pgx.Conn
 }
 
-func NewTabRepository(db *pgxpool.Pool) *TabRepository {
+func NewTabRepository(db *pgx.Conn) *TabRepository {
 	return &TabRepository{db: db}
 }
 
 func (r *TabRepository) Create(ctx context.Context, tab *models.Tab) error {
 	query := `INSERT INTO tabs (name, file_path) VALUES ($1, $2) RETURNING id`
-	return r.db.QueryRow(ctx, query, tab.Name, tab.Path).Scan(&tab.ID)
+	return r.db.QueryRow(ctx, query, pgx.QueryExecModeSimpleProtocol, tab.Name, tab.Path).Scan(&tab.ID)
 }
 
-func (r *TabRepository) Delete(ctx context.Context, id int64) error {
+func (r *TabRepository) Delete(ctx context.Context, id string) error {
 	query := `DELETE FROM tabs WHERE id = $1`
-	_, err := r.db.Exec(ctx, query, id)
+	_, err := r.db.Exec(ctx, query, pgx.QueryExecModeSimpleProtocol, id)
 	return err
 }
 
-func (r *TabRepository) GetByID(ctx context.Context, id int64) (*models.Tab, error) {
+func (r *TabRepository) GetByID(ctx context.Context, id string) (*models.Tab, error) {
 	tab := new(models.Tab)
 	query := `SELECT id, name, file_path FROM tabs WHERE id = $1`
-	err := r.db.QueryRow(ctx, query, id).Scan(&tab.ID, &tab.Name, &tab.Path)
+	err := r.db.QueryRow(ctx, query, pgx.QueryExecModeSimpleProtocol, id).Scan(&tab.ID, &tab.Name, &tab.Path)
 	if err != nil {
 		return nil, err
 	}
@@ -38,8 +38,8 @@ func (r *TabRepository) GetByID(ctx context.Context, id int64) (*models.Tab, err
 }
 
 func (r *TabRepository) FindByNameLike(ctx context.Context, name string) ([]*models.Tab, error) {
-	query := `SELECT id, name, tab_path FROM tabs WHERE name ILIKE '%' || $1 || '%'`
-	rows, err := r.db.Query(ctx, query, name)
+	query := `SELECT id, name, file_path FROM tabs WHERE name ILIKE '%' || $1 || '%'`
+	rows, err := r.db.Query(ctx, query, pgx.QueryExecModeSimpleProtocol, name)
 	if err != nil {
 		return nil, err
 	}

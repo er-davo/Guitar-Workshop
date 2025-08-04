@@ -21,6 +21,14 @@ const translations = {
         separationResult: "Результирующие дорожки:",
         loading: "Обработка...",
         loadingSeparation: "Разделение аудио...",
+        saveTab: "Сохранить таб",
+        tabNamePlaceholder: "Введите имя для табулатуры",
+        searchPlaceholder: "Введите имя табулатуры",
+        searchButton: "Поиск",
+        errorEmptyYoutube: "Введите YouTube ссылку!",
+        errorInvalidYoutube: "Некорректная YouTube ссылка!",
+        errorNoFile: "Пожалуйста, выберите аудиофайл для разделения.",
+        errorNoStems: "Выберите хотя бы одну дорожку для сохранения."
     },
     en: {
         title: "Guitar Workshop",
@@ -44,5 +52,13 @@ const translations = {
         separationResult: "Resulting Tracks:",
         loading: "Processing...",
         loadingSeparation: "Separating audio...",
+        saveTab: "Save tab",
+        tabNamePlaceholder: "Enter a name for the tab",
+        searchPlaceholder: "Enter tab name",
+        searchButton: "Search",
+        errorEmptyYoutube: "Please enter a YouTube URL!",
+        errorInvalidYoutube: "Invalid YouTube URL!",
+        errorNoFile: "Please select an audio file for separation.",
+        errorNoStems: "Select at least one stem to keep."
     }
 };

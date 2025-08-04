@@ -79,13 +79,19 @@
                     </button>
 
 
-                    
+                    <!-- Сохранение таба -->
                     <div id="saveSection" style="margin-top: 15px; display:none;">
-                        <input type="text" id="tabNameInput" placeholder="Введите имя для табулатуры" style="padding:8px; width:70%;" />
-                        <button id="saveTabButton" disabled>Сохранить таб</button>
+                        <input type="text" id="tabNameInput" data-i18n-placeholder="tabNamePlaceholder" />
+                        <button id="saveTabButton" data-i18n="saveTab"></button>
                     </div>
 
                 </div>
+
+                <!-- Поиск табов -->
+                <input type="text" id="searchInput" data-i18n-placeholder="searchPlaceholder" />
+                <button onclick="searchTabs()" data-i18n="searchButton"></button>
+                <ul id="searchResults"></ul>
+
             </div>
 
             <!-- Вкладка: Разделение аудио -->

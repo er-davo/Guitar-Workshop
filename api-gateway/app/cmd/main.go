@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 
 	"api-gateway/internal/clients"
@@ -18,8 +19,9 @@ func main() {
 
 	cfg := config.Load()
 
-	db := database.Connect(cfg.DatabaseURL)
-	handlers.Init(db)
+	dbConn := database.Connect(cfg.DatabaseURL)
+	defer dbConn.Close(context.Background())
+	handlers.Init(dbConn)
 
 	e := echo.New()
 
@@ -38,6 +40,7 @@ func main() {
 	tabGroup.POST("/save", handlers.SaveTab)
 	tabGroup.GET("/search", handlers.SearchTabs)
 	tabGroup.GET("/:id", handlers.GetTab)
+	tabGroup.GET("/view/:id", handlers.ViewTabPage)
 
 	e.POST("/audio/separate", handlers.SeparateAudio)
 

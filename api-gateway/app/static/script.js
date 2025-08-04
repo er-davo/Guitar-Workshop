@@ -172,33 +172,42 @@ document.addEventListener('DOMContentLoaded', () => {
 
     saveTabButton.addEventListener('click', async () => {
         const tabName = tabNameInput.value.trim();
-        if (!tabName) return alert('Введите имя для табулатуры');
+        if (!tabName) {
+            alert(currentLang === 'ru' ? 'Введите имя для табулатуры' : 'Enter a name for the tab');
+            return;
+        }
 
-        // Получаем текст табулатуры из результата
         const tabText = Array.from(resultDiv.querySelectorAll('.tab-line'))
             .map(line => line.textContent)
             .join('\n');
 
         try {
-            const resp = await fetch('http://localhost:8080/tab/save', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ name: tabName, body: tabText }),
+            const resp = await fetch('/tab/save', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name: tabName, body: tabText }),
             });
 
             if (!resp.ok) {
-            const errData = await resp.json();
-            throw new Error(errData.error || 'Ошибка сохранения');
+                const errData = await resp.json();
+                throw new Error(errData.error || (currentLang === 'ru' ? 'Ошибка сохранения' : 'Save error'));
             }
 
-            alert('Табулатура успешно сохранена!');
+            const data = await resp.json();
+            const viewUrl = `/tab/${data.id}`;
+            alert(currentLang === 'ru'
+                ? `Табулатура успешно сохранена!\nПосмотреть: ${viewUrl}`
+                : `Tab saved successfully!\nView: ${viewUrl}`
+            );
+
             saveTabButton.disabled = true;
             tabNameInput.value = '';
             saveSection.style.display = 'none';
         } catch (err) {
-            alert('Ошибка: ' + err.message);
+            alert((currentLang === 'ru' ? 'Ошибка: ' : 'Error: ') + err.message);
         }
     });
+
 
     separationForm.addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -340,6 +349,14 @@ function setLanguage(lang) {
         }
     });
 
+    document.querySelectorAll("[data-i18n-placeholder]").forEach(el => {
+        const key = el.getAttribute("data-i18n-placeholder");
+        if (dict[key]) {
+            el.placeholder = dict[key];
+        }
+    });
+
+
     const ytInput = document.getElementById("youtubeUrl");
     if (ytInput) ytInput.placeholder = dict.youtubePlaceholder;
 
@@ -349,3 +366,31 @@ function setLanguage(lang) {
     const separationLoadingText = document.querySelector("#separationLoading .loading-text");
     if (separationLoadingText) separationLoadingText.textContent = dict.loadingSeparation;
 }
+
+async function searchTabs() {
+    const name = document.getElementById('searchInput').value;
+    if (!name) return;
+
+    const response = await fetch(`/tab/search?name=${encodeURIComponent(name)}`);
+    const results = await response.json();
+
+    const resultsList = document.getElementById('searchResults');
+    resultsList.innerHTML = '';
+
+    results.forEach(tab => {
+        const li = document.createElement('li');
+        const link = document.createElement('a');
+        link.href = `/tab/view/${tab.id}`;
+        link.innerText = tab.name;
+        link.target = '_blank';
+
+        li.appendChild(link);
+        resultsList.appendChild(li);
+    });
+}
+
+document.getElementById('searchInput').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+        searchTabs();
+    }
+});

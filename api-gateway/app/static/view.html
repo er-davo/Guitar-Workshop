@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Табулатура</title>
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+  <header>
+    <h1 id="tabName" class="page-title">Загрузка...</h1>
+  </header>
+
+  <main class="container">
+    <div class="card result-card">
+      <div class="result-container">
+        <div id="tabResult" class="tablature"></div>
+
+        <div id="loading" class="loading">
+          <div class="spinner"></div>
+          <div class="loading-text" data-i18n="loading">Обработка...</div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script src="/static/view.js"></script>
+</body>
+</html>

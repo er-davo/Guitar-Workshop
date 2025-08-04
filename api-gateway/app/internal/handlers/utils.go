@@ -6,7 +6,7 @@ import (
 
 	"api-gateway/internal/repository"
 
-	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/jackc/pgx/v5"
 	"github.com/labstack/echo"
 )
 
@@ -14,7 +14,7 @@ var (
 	tabRepo *repository.TabRepository
 )
 
-func Init(db *pgxpool.Pool) {
+func Init(db *pgx.Conn) {
 	tabRepo = repository.NewTabRepository(db)
 }
 

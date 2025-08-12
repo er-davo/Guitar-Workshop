@@ -1,20 +1,30 @@
 package handlers
 
 import (
-	"api-gateway/internal/clients"
+	"api-gateway/internal/service"
 	"encoding/base64"
 	"net/http"
 
 	"github.com/labstack/echo"
 )
 
-func SeparateAudio(c echo.Context) error {
+type AudioHandler struct {
+	service *service.AudioService
+}
+
+func NewAudioHandler(service *service.AudioService) *AudioHandler {
+	return &AudioHandler{
+		service: service,
+	}
+}
+
+func (h *AudioHandler) SeparateAudio(c echo.Context) error {
 	audioFileName, audioFileData, err := parseAudioInput(c)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": err.Error()})
 	}
 
-	stems, err := clients.SeparateAudio(c.Request().Context(), audioFileName, audioFileData)
+	stems, err := h.service.SeparateAudio(c.Request().Context(), audioFileName, audioFileData)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "разделение не удалось: " + err.Error()})
 	}

@@ -9,19 +9,44 @@ import (
 
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 )
 
 type AudioSeparator interface {
-	SeparateAudio(ctx context.Context, in *separator.SeparateRequest, opts ...grpc.CallOption) (*separator.SeparateResponse, error)
+	SeparateAudio(ctx context.Context, fileName string, audioData []byte) (map[string]*separator.AudioFileData, error)
+	Close() error
 }
 
-func SeparateAudio(ctx context.Context, fileName string, audioData []byte) (map[string]*separator.AudioFileData, error) {
+type audioSeaparator struct {
+	conn   *grpc.ClientConn
+	client separator.AudioSeparatorClient
+}
+
+func NewAudioSeparator(target string) (AudioSeparator, error) {
+	conn, err := grpc.NewClient(
+		target,
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+		grpc.WithDefaultCallOptions(
+			grpc.MaxCallRecvMsgSize(250<<20), // 250 MB
+			grpc.MaxCallSendMsgSize(250<<20),
+		),
+	)
+	if err != nil {
+		return nil, err
+	}
+	return &audioSeaparator{
+		conn:   conn,
+		client: separator.NewAudioSeparatorClient(conn),
+	}, nil
+}
+
+func (as audioSeaparator) SeparateAudio(ctx context.Context, fileName string, audioData []byte) (map[string]*separator.AudioFileData, error) {
 	fileData := &separator.AudioFileData{
 		FileName:   fileName,
 		AudioBytes: audioData,
 	}
 
-	resp, err := AudioSeparatorClient.SeparateAudio(ctx, &separator.SeparateRequest{
+	resp, err := as.client.SeparateAudio(ctx, &separator.SeparateRequest{
 		AudioData: fileData,
 	})
 	if err != nil {
@@ -34,4 +59,8 @@ func SeparateAudio(ctx context.Context, fileName string, audioData []byte) (map[
 	}
 
 	return resp.Stems, nil
+}
+
+func (as *audioSeaparator) Close() error {
+	return as.conn.Close()
 }

@@ -13,14 +13,14 @@ import (
 )
 
 type TabService struct {
-	repo           *repository.TabRepository
+	repo           repository.TabRepository
 	supabaseClient *supabase.Client
 	tabClient      clients.TabGenerator
 	audioClient    clients.AudioSeparator
 }
 
 func NewTabService(
-	repo *repository.TabRepository,
+	repo repository.TabRepository,
 	supabaseClient *supabase.Client,
 	tabClient clients.TabGenerator,
 	audioClient clients.AudioSeparator,

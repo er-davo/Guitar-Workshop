@@ -8,26 +8,33 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-type TabRepository struct {
+type TabRepository interface {
+	Create(ctx context.Context, tab *models.Tab) error
+	Delete(ctx context.Context, id string) error
+	GetByID(ctx context.Context, id string) (*models.Tab, error)
+	FindByNameLike(ctx context.Context, name string) ([]*models.Tab, error)
+}
+
+type tabRepository struct {
 	db *pgx.Conn
 }
 
-func NewTabRepository(db *pgx.Conn) *TabRepository {
-	return &TabRepository{db: db}
+func NewTabRepository(db *pgx.Conn) *tabRepository {
+	return &tabRepository{db: db}
 }
 
-func (r *TabRepository) Create(ctx context.Context, tab *models.Tab) error {
+func (r *tabRepository) Create(ctx context.Context, tab *models.Tab) error {
 	query := `INSERT INTO tabs (name, file_path) VALUES ($1, $2) RETURNING id`
 	return r.db.QueryRow(ctx, query, pgx.QueryExecModeSimpleProtocol, tab.Name, tab.Path).Scan(&tab.ID)
 }
 
-func (r *TabRepository) Delete(ctx context.Context, id string) error {
+func (r *tabRepository) Delete(ctx context.Context, id string) error {
 	query := `DELETE FROM tabs WHERE id = $1`
 	_, err := r.db.Exec(ctx, query, pgx.QueryExecModeSimpleProtocol, id)
 	return err
 }
 
-func (r *TabRepository) GetByID(ctx context.Context, id string) (*models.Tab, error) {
+func (r *tabRepository) GetByID(ctx context.Context, id string) (*models.Tab, error) {
 	tab := new(models.Tab)
 	query := `SELECT id, name, file_path FROM tabs WHERE id = $1`
 	err := r.db.QueryRow(ctx, query, pgx.QueryExecModeSimpleProtocol, id).Scan(&tab.ID, &tab.Name, &tab.Path)
@@ -37,7 +44,7 @@ func (r *TabRepository) GetByID(ctx context.Context, id string) (*models.Tab, er
 	return tab, nil
 }
 
-func (r *TabRepository) FindByNameLike(ctx context.Context, name string) ([]*models.Tab, error) {
+func (r *tabRepository) FindByNameLike(ctx context.Context, name string) ([]*models.Tab, error) {
 	query := `SELECT id, name, file_path FROM tabs WHERE name ILIKE '%' || $1 || '%'`
 	rows, err := r.db.Query(ctx, query, pgx.QueryExecModeSimpleProtocol, name)
 	if err != nil {

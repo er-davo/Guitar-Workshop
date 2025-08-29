@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 
-	"api-gateway/internal/logger"
 	"api-gateway/internal/proto/separator"
 
 	"go.uber.org/zap"
@@ -20,9 +19,11 @@ type AudioSeparator interface {
 type audioSeaparator struct {
 	conn   *grpc.ClientConn
 	client separator.AudioSeparatorClient
+
+	log *zap.Logger
 }
 
-func NewAudioSeparator(target string) (AudioSeparator, error) {
+func NewAudioSeparator(target string, log *zap.Logger) (AudioSeparator, error) {
 	conn, err := grpc.NewClient(
 		target,
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
@@ -37,6 +38,7 @@ func NewAudioSeparator(target string) (AudioSeparator, error) {
 	return &audioSeaparator{
 		conn:   conn,
 		client: separator.NewAudioSeparatorClient(conn),
+		log:    log,
 	}, nil
 }
 
@@ -50,7 +52,7 @@ func (as audioSeaparator) SeparateAudio(ctx context.Context, fileName string, au
 		AudioData: fileData,
 	})
 	if err != nil {
-		logger.Log.Error("failed to separate audio", zap.Error(err))
+		as.log.Error("failed to separate audio", zap.Error(err))
 		return nil, err
 	}
 

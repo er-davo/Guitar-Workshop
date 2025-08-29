@@ -1,9 +1,11 @@
 package clients
 
 import (
-	"api-gateway/internal/proto/tab"
 	"context"
 
+	"api-gateway/internal/proto/tab"
+
+	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )
@@ -16,9 +18,11 @@ type TabGenerator interface {
 type tabGenerator struct {
 	conn   *grpc.ClientConn
 	client tab.TabGenerateClient
+
+	log *zap.Logger
 }
 
-func NewTabGenerator(target string) (TabGenerator, error) {
+func NewTabGenerator(target string, log *zap.Logger) (TabGenerator, error) {
 	conn, err := grpc.NewClient(
 		target,
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
@@ -33,6 +37,7 @@ func NewTabGenerator(target string) (TabGenerator, error) {
 	return &tabGenerator{
 		conn:   conn,
 		client: tab.NewTabGenerateClient(conn),
+		log:    log,
 	}, nil
 }
 

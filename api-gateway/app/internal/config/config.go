@@ -2,50 +2,51 @@ package config
 
 import (
 	"os"
-	"sync"
+	"time"
+
+	"gopkg.in/yaml.v3"
 )
 
 type Config struct {
-	PORT string
-
-	SupabaseURL string
-	SupabaseKey string
+	App App `yaml:"app"`
 
 	DatabaseURL string
 
-	TabgenPort string
-	TabgenHost string
+	Tabgen   GrpcClient `yaml:"tabgen"`
+	AudioSep GrpcClient `yaml:"audiosep"`
 
-	AudioProcPort string
-	AudioProcHost string
-
-	AudioSeparatorPort string
-	AudioSeparatorHost string
+	Supabase Supabase
 }
 
-var (
-	config Config
-	once   sync.Once
-)
+type App struct {
+	Port            string        `yaml:"port"`
+	ShutdownTimeout time.Duration `yaml:"shutdown_timeout"`
+}
 
-func Load() *Config {
-	once.Do(func() {
-		config.PORT = os.Getenv("PORT")
+type GrpcClient struct {
+	Port string `yaml:"port"`
+	Host string `yaml:"host"`
+}
 
-		config.SupabaseURL = os.Getenv("SUPABASE_URL")
-		config.SupabaseKey = os.Getenv("ACCESS_KEY")
+type Supabase struct {
+	URL string `yaml:"url"`
+	Key string `yaml:"key"`
+}
 
-		config.DatabaseURL = os.Getenv("DATABASE_URL")
+func Load(yamlConfigFilePath string) (*Config, error) {
+	cfg := &Config{}
+	data, err := os.ReadFile(yamlConfigFilePath)
+	if err != nil {
+		return nil, err
+	}
 
-		config.TabgenPort = os.Getenv("TABGEN_PORT")
-		config.TabgenHost = os.Getenv("TABGEN_HOST")
+	if err := yaml.Unmarshal(data, cfg); err != nil {
+		return nil, err
+	}
+	cfg.Supabase.URL = os.Getenv("SUPABASE_URL")
+	cfg.Supabase.Key = os.Getenv("ACCESS_KEY")
 
-		config.AudioProcPort = os.Getenv("AUDIO_PROC_PORT")
-		config.AudioProcHost = os.Getenv("AUDIO_PROC_HOST")
+	cfg.DatabaseURL = os.Getenv("DATABASE_URL")
 
-		config.AudioSeparatorPort = os.Getenv("AUDIO_SEPARATOR_PORT")
-		config.AudioSeparatorHost = os.Getenv("AUDIO_SEPARATOR_HOST")
-	})
-
-	return &config
+	return cfg, nil
 }

@@ -1,0 +1,9 @@
+app:
+  port: 8080
+  shutdown_timeout: 10s
+tabgen:
+  port: 50052
+  host: tab-generator
+audiosep:
+  port: 50054
+  host: audio-separator

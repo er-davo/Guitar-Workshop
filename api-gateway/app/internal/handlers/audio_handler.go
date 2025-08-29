@@ -6,15 +6,18 @@ import (
 	"net/http"
 
 	"github.com/labstack/echo"
+	"go.uber.org/zap"
 )
 
 type AudioHandler struct {
 	service *service.AudioService
+	log     *zap.Logger
 }
 
-func NewAudioHandler(service *service.AudioService) *AudioHandler {
+func NewAudioHandler(service *service.AudioService, log *zap.Logger) *AudioHandler {
 	return &AudioHandler{
 		service: service,
+		log:     log,
 	}
 }
 
@@ -38,4 +41,9 @@ func (h *AudioHandler) SeparateAudio(c echo.Context) error {
 	return c.JSON(http.StatusOK, map[string]interface{}{
 		"stems": resp,
 	})
+}
+
+func (h *AudioHandler) RegisterRoutes(e *echo.Echo) {
+	audioGroup := e.Group("/audio")
+	audioGroup.POST("/separate", h.SeparateAudio)
 }

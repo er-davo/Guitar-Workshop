@@ -6,7 +6,6 @@ import (
 	"api-gateway/internal/repository"
 	"bytes"
 	"context"
-	"database/sql"
 	"errors"
 
 	"github.com/supabase-community/supabase-go"
@@ -33,7 +32,12 @@ func NewTabService(
 	}
 }
 
-func (s *TabService) GenerateTab(ctx context.Context, audioFileName string, audioFileData []byte, separation bool) (*models.Tab, error) {
+func (s *TabService) GenerateTab(
+	ctx context.Context,
+	audioFileName string,
+	audioFileData []byte,
+	separation bool,
+) (*models.Tab, error) {
 	if separation {
 		separatedFiles, err := s.audioClient.SeparateAudio(ctx, audioFileName, audioFileData)
 		if err != nil {
@@ -62,11 +66,7 @@ func (s *TabService) GenerateTab(ctx context.Context, audioFileName string, audi
 func (s *TabService) CreateTab(ctx context.Context, tab *models.Tab) error {
 	err := s.repo.Create(ctx, tab)
 	if err != nil {
-		if err.Error() == "The resource already exists" {
-			return errors.New("tab with that name already exists")
-		} else {
-			return err
-		}
+		return err
 	}
 	_, err = s.supabaseClient.Storage.UploadFile(
 		"tabs",
@@ -83,11 +83,7 @@ func (s *TabService) DeleteTab(ctx context.Context, id string) error {
 func (s *TabService) GetTabByID(ctx context.Context, id string) (*models.Tab, error) {
 	tab, err := s.repo.GetByID(ctx, id)
 	if err != nil {
-		if err == sql.ErrNoRows {
-			return nil, errors.New("tab not found")
-		} else {
-			return nil, err
-		}
+		return nil, err
 	}
 	buf, err := s.supabaseClient.Storage.DownloadFile("tabs", tab.Path)
 	if err != nil {

@@ -6,6 +6,7 @@ import (
 	"api-gateway/internal/models"
 
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 type TabRepository interface {
@@ -16,30 +17,49 @@ type TabRepository interface {
 }
 
 type tabRepository struct {
-	db *pgx.Conn
+	db *pgxpool.Pool
 }
 
-func NewTabRepository(db *pgx.Conn) *tabRepository {
+func NewTabRepository(db *pgxpool.Pool) *tabRepository {
 	return &tabRepository{db: db}
 }
 
 func (r *tabRepository) Create(ctx context.Context, tab *models.Tab) error {
+	if tab == nil {
+		return ErrNilValue
+	}
 	query := `INSERT INTO tabs (name, file_path) VALUES ($1, $2) RETURNING id`
-	return r.db.QueryRow(ctx, query, pgx.QueryExecModeSimpleProtocol, tab.Name, tab.Path).Scan(&tab.ID)
+	err := r.db.QueryRow(
+		ctx,
+		query,
+		pgx.QueryExecModeSimpleProtocol,
+		tab.Name,
+		tab.Path,
+	).Scan(&tab.ID)
+	return wrapDBError(err)
 }
 
 func (r *tabRepository) Delete(ctx context.Context, id string) error {
+	if id == "" {
+		return ErrInvalidID
+	}
 	query := `DELETE FROM tabs WHERE id = $1`
-	_, err := r.db.Exec(ctx, query, pgx.QueryExecModeSimpleProtocol, id)
-	return err
+	cmd, err := r.db.Exec(ctx, query, pgx.QueryExecModeSimpleProtocol, id)
+	if cmd.RowsAffected() == 0 {
+		return ErrNoRowsAffected
+	}
+	return wrapDBError(err)
 }
 
 func (r *tabRepository) GetByID(ctx context.Context, id string) (*models.Tab, error) {
+	if id == "" {
+		return nil, ErrInvalidID
+	}
 	tab := new(models.Tab)
 	query := `SELECT id, name, file_path FROM tabs WHERE id = $1`
 	err := r.db.QueryRow(ctx, query, pgx.QueryExecModeSimpleProtocol, id).Scan(&tab.ID, &tab.Name, &tab.Path)
 	if err != nil {
-		return nil, err
+		return nil, wrapDBError(err)
 	}
 	return tab, nil
 }
@@ -48,7 +68,7 @@ func (r *tabRepository) FindByNameLike(ctx context.Context, name string) ([]*mod
 	query := `SELECT id, name, file_path FROM tabs WHERE name ILIKE '%' || $1 || '%'`
 	rows, err := r.db.Query(ctx, query, pgx.QueryExecModeSimpleProtocol, name)
 	if err != nil {
-		return nil, err
+		return nil, wrapDBError(err)
 	}
 	defer rows.Close()
 
@@ -56,13 +76,13 @@ func (r *tabRepository) FindByNameLike(ctx context.Context, name string) ([]*mod
 	for rows.Next() {
 		tab := new(models.Tab)
 		if err := rows.Scan(&tab.ID, &tab.Name, &tab.Path); err != nil {
-			return nil, err
+			return nil, wrapDBError(err)
 		}
 		tabs = append(tabs, tab)
 	}
 
 	if err := rows.Err(); err != nil {
-		return nil, err
+		return nil, wrapDBError(err)
 	}
 
 	return tabs, nil

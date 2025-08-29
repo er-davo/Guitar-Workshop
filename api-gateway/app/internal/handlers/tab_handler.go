@@ -6,7 +6,6 @@ import (
 	"regexp"
 	"strings"
 
-	"api-gateway/internal/logger"
 	"api-gateway/internal/models"
 	"api-gateway/internal/service"
 
@@ -16,11 +15,13 @@ import (
 
 type TabHandler struct {
 	service *service.TabService
+	log     *zap.Logger
 }
 
-func NewTabHandler(service *service.TabService) *TabHandler {
+func NewTabHandler(service *service.TabService, log *zap.Logger) *TabHandler {
 	return &TabHandler{
 		service: service,
+		log:     log,
 	}
 }
 
@@ -34,11 +35,11 @@ func (h *TabHandler) TabGenerate(c echo.Context) error {
 
 	tab, err := h.service.GenerateTab(c.Request().Context(), audioFileName, audioFileData, separation)
 	if err != nil {
-		logger.Log.Error("error on generating tab", zap.Error(err))
+		h.log.Error("error on generating tab", zap.Error(err))
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": err.Error()})
 	}
 
-	logger.Log.Info("tab successfully generated")
+	h.log.Info("tab successfully generated")
 	return c.JSON(http.StatusOK, map[string]string{"tab": tab.Body})
 }
 
@@ -46,15 +47,15 @@ func (h *TabHandler) CreateTab(c echo.Context) error {
 	tab := models.Tab{}
 	err := c.Bind(&tab)
 	if err != nil {
-		logger.Log.Warn("invalid tab payload", zap.Error(err))
+		h.log.Warn("invalid tab payload", zap.Error(err))
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": err.Error()})
 	}
 	if strings.TrimSpace(tab.Name) == "" {
-		logger.Log.Warn("tab name is empty")
+		h.log.Warn("tab name is empty")
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Tab name cannot be empty"})
 	}
 	if strings.TrimSpace(tab.Body) == "" {
-		logger.Log.Warn("tab body is empty")
+		h.log.Warn("tab body is empty")
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Tab body cannot be empty"})
 	}
 
@@ -64,11 +65,11 @@ func (h *TabHandler) CreateTab(c echo.Context) error {
 
 	err = h.service.CreateTab(c.Request().Context(), &tab)
 	if err != nil {
-		logger.Log.Error("failed to upload tab to storage", zap.String("path", tab.Path), zap.Error(err))
+		h.log.Error("failed to upload tab to storage", zap.String("path", tab.Path), zap.Error(err))
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "error on uploading tab to storage"})
 	}
 
-	logger.Log.Info("tab saved successfully", zap.String("id", tab.ID), zap.String("name", tab.Name))
+	h.log.Info("tab saved successfully", zap.String("id", tab.ID), zap.String("name", tab.Name))
 
 	return c.JSON(http.StatusOK, map[string]string{"message": "tab saved", "id": tab.ID})
 }
@@ -101,13 +102,13 @@ func (h *TabHandler) DeleteTab(c echo.Context) error {
 func (h *TabHandler) SearchTabs(c echo.Context) error {
 	name := c.QueryParam("name")
 	if name == "" {
-		logger.Log.Info("missing name query param")
+		h.log.Info("missing name query param")
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "name query param is required"})
 	}
 
 	tabs, err := h.service.FindTabsByNameLike(c.Request().Context(), name)
 	if err != nil {
-		logger.Log.Error("error on searching tabs", zap.Error(err))
+		h.log.Error("error on searching tabs", zap.Error(err))
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
 	}
 	if len(tabs) == 0 {
@@ -119,4 +120,15 @@ func (h *TabHandler) SearchTabs(c echo.Context) error {
 
 func (h *TabHandler) ViewTabPage(c echo.Context) error {
 	return c.File("static/view.html")
+}
+
+func (h *TabHandler) RegisterRoutes(e *echo.Echo) {
+	tabGroup := e.Group("/tab")
+
+	tabGroup.POST("/generate", h.TabGenerate)
+	tabGroup.GET("/search", h.SearchTabs)
+	tabGroup.POST("/", h.CreateTab)
+	tabGroup.DELETE("/:id", h.DeleteTab)
+	tabGroup.GET("/:id", h.GetTab)
+	tabGroup.GET("/view/:id", h.ViewTabPage)
 }

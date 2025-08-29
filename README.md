@@ -40,9 +40,10 @@ The project is built with a microservice architecture. Components communicate vi
 |-----------------------|--------|------------------------------------------|
 | `/`                   | GET    | Static web interface                     |
 | `/tab/generate`       | POST   | Generate tab from uploaded audio         |
-| `/tab/save`           | POST   | Save tab to database                     |
-| `/tab/search`         | GET    | Search tabs by name                      |
+| `/tab`                | POST   | Save tab to database                     |
+| `/tab/:id`            | DELETE | Delete tab from database                 |
 | `/tab/:id`            | GET    | Get tab data by ID (JSON)                |
+| `/tab/search`         | GET    | Search tabs by name                      |
 | `/tab/view/:id`       | GET    | Render tab as HTML                       |
 | `/audio/separate`     | POST   | Isolate guitar from mix (optional)       |
 

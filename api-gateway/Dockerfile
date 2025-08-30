@@ -18,5 +18,8 @@ WORKDIR /app
 
 COPY --from=builder /api-gateway/main /app/main
 COPY --from=builder /api-gateway/static /app/static
+COPY app/config /app/config
+
+ENV CONFIG_PATH=/app/config
 
 CMD [ "/app/main" ]

@@ -1,3 +1,4 @@
+//go:generate mockgen -source=note_analyzer.go -destination=../mocks/mock_note_analyzer.go -package=mocks
 package clients
 
 import (

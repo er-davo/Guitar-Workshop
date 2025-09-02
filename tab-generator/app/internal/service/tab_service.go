@@ -5,7 +5,6 @@ import (
 	"fmt"
 
 	"tabgen/internal/clients"
-	"tabgen/internal/logger"
 	"tabgen/internal/music"
 	note_analyzer "tabgen/internal/proto/note-analyzer"
 	"tabgen/internal/proto/tab"
@@ -14,18 +13,26 @@ import (
 )
 
 type TabService struct {
-	tab.UnimplementedTabGenerateServer
+	analyzer clients.NoteAnalyzer
+	log      *zap.Logger
+}
+
+func NewTabService(analyzer clients.NoteAnalyzer, log *zap.Logger) *TabService {
+	return &TabService{
+		analyzer: analyzer,
+		log:      log,
+	}
 }
 
 func (s *TabService) GenerateTab(ctx context.Context, req *tab.TabRequest) (*tab.TabResponse, error) {
-	AudioReq := note_analyzer.AudioRequest{
+	AudioReq := &note_analyzer.AudioRequest{
 		AudioData: &note_analyzer.AudioFileData{
 			FileName:   req.Audio.FileName,
 			AudioBytes: req.Audio.AudioBytes,
 		},
 	}
-	logger.Debug("analyzing for audio", zap.Int("size", len(AudioReq.AudioData.AudioBytes)))
-	notes, err := clients.NoteAnalyzerClient.Analyze(context.Background(), &AudioReq)
+	s.log.Debug("analyzing for audio", zap.Int("size", len(AudioReq.AudioData.AudioBytes)))
+	notes, err := s.analyzer.Analyze(ctx, AudioReq)
 	if err != nil {
 		return nil, err
 	}
@@ -51,8 +58,6 @@ func (s *TabService) GenerateTab(ctx context.Context, req *tab.TabRequest) (*tab
 	for _, note := range processedSeq.Notes {
 		noti += fmt.Sprintf("%+v\n", note)
 	}
-
-	// logger.Debug(noti)
 
 	tabs, err := music.GenerateTab(*processedSeq)
 	if err != nil {

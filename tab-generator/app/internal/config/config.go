@@ -2,26 +2,36 @@ package config
 
 import (
 	"os"
-	"sync"
+	"time"
+
+	"github.com/stretchr/testify/assert/yaml"
 )
 
 type Config struct {
-	PORT         string
-	AnalyzerPort string
-	AnalyzerHost string
+	App      App        `yaml:"app"`
+	Analyzer GrpcClient `yaml:"analyzer"`
 }
 
-var (
-	config Config
-	once   sync.Once
-)
+type App struct {
+	Port            string        `yaml:"port"`
+	ShutdownTimeout time.Duration `yaml:"shutdown_timeout"`
+}
 
-func Load() *Config {
-	once.Do(func() {
-		config.PORT = os.Getenv("PORT")
-		config.AnalyzerPort = os.Getenv("ANALYZER_PORT")
-		config.AnalyzerHost = os.Getenv("ANALYZER_HOST")
-	})
+type GrpcClient struct {
+	Port string `yaml:"port"`
+	Host string `yaml:"host"`
+}
 
-	return &config
+func Load(yamlConfigFilePath string) (*Config, error) {
+	cfg := &Config{}
+	data, err := os.ReadFile(yamlConfigFilePath)
+	if err != nil {
+		return nil, err
+	}
+
+	if err := yaml.Unmarshal(data, cfg); err != nil {
+		return nil, err
+	}
+
+	return cfg, nil
 }

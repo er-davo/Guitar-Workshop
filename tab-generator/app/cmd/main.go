@@ -1,36 +1,41 @@
 package main
 
 import (
-	"fmt"
-	"net"
-
-	"tabgen/internal/clients"
+	"context"
+	"os"
+	"os/signal"
+	"syscall"
+	"tabgen/internal/app"
 	"tabgen/internal/config"
 	"tabgen/internal/logger"
-	"tabgen/internal/proto/tab"
-	"tabgen/internal/service"
 
 	"go.uber.org/zap"
-	"google.golang.org/grpc"
 )
 
 func main() {
-	defer clients.CloseClients()
-	defer logger.Log.Sync()
+	log := logger.NewLogger()
 
-	lis, err := net.Listen("tcp", fmt.Sprintf(":%s", config.Load().PORT))
-	if err != nil {
-		logger.Log.Fatal("Failed to listen", zap.Error(err))
+	configPath := os.Getenv("CONFIG_PATH")
+	if configPath == "" {
+		log.Fatal("CONFIG_PATH environment variable not set")
 	}
 
-	s := grpc.NewServer(
-		grpc.MaxRecvMsgSize(100*1024*1024), // 100 MB
-		grpc.MaxSendMsgSize(100*1024*1024), // 100 MB
-	)
-	tab.RegisterTabGenerateServer(s, &service.TabService{})
+	cfg, err := config.Load(configPath)
+	if err != nil {
+		log.Fatal("error on loading config", zap.Error(err))
+	}
 
-	logger.Log.Info("gRPC server running on " + fmt.Sprintf(":%s", config.Load().PORT))
-	if err := s.Serve(lis); err != nil {
-		logger.Log.Fatal("Failed to serve", zap.Error(err))
+	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGTERM, syscall.SIGINT)
+	defer stop()
+
+	application, err := app.New(ctx, cfg, log)
+	if err != nil {
+		log.Fatal("error on creating app", zap.Error(err))
+	}
+
+	log.Info("statring tab generator service", zap.String("port", cfg.App.Port))
+
+	if err := application.Run(ctx); err != nil {
+		log.Error("server exited with error", zap.Error(err))
 	}
 }

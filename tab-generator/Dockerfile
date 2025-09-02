@@ -17,5 +17,8 @@ FROM alpine AS runner
 WORKDIR /app
 
 COPY --from=builder /tab-generator/main /app/main
+COPY app/config /app/config
+
+ENV CONFIG_PATH=/app/config
 
 CMD [ "/app/main" ]

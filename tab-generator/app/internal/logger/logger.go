@@ -1,42 +1,27 @@
 package logger
 
 import (
-	"sync"
+	"os"
 
 	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 )
 
-var (
-	Log  *zap.Logger
-	once sync.Once
-)
+func NewLogger() *zap.Logger {
+	var cfg zapcore.EncoderConfig
+	var encoder zapcore.Encoder
 
-func init() {
-	once.Do(func() {
-		Log, _ = zap.NewDevelopment()
-	})
-}
+	cfg = zap.NewDevelopmentEncoderConfig()
+	cfg.EncodeTime = zapcore.TimeEncoderOfLayout("15:04:05")
 
-func Info(msg string, fields ...zap.Field) {
-	Log.Info(msg, fields...)
-}
+	cfg.EncodeLevel = zapcore.CapitalColorLevelEncoder
+	encoder = zapcore.NewConsoleEncoder(cfg)
 
-func Debug(msg string, fields ...zap.Field) {
-	Log.Debug(msg, fields...)
-}
+	core := zapcore.NewCore(
+		encoder,
+		zapcore.AddSync(os.Stdout),
+		zapcore.DebugLevel,
+	)
 
-func Warn(msg string, fields ...zap.Field) {
-	Log.Warn(msg, fields...)
-}
-
-func Error(msg string, fields ...zap.Field) {
-	Log.Error(msg, fields...)
-}
-
-func Fatal(msg string, fields ...zap.Field) {
-	Log.Fatal(msg, fields...)
-}
-
-func Panic(msg string, fields ...zap.Field) {
-	Log.Panic(msg, fields...)
+	return zap.New(core, zap.AddCaller(), zap.AddStacktrace(zapcore.ErrorLevel))
 }

@@ -1,0 +1,6 @@
+app:
+  port: 50052
+  shutdown_timeout: 10s
+analyzer:
+  port: 50051
+  host: analyzer

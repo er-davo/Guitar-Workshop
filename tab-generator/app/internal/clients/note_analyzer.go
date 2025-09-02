@@ -2,8 +2,7 @@ package clients
 
 import (
 	"context"
-	"tabgen/internal/config"
-	"tabgen/internal/logger"
+
 	note_analyzer "tabgen/internal/proto/note-analyzer"
 
 	"go.uber.org/zap"
@@ -11,16 +10,21 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 )
 
-var (
-	NoteAnalyzerClient NoteAnalyzer
-	NoteAnalyzerConn   *grpc.ClientConn
-)
+type NoteAnalyzer interface {
+	Analyze(ctx context.Context, in *note_analyzer.AudioRequest, opts ...grpc.CallOption) (*note_analyzer.NoteResponse, error)
+	Close() error
+}
 
-func init() {
-	var err error
+type noteAnalyzer struct {
+	conn   *grpc.ClientConn
+	client note_analyzer.NoteAnalyzerClient
 
-	NoteAnalyzerConn, err = grpc.NewClient(
-		config.Load().AnalyzerHost+":"+config.Load().AnalyzerPort,
+	log *zap.Logger
+}
+
+func NewNoteAnalyzerClient(target string, log *zap.Logger) (NoteAnalyzer, error) {
+	conn, err := grpc.NewClient(
+		target,
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 		grpc.WithDefaultCallOptions(
 			grpc.MaxCallRecvMsgSize(100*1024*1024), // 100 MB
@@ -28,18 +32,28 @@ func init() {
 		),
 	)
 	if err != nil {
-		logger.Log.Fatal("onsets-frames gRPC connection failed", zap.Error(err))
+		return nil, err
 	}
 
-	NoteAnalyzerClient = note_analyzer.NewNoteAnalyzerClient(NoteAnalyzerConn)
+	return &noteAnalyzer{
+		conn:   conn,
+		client: note_analyzer.NewNoteAnalyzerClient(conn),
+		log:    log,
+	}, nil
 }
 
-type NoteAnalyzer interface {
-	Analyze(ctx context.Context, in *note_analyzer.AudioRequest, opts ...grpc.CallOption) (*note_analyzer.NoteResponse, error)
+func (n *noteAnalyzer) Analyze(ctx context.Context, in *note_analyzer.AudioRequest, opts ...grpc.CallOption) (*note_analyzer.NoteResponse, error) {
+	if in != nil {
+		return n.client.Analyze(ctx, in, opts...)
+	} else {
+		return nil, nil
+	}
 }
 
-func CloseClients() {
-	if NoteAnalyzerConn != nil {
-		NoteAnalyzerConn.Close()
+func (n *noteAnalyzer) Close() error {
+	if n.conn != nil {
+		return n.conn.Close()
+	} else {
+		return nil
 	}
 }

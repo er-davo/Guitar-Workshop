@@ -1,13 +1,15 @@
 package app
 
 import (
+	"api-gateway/internal/config"
 	"time"
 
+	"github.com/er-davo/retry"
 	"github.com/labstack/echo"
 	"go.uber.org/zap"
 )
 
-func ZapLogger(log *zap.Logger) echo.MiddlewareFunc {
+func zapLogger(log *zap.Logger) echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
 			start := time.Now()
@@ -32,4 +34,21 @@ func ZapLogger(log *zap.Logger) echo.MiddlewareFunc {
 			return err
 		}
 	}
+}
+
+func newRetrier(cfg config.Retry) retry.Retrier {
+	opts := []retry.RetryOption{
+		retry.WithMaxAttempts(cfg.MaxAttempts),
+	}
+
+	if cfg.Backoff == "exponential" {
+		opts = append(opts, retry.WithBackoff(retry.ExponentialBackoff{
+			Base:   cfg.Base,
+			Factor: cfg.Factor,
+			Max:    cfg.Max,
+			Jitter: cfg.Jitter,
+		}))
+	}
+
+	return retry.New(opts...)
 }

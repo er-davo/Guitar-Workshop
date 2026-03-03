@@ -1,6 +1,29 @@
 app:
-  port: 50052
   shutdown_timeout: 10s
+  log_level: debug
+  max_workers: 5
+  service:
+    max_ml_requests: 1
+    config:
+      task_timeout: 5m
+      db_timeout: 10s
+      storage_timeout: 30s
+      ml_timeout: 1m
+database_url: postgresql
+storage:
+  endpoint: minio:9000
+  access_key: minio
+  secret_key: minio123
+  use_ssl: false
+  region: us-east-1
+  audio_bucket: audio
+  tab_bucket: tab
 analyzer:
   port: 50051
   host: analyzer
+kafka:
+  brokers:
+    - kafka:9092
+  topics:
+    tab_generation_start: tab.generation.start
+  group_id: tab-generator

@@ -3,5 +3,7 @@ package service
 import "errors"
 
 var (
-	ErrMissingSeparatedStem = errors.New("audio separation result missing stem")
+	ErrTaskNotCompleted    = errors.New("task not completed")
+	ErrNoResultTabName     = errors.New("no result tab name")
+	ErrNoSeparedAudioFiles = errors.New("no separated audio files")
 )

@@ -3,22 +3,33 @@ package app
 import (
 	"context"
 	"fmt"
-	"net"
+
+	"tabgen/internal/broker"
+	"tabgen/internal/broker/consumer"
 	"tabgen/internal/clients"
 	"tabgen/internal/config"
-	"tabgen/internal/handler"
-	"tabgen/internal/proto/tab"
+	"tabgen/internal/database"
+	"tabgen/internal/processor"
+	"tabgen/internal/repository"
 	"tabgen/internal/service"
+	"tabgen/internal/storage"
+	"tabgen/internal/worker"
 
+	trmpgx "github.com/avito-tech/go-transaction-manager/drivers/pgxv5/v2"
+	"github.com/segmentio/kafka-go"
 	"go.uber.org/zap"
-	"google.golang.org/grpc"
 )
+
+type TabGenStartConsumer interface {
+	Run(ctx context.Context)
+	Close() error
+}
 
 type App struct {
 	log *zap.Logger
 	cfg *config.Config
 
-	grpcServer *grpc.Server
+	tgStartConsumer TabGenStartConsumer
 
 	analyzerCliet clients.NoteAnalyzer
 }
@@ -31,11 +42,6 @@ func New(ctx context.Context, cfg *config.Config, log *zap.Logger) (*App, error)
 		return nil, fmt.Errorf("logger is nil")
 	}
 
-	s := grpc.NewServer(
-		grpc.MaxRecvMsgSize(100*1024*1024), // 100 MB
-		grpc.MaxSendMsgSize(100*1024*1024), // 100 MB
-	)
-
 	analyzer, err := clients.NewNoteAnalyzerClient(
 		cfg.Analyzer.Host+":"+cfg.Analyzer.Port,
 		log,
@@ -44,30 +50,74 @@ func New(ctx context.Context, cfg *config.Config, log *zap.Logger) (*App, error)
 		return nil, fmt.Errorf("create analyzer client: %w", err)
 	}
 
-	tabService := service.NewTabService(analyzer, log)
-	tabHandler := handler.NewTabHandler(tabService, log)
+	db, err := database.Connect(ctx, cfg.DatabaseURL)
+	if err != nil {
+		return nil, fmt.Errorf("connect to database: %w", err)
+	}
 
-	tab.RegisterTabGenerateServer(s, tabHandler)
+	fmt.Println(cfg.Storage)
+
+	if err != nil {
+		return nil, fmt.Errorf("error on initializing minio client: %w", err)
+	}
+
+	tgRepo := repository.NewTabGenTaskRepository(db, trmpgx.DefaultCtxGetter)
+	asRepo := repository.NewAudioSepTaskRepository(db, trmpgx.DefaultCtxGetter)
+
+	dataStorage, err := storage.NewStorage(ctx, log)
+	if err != nil {
+		return nil, fmt.Errorf("error on initializing data storage: %w", err)
+	}
+
+	tabGenService := service.NewTabGenStartService(
+		&service.TabGenServiceConfig{
+			TaskTimeout:    cfg.App.Service.Config.TaskTimeout,
+			DBTimeout:      cfg.App.Service.Config.DBTimeout,
+			StorageTimeout: cfg.App.Service.Config.StorageTimeout,
+			MLTimeout:      cfg.App.Service.Config.MLTimeout,
+		},
+		tgRepo,
+		asRepo,
+		cfg.App.Service.MaxMLRequests,
+		analyzer,
+		dataStorage,
+		cfg.Storage.AudioBucket,
+		cfg.Storage.TabBucket,
+		*processor.NewTabProcessor(),
+		log,
+	)
+
+	workerPool := worker.NewPool(cfg.App.MaxWorkers)
+
+	// wait kafka to be ready
+	broker.WaitKafkaConsumersGroupReadiness(
+		cfg.Kafka.Brokers[0],
+		cfg.Kafka.Topics.TabGenerationStart,
+	)
+
+	consumer := consumer.NewTabGenTaskStartConsumer(kafka.NewReader(
+		kafka.ReaderConfig{
+			Brokers: cfg.Kafka.Brokers,
+			Topic:   cfg.Kafka.Topics.TabGenerationStart,
+			GroupID: cfg.Kafka.GroupID,
+		},
+	),
+		tabGenService,
+		workerPool,
+		log,
+	)
 
 	return &App{
-		log:           log,
-		cfg:           cfg,
-		grpcServer:    s,
-		analyzerCliet: analyzer,
+		log:             log,
+		cfg:             cfg,
+		tgStartConsumer: consumer,
+		analyzerCliet:   analyzer,
 	}, nil
 }
 
 func (a *App) Run(ctx context.Context) error {
-	lis, err := net.Listen("tcp", fmt.Sprintf(":%s", a.cfg.App.Port))
-	if err != nil {
-		return fmt.Errorf("listen tcp: %w", err)
-	}
 
-	go func() {
-		if err := a.grpcServer.Serve(lis); err != nil {
-			a.log.Error("gRPC server stopped", zap.Error(err))
-		}
-	}()
+	go a.tgStartConsumer.Run(ctx)
 
 	<-ctx.Done()
 	a.log.Info("gracefully shutting down grpc server")
@@ -76,9 +126,11 @@ func (a *App) Run(ctx context.Context) error {
 }
 
 func (a *App) Shutdown() error {
-	a.grpcServer.GracefulStop()
 	if err := a.analyzerCliet.Close(); err != nil {
 		return fmt.Errorf("close analyzer client: %w", err)
+	}
+	if err := a.tgStartConsumer.Close(); err != nil {
+		return fmt.Errorf("close tab gen start consumer: %w", err)
 	}
 	return nil
 }

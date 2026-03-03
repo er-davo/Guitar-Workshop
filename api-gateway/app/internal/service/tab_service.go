@@ -1,100 +1,152 @@
 package service
 
 import (
-	"api-gateway/internal/clients"
 	"api-gateway/internal/models"
-	"api-gateway/internal/repository"
 	"bytes"
 	"context"
-	"errors"
+	"time"
 
-	"github.com/supabase-community/supabase-go"
+	"github.com/er-davo/retry"
+	"go.uber.org/zap"
 )
 
 type TabService struct {
-	repo           repository.TabRepository
-	supabaseClient *supabase.Client
-	tabClient      clients.TabGenerator
-	audioClient    clients.AudioSeparator
+	tabRepo   TabRepository
+	trManager TxManager
+
+	storage             Storage
+	tabsBucket          string
+	presignedExpiration time.Duration
+
+	retrier retry.Retrier
+
+	log *zap.Logger
 }
 
 func NewTabService(
-	repo repository.TabRepository,
-	supabaseClient *supabase.Client,
-	tabClient clients.TabGenerator,
-	audioClient clients.AudioSeparator,
+	tabRepo TabRepository,
+	genTaskRepo TabGenTaskRepository,
+	trManager TxManager,
+	storage Storage,
+	tabsBucket string,
+	presignedExpiration time.Duration,
+	retrier retry.Retrier,
+	log *zap.Logger,
 ) *TabService {
 	return &TabService{
-		repo:           repo,
-		supabaseClient: supabaseClient,
-		tabClient:      tabClient,
-		audioClient:    audioClient,
+		tabRepo:             tabRepo,
+		storage:             storage,
+		trManager:           trManager,
+		tabsBucket:          tabsBucket,
+		presignedExpiration: presignedExpiration,
+		retrier:             retrier,
+		log:                 log,
 	}
 }
 
-func (s *TabService) GenerateTab(
-	ctx context.Context,
-	audioFileName string,
-	audioFileData []byte,
-	separation bool,
-) (*models.Tab, error) {
-	if separation {
-		separatedFiles, err := s.audioClient.SeparateAudio(ctx, audioFileName, audioFileData)
-		if err != nil {
-			return nil, err
+// CreateTab uploads the tab file to storage and saves metadata in DB
+func (s *TabService) CreateTab(ctx context.Context, tabc *models.TabCreate) error {
+	err := s.retrier.Do(ctx, func(attempt int) error {
+		innerErr := s.storage.UploadFile(ctx,
+			s.tabsBucket,
+			tabc.Path,
+			bytes.NewReader([]byte(tabc.Body)),
+		)
+		if innerErr != nil {
+			s.log.Warn("upload tab file failed, retrying",
+				zap.String("tab_path", tabc.Path),
+				zap.Int("attempt", attempt),
+				zap.Error(innerErr),
+			)
 		}
-		otherStem, ok := separatedFiles["other"]
-		if !ok {
-			return nil, errors.New("audio separation result missing 'other' stem")
-		}
-
-		audioFileName = otherStem.FileName
-		audioFileData = otherStem.AudioBytes
-	}
-
-	tabResp, err := s.tabClient.GenerateTab(ctx, audioFileName, audioFileData)
+		return innerErr
+	})
 	if err != nil {
-		return nil, err
-	}
-
-	tab := new(models.Tab)
-	tab.Body = tabResp.Tab
-
-	return tab, nil
-}
-
-func (s *TabService) CreateTab(ctx context.Context, tab *models.Tab) error {
-	err := s.repo.Create(ctx, tab)
-	if err != nil {
+		s.log.Error("failed to upload tab file after retries", zap.String("tab_path", tabc.Path), zap.Error(err))
 		return err
 	}
-	_, err = s.supabaseClient.Storage.UploadFile(
-		"tabs",
-		tab.Path,
-		bytes.NewReader([]byte(tab.Body)),
-	)
-	return err
+
+	tab := &models.Tab{
+		Name: tabc.Name,
+		Path: tabc.Path,
+	}
+
+	if err := s.tabRepo.Create(ctx, tab); err != nil {
+		s.log.Error("failed to save tab metadata", zap.String("tab_name", tabc.Name), zap.Error(err))
+		return err
+	}
+
+	tabc.ID = tab.ID
+	s.log.Info("tab created successfully", zap.String("tab_id", tab.ID), zap.String("tab_name", tab.Name))
+
+	return nil
 }
 
+// DeleteTab marks tab as deleted and removes file from storage
 func (s *TabService) DeleteTab(ctx context.Context, id string) error {
-	return s.repo.Delete(ctx, id)
+	tab, err := s.tabRepo.Get(ctx, id)
+	if err != nil {
+		s.log.Error("failed to fetch tab for deletion", zap.String("tab_id", id), zap.Error(err))
+		return err
+	}
+
+	if err := s.tabRepo.MarkDeleted(ctx, id); err != nil {
+		s.log.Error("failed to mark tab as deleted", zap.String("tab_id", id), zap.Error(err))
+		return err
+	}
+
+	err = s.retrier.Do(ctx, func(attempt int) error {
+		removeErr := s.storage.RemoveFile(ctx, s.tabsBucket, tab.Path)
+		if removeErr != nil {
+			s.log.Warn("failed to remove tab file, retrying",
+				zap.String("tab_id", tab.ID),
+				zap.String("tab_path", tab.Path),
+				zap.Int("attempt", attempt),
+				zap.Error(removeErr),
+			)
+		}
+		return removeErr
+	})
+	if err != nil {
+		s.log.Error("tab marked deleted but failed to remove file from storage",
+			zap.String("tab_id", tab.ID),
+			zap.String("tab_path", tab.Path),
+			zap.Error(err),
+		)
+		return nil // background cleanup can handle file removal
+	}
+
+	s.log.Info("tab deleted successfully", zap.String("tab_id", tab.ID))
+	return nil
 }
 
+// GetTabByID fetches tab and generates presigned URL
 func (s *TabService) GetTabByID(ctx context.Context, id string) (*models.Tab, error) {
-	tab, err := s.repo.GetByID(ctx, id)
+	tab, err := s.tabRepo.Get(ctx, id)
 	if err != nil {
-		return nil, err
-	}
-	buf, err := s.supabaseClient.Storage.DownloadFile("tabs", tab.Path)
-	if err != nil {
+		s.log.Error("failed to fetch tab by ID", zap.String("tab_id", id), zap.Error(err))
 		return nil, err
 	}
 
-	tab.Body = string(buf)
+	url, err := s.storage.PresignedGet(ctx, s.tabsBucket, tab.Path, s.presignedExpiration)
+	if err != nil {
+		s.log.Error("failed to generate presigned URL", zap.String("tab_id", tab.ID), zap.Error(err))
+		return nil, err
+	}
 
+	tab.PresignedURL = url.String()
+	s.log.Info("tab fetched successfully", zap.String("tab_id", tab.ID), zap.String("tab_name", tab.Name))
 	return tab, nil
 }
 
+// FindTabsByNameLike searches tabs by name
 func (s *TabService) FindTabsByNameLike(ctx context.Context, name string) ([]*models.Tab, error) {
-	return s.repo.FindByNameLike(ctx, name)
+	s.log.Info("searching tabs", zap.String("query", name))
+	tabs, err := s.tabRepo.FindByNameLike(ctx, name)
+	if err != nil {
+		s.log.Error("failed to search tabs", zap.String("query", name), zap.Error(err))
+		return nil, err
+	}
+	s.log.Info("tabs search result", zap.String("query", name), zap.Int("count", len(tabs)))
+	return tabs, nil
 }

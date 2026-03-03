@@ -5,11 +5,13 @@ RUN apt-get update && \
     
 WORKDIR /app
 
-RUN pip install demucs
+COPY app/requirements.mlmodel.txt /app/
+
+RUN pip install --no-cache-dir --default-timeout=1000 -r requirements.mlmodel.txt
 
 COPY app/requirements.txt /app/
 
-RUN pip install -r requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
 
 COPY app/ /app/
 

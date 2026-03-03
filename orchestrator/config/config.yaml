@@ -1,0 +1,20 @@
+app:
+  shutdown_timeout: 10s
+  migration_dir: ./migrations
+  log_level: debug
+database_url: postgres
+kafka:
+  brokers:
+    - kafka:9092
+  topics:
+    audio_separation_completed: audio.separation.complete
+    tab_generation_requested: tab.generation.request
+    tab_generation_start: tab.generation.start
+  group_id: orchestrator
+retry:
+  backoff: exponential
+  max_attempts: 3
+  base: 100ms
+  factor: 2
+  max: 1s
+  jitter: 0.1

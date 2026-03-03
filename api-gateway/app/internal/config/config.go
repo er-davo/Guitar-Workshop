@@ -1,52 +1,78 @@
 package config
 
 import (
-	"os"
+	"fmt"
+	"strings"
 	"time"
 
-	"gopkg.in/yaml.v3"
+	"github.com/spf13/viper"
 )
 
 type Config struct {
-	App App `yaml:"app"`
+	App App `mapstructure:"app"`
 
-	DatabaseURL string
+	Kafka   Kafka   `mapstructure:"kafka"`
+	Storage Storage `mapstructure:"storage"`
 
-	Tabgen   GrpcClient `yaml:"tabgen"`
-	AudioSep GrpcClient `yaml:"audiosep"`
+	Retry Retry `mapstructure:"retry"`
 
-	Supabase Supabase
+	DatabaseURL string `mapstructure:"database_url"`
 }
 
 type App struct {
-	Port            string        `yaml:"port"`
-	ShutdownTimeout time.Duration `yaml:"shutdown_timeout"`
+	Port            string        `mapstructure:"port"`
+	ShutdownTimeout time.Duration `mapstructure:"shutdown_timeout"`
+	MigrationDir    string        `mapstructure:"migration_dir"`
+	LogLevel        string        `mapstructure:"log_level"`
 }
 
-type GrpcClient struct {
-	Port string `yaml:"port"`
-	Host string `yaml:"host"`
+type Kafka struct {
+	Brokers []string `mapstructure:"brokers"`
+	Topics  struct {
+		AudioSeparation string `mapstructure:"audio_separation"`
+		TabGeneration   string `mapstructure:"tab_generation"`
+	} `mapstructure:"topics"`
 }
 
-type Supabase struct {
-	URL string `yaml:"url"`
-	Key string `yaml:"key"`
+type Storage struct {
+	Endpoint       string        `mapstructure:"endpoint"`
+	AccessKey      string        `mapstructure:"access_key"`
+	SecretKey      string        `mapstructure:"secret_key"`
+	UseSSL         bool          `mapstructure:"use_ssl"`
+	Region         string        `mapstructure:"region"`
+	AudioBucket    string        `mapstructure:"audio_bucket"`
+	TabBucket      string        `mapstructure:"tab_bucket"`
+	ExpirationTime time.Duration `mapstructure:"expiration_time"`
 }
 
-func Load(yamlConfigFilePath string) (*Config, error) {
-	cfg := &Config{}
-	data, err := os.ReadFile(yamlConfigFilePath)
-	if err != nil {
-		return nil, err
+type Retry struct {
+	Backoff     string        `mapstructure:"backoff"`
+	MaxAttempts int           `mapstructure:"max_attempts"`
+	Base        time.Duration `mapstructure:"base"`
+	Factor      float64       `mapstructure:"factor"`
+	Max         time.Duration `mapstructure:"max"`
+	Jitter      float64       `mapstructure:"jitter"`
+}
+
+// Load reads configuration from file or environment variables.
+// Config file is optional; environment variables override file values.
+func Load(configFilePath string) (*Config, error) {
+	v := viper.New()
+
+	v.AutomaticEnv()
+	v.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
+
+	if configFilePath != "" {
+		v.SetConfigFile(configFilePath)
+		if err := v.ReadInConfig(); err != nil {
+			return nil, fmt.Errorf("failed to read config file: %w", err)
+		}
 	}
 
-	if err := yaml.Unmarshal(data, cfg); err != nil {
-		return nil, err
+	var cfg Config
+	if err := v.Unmarshal(&cfg); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal config: %w", err)
 	}
-	cfg.Supabase.URL = os.Getenv("SUPABASE_URL")
-	cfg.Supabase.Key = os.Getenv("ACCESS_KEY")
 
-	cfg.DatabaseURL = os.Getenv("DATABASE_URL")
-
-	return cfg, nil
+	return &cfg, nil
 }

@@ -1,0 +1,108 @@
+/* SavedTabs.css — мягкий dark-blue стиль */
+
+.saved-tabs {
+    padding: 2rem;
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.search-bar {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.search-bar input {
+    flex: 1;
+    padding: 0.5rem;
+    border-radius: 8px;
+    border: 1px solid #263449;
+    background-color: #162033;
+    color: #e5e7eb;
+    font-size: 1rem;
+}
+
+.search-bar button {
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    border: none;
+    background-color: #3b82f6;
+    color: #0f172a;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background 0.2s ease;
+}
+
+.search-bar button:hover:not(:disabled) {
+    background-color: #2563eb;
+}
+
+.tabs-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.tab-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem;
+    border-radius: 8px;
+    border: 1px solid #263449;
+    background-color: #1e293b;
+    color: #e5e7eb;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+.tab-item.selected,
+.tab-item:hover {
+    background-color: #162f53;
+}
+
+.tab-item button {
+    padding: 0.3rem 0.6rem;
+    border-radius: 6px;
+    border: none;
+    background-color: #3b82f6;
+    color: #0f172a;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.tab-item button:hover {
+    background-color: #2563eb;
+}
+
+.tab-view {
+    padding: 1rem;
+    background-color: #1e293b;
+    border-radius: 12px;
+    border: 1px solid #263449;
+}
+
+.tab-view pre {
+    margin: 0;
+    font-family: "JetBrains Mono", monospace;
+    white-space: pre-wrap;
+    color: #e5e7eb;
+}
+
+.tab-view h3 {
+    margin: 0 0 0.5rem 0;
+    color: #3b82f6;
+}
+
+.tabs-list .tab-item button {
+    margin-left: 0.5rem;
+}
+
+.tab-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 1rem;
+}

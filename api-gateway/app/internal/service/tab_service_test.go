@@ -1,113 +1,188 @@
-package service
+package service_test
 
 import (
-	"api-gateway/internal/mocks"
-	"api-gateway/internal/proto/separator"
-	"api-gateway/internal/proto/tab"
+	"bytes"
 	"context"
 	"errors"
+	"io"
 	"testing"
+	"time"
 
+	"api-gateway/internal/mocks"
+	"api-gateway/internal/models"
+	"api-gateway/internal/service"
+
+	"github.com/er-davo/retry"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/mock/gomock"
+	"go.uber.org/zap"
 )
 
-func TestTabServiceGenerateTab(t *testing.T) {
+func setupService(t *testing.T) (
+	*service.TabService,
+	*mocks.MockTabRepository,
+	*mocks.MockTabGenTaskRepository,
+	*mocks.MockStorage,
+) {
 	ctrl := gomock.NewController(t)
-	defer ctrl.Finish()
+	t.Cleanup(ctrl.Finish)
 
-	audiosep := mocks.NewMockAudioSeparator(ctrl)
-	tabgen := mocks.NewMockTabGenerator(ctrl)
+	tabRepo := mocks.NewMockTabRepository(ctrl)
+	genTaskRepo := mocks.NewMockTabGenTaskRepository(ctrl)
+	storage := mocks.NewMockStorage(ctrl)
+	logger := zap.NewNop()
 
-	service := NewTabService(nil, nil, tabgen, audiosep)
+	svc := service.NewTabService(
+		tabRepo,
+		genTaskRepo,
+		service.TxManagerStub{},
+		storage,
+		"tabs-bucket",
+		time.Minute,
+		retry.NoRetry(),
+		logger,
+	)
 
-	type testCase struct {
-		name          string
-		separation    bool
-		setupMocks    func()
-		expectedBody  string
-		expectedError string
+	return svc, tabRepo, genTaskRepo, storage
+}
+
+func TestTabService_CreateTab(t *testing.T) {
+	ctx := context.Background()
+	tabBody := "TAB CONTENT"
+
+	t.Run("success", func(t *testing.T) {
+		svc, tabRepo, _, storage := setupService(t)
+
+		storage.EXPECT().
+			UploadFile(ctx, "tabs-bucket", "tab.txt", gomock.Any()).
+			DoAndReturn(func(ctx context.Context, bucket, object string, r io.Reader) error {
+				buf := new(bytes.Buffer)
+				_, _ = io.Copy(buf, r)
+				require.Equal(t, tabBody, buf.String())
+				return nil
+			})
+
+		tabRepo.EXPECT().
+			Create(ctx, gomock.Any()).
+			DoAndReturn(func(ctx context.Context, tab *models.Tab) error {
+				require.Equal(t, "song.wav", tab.Name)
+				require.Equal(t, "tab.txt", tab.Path)
+				require.Empty(t, tab.PresignedURL)
+				tab.ID = "generated-id"
+				return nil
+			})
+
+		tabCreate := &models.TabCreate{
+			Name: "song.wav",
+			Path: "tab.txt",
+			Body: tabBody,
+		}
+
+		require.NoError(t, svc.CreateTab(ctx, tabCreate))
+		require.Equal(t, "generated-id", tabCreate.ID)
+	})
+
+	t.Run("db error", func(t *testing.T) {
+		svc, tabRepo, _, storage := setupService(t)
+
+		storage.EXPECT().
+			UploadFile(ctx, "tabs-bucket", "tab.txt", gomock.Any()).
+			Return(nil)
+
+		tabRepo.EXPECT().
+			Create(ctx, gomock.Any()).
+			Return(errors.New("db fail"))
+
+		tabCreate := &models.TabCreate{
+			Name: "song.wav",
+			Path: "tab.txt",
+			Body: tabBody,
+		}
+
+		err := svc.CreateTab(ctx, tabCreate)
+		require.ErrorContains(t, err, "db fail")
+	})
+
+	t.Run("upload error", func(t *testing.T) {
+		svc, _, _, storage := setupService(t)
+
+		storage.EXPECT().
+			UploadFile(ctx, "tabs-bucket", "tab.txt", gomock.Any()).
+			Return(errors.New("upload fail"))
+
+		tabCreate := &models.TabCreate{
+			Name: "song.wav",
+			Path: "tab.txt",
+			Body: tabBody,
+		}
+
+		err := svc.CreateTab(ctx, tabCreate)
+		require.ErrorContains(t, err, "upload fail")
+	})
+}
+
+func TestTabService_DeleteTab(t *testing.T) {
+	ctx := context.Background()
+	tab := &models.Tab{ID: "tab-id", Path: "tab.txt"}
+
+	t.Run("success", func(t *testing.T) {
+		svc, tabRepo, _, storage := setupService(t)
+
+		tabRepo.EXPECT().Get(ctx, "tab-id").Return(tab, nil)
+		tabRepo.EXPECT().MarkDeleted(ctx, "tab-id").Return(nil)
+		storage.EXPECT().RemoveFile(ctx, "tabs-bucket", "tab.txt").Return(nil)
+
+		require.NoError(t, svc.DeleteTab(ctx, "tab-id"))
+	})
+
+	t.Run("storage error is not fatal", func(t *testing.T) {
+		svc, tabRepo, _, storage := setupService(t)
+
+		tabRepo.EXPECT().Get(ctx, "tab-id").Return(tab, nil)
+		tabRepo.EXPECT().MarkDeleted(ctx, "tab-id").Return(nil)
+		storage.EXPECT().RemoveFile(ctx, "tabs-bucket", "tab.txt").
+			Return(errors.New("fs fail"))
+
+		require.NoError(t, svc.DeleteTab(ctx, "tab-id"))
+	})
+
+	t.Run("get tab error", func(t *testing.T) {
+		svc, tabRepo, _, _ := setupService(t)
+
+		tabRepo.EXPECT().Get(ctx, "tab-id").
+			Return(nil, errors.New("not found"))
+
+		err := svc.DeleteTab(ctx, "tab-id")
+		require.ErrorContains(t, err, "not found")
+	})
+
+	t.Run("mark deleted error", func(t *testing.T) {
+		svc, tabRepo, _, _ := setupService(t)
+
+		tabRepo.EXPECT().Get(ctx, "tab-id").Return(tab, nil)
+		tabRepo.EXPECT().MarkDeleted(ctx, "tab-id").
+			Return(errors.New("db fail"))
+
+		err := svc.DeleteTab(ctx, "tab-id")
+		require.ErrorContains(t, err, "db fail")
+	})
+}
+
+func TestTabService_FindTabsByNameLike(t *testing.T) {
+	svc, tabRepo, _, _ := setupService(t)
+	ctx := context.Background()
+
+	tabs := []*models.Tab{
+		{Name: "song1"},
+		{Name: "song2"},
 	}
 
-	tests := []testCase{
-		{
-			name:       "success with separation",
-			separation: true,
-			setupMocks: func() {
-				audiosep.EXPECT().
-					SeparateAudio(gomock.Any(), "file.wav", []byte("data")).
-					Return(map[string]*separator.AudioFileData{
-						"other": {FileName: "other.wav", AudioBytes: []byte("guitar-data")},
-					}, nil)
+	tabRepo.EXPECT().
+		FindByNameLike(ctx, "song").
+		Return(tabs, nil)
 
-				tabgen.EXPECT().
-					GenerateTab(gomock.Any(), "other.wav", []byte("guitar-data")).
-					Return(&tab.TabResponse{Tab: "TAB123"}, nil)
-			},
-			expectedBody: "TAB123",
-		},
-		{
-			name:       "success without separation",
-			separation: false,
-			setupMocks: func() {
-				tabgen.EXPECT().
-					GenerateTab(gomock.Any(), "file.wav", []byte("data")).
-					Return(&tab.TabResponse{Tab: "TAB_NOSEP"}, nil)
-			},
-			expectedBody: "TAB_NOSEP",
-		},
-		{
-			name:       "separation error",
-			separation: true,
-			setupMocks: func() {
-				audiosep.EXPECT().
-					SeparateAudio(gomock.Any(), "file.wav", []byte("data")).
-					Return(nil, errors.New("sep fail"))
-			},
-			expectedError: "sep fail",
-		},
-		{
-			name:       "missing 'other' stem",
-			separation: true,
-			setupMocks: func() {
-				audiosep.EXPECT().
-					SeparateAudio(gomock.Any(), "file.wav", []byte("data")).
-					Return(map[string]*separator.AudioFileData{}, nil)
-			},
-			expectedError: "audio separation result missing 'other' stem",
-		},
-		{
-			name:       "tab generator error",
-			separation: true,
-			setupMocks: func() {
-				audiosep.EXPECT().
-					SeparateAudio(gomock.Any(), "file.wav", []byte("data")).
-					Return(map[string]*separator.AudioFileData{
-						"other": {FileName: "other.wav", AudioBytes: []byte("guitar-data")},
-					}, nil)
+	res, err := svc.FindTabsByNameLike(ctx, "song")
 
-				tabgen.EXPECT().
-					GenerateTab(gomock.Any(), "other.wav", []byte("guitar-data")).
-					Return(nil, errors.New("tabgen fail"))
-			},
-			expectedError: "tabgen fail",
-		},
-	}
-
-	for _, tc := range tests {
-		t.Run(tc.name, func(t *testing.T) {
-			tc.setupMocks()
-
-			tab, err := service.GenerateTab(context.Background(), "file.wav", []byte("data"), tc.separation)
-
-			if tc.expectedError != "" {
-				require.Nil(t, tab)
-				require.EqualError(t, err, tc.expectedError)
-			} else {
-				require.NoError(t, err)
-				require.NotNil(t, tab)
-				require.Equal(t, tc.expectedBody, tab.Body)
-			}
-		})
-	}
+	require.NoError(t, err)
+	require.Equal(t, tabs, res)
 }

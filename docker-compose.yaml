@@ -1,31 +1,140 @@
 services:
-  api-gateway:
-    build: ./api-gateway
+  postgres:
+    image: postgres:15
+    container_name: postgres
     env_file:
-      - /api-gateway/.env
+      - .env
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $POSTGRES_USER"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+
+  # zookeeper:
+  #   image: confluentinc/cp-zookeeper:7.5.0
+  #   container_name: zookeeper
+  #   env_file:
+  #     - .env
+  #   ports:
+  #     - "2181:2181"
+
+  kafka:
+    image: bitnamilegacy/kafka
+    container_name: kafka
+    ports:
+      - "9092:9092"
+    env_file:
+      - .env
+    healthcheck:
+      test: ["CMD", "bash", "-c", "kafka-topics.sh --bootstrap-server localhost:9092 --list"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+  kafka-init:
+    image: bitnamilegacy/kafka
+    depends_on:
+      - kafka
+    volumes:
+      - ./scripts/kafka-init.sh:/kafka-init.sh
+    entrypoint: ["/bin/sh", "/kafka-init.sh"]
+
+  # minio:
+  #   image: minio/minio:latest
+  #   container_name: minio
+  #   env_file:
+  #     - .env
+  #   command: server /data --console-address ":9001"
+  #   ports:
+  #     - "9000:9000"
+  #     - "9001:9001"
+  #   volumes:
+  #     - minio_data:/data
+  #   healthcheck:
+  #     test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+  #     interval: 10s
+  #     timeout: 5s
+  #     retries: 10
+  #     start_period: 20s
+
+  api-gateway:
+    container_name: api-gateway
+    build:
+      context: .
+      dockerfile: api-gateway/Dockerfile
+    env_file:
+      - ./api-gateway/.env
     ports:
       - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+      # minio:
+      #   condition: service_healthy
+    
+  frontend:
+    build: ./frontend
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend/app:/app
+      - node_modules:/app/node_modules
+    depends_on:
+      - api-gateway
 
-  
+  orchestrator:
+    build: ./orchestrator
+    env_file:
+      - ./orchestrator/.env
+    depends_on:
+      postgres:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+
+
   audio-separator:
     build: ./audio-separator
-    env_file:
-      - /audio-separator/.env
-    ports:
-      - "50054:50054"
-    
-  tab-generator:
-    build: ./tab-generator
-    env_file:
-      - /tab-generator/.env
-    ports:
-      - "50052:50052"
     depends_on:
-      - analyzer
-  
+      postgres:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+      # minio:
+      #   condition: service_healthy
+
   analyzer:
     build: ./analyzer
     env_file:
       - ./analyzer/.env
     ports:
       - "50051:50051"
+
+
+  tab-generator:
+    build: ./tab-generator
+    env_file:
+      - ./tab-generator/.env
+    depends_on:
+      postgres:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+      analyzer:
+        condition: service_started
+      # minio:
+      #   condition: service_healthy
+
+
+volumes:
+  postgres_data:
+  # minio_data:
+  node_modules:

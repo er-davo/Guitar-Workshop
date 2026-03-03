@@ -1,6 +1,5 @@
-torchaudio
-numpy
-protobuf
-grpcio
-grpcio-tools
-soundfile
+dynaconf
+aiokafka
+asyncpg
+botocore
+aiobotocore

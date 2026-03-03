@@ -1,0 +1,8 @@
+CREATE TYPE status AS ENUM(
+    'CREATED',
+    'PENDING',
+	'WAITING_FOR_SEPARATION',
+    'PROCESSING',
+    'DONE',
+    'FAILED'
+);

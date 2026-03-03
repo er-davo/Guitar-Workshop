@@ -4,7 +4,9 @@ package noteanlyzer;
 
 option go_package = "internal/proto/note-analyzer";
 
+// NoteAnalyzer analyzes audio and retuns notes
 service NoteAnalyzer {
+    // Analyze analyzes audio and returns notes
     rpc Analyze (AudioRequest) returns (NoteResponse);
 }
 
@@ -22,8 +24,8 @@ message AudioFileData {
 }
 
 message NoteEvent {
-    double start_seconds = 1;  // Время начала ноты
-    int32 midi_pitch = 2;     // Например, 40 = E2, 64 = E4 и т.д.
-    double velocity = 3;       // Громкость/интенсивность (если доступно)
+    double start_seconds = 1;
+    int32 midi_pitch = 2;
+    double velocity = 3;         // Громкость/интенсивность (если доступно)
     double duration_seconds = 4;
 }

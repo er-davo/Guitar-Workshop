@@ -1,0 +1,1 @@
+DROP TABLE audio_sep_tasks IF EXISTS;

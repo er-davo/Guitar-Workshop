@@ -1,5 +1,6 @@
 .vscode
 .env
+.secrets.yaml
 venv
 
 node_modules
@@ -8,6 +9,8 @@ generated
 temp
 
 output_stems
+
+pretrained_models
 
 # Visual Studio 2022
 .vs

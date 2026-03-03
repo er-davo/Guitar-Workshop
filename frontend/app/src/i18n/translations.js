@@ -1,0 +1,92 @@
+export const translations = {
+    ru: {
+        appTitle: "Guitar Workshop",
+        
+        tabGenTitle: "Генерация табов",
+        sepTitle: "Сепарация аудио",
+        uploadAudio: "Загрузить аудио",
+        enableSeparation: "Включить сепарацию",
+        saveTab: "Сохранить таб",
+        copyTab: "Скопировать",
+        tabNamePlaceholder: "Имя таба",
+        loading: "Загрузка...",
+        loadingSeparation: "Сепарация аудио...",
+        errorNoFile: "Файл не выбран",
+        errorNoStems: "Не выбраны стемы",
+
+        statusCreated: "Создано",
+        statusPending: "В обработке",
+        statusWaitingForSeparation: "Ожидание сепарации",
+        statusDone: "Готово",
+        statusFail: "Ошибка",
+
+        errorNoTaskId: "Нет ID задачи",
+        errorLoadingTab: "Ошибка при загрузке таба",
+        errorGeneratingTab: "Ошибка генерации",
+        errorGeneric: "Ошибка",
+        tabSaved: "Таб сохранён",
+
+        dropzonePlaceholder: "Перетащите аудио сюда или выберите файл",
+        fileLabel: "Файл",
+        statusLabel: "Статус",
+
+        savedTabsTitle: "Сохранённые табы",
+        searchPlaceholder: "Введите название таба",
+        search: "Поиск",
+        open: "Открыть",
+        delete: "Удалить",
+        close: "Закрыть",
+        confirmDelete: "Удалить этот таб?",
+        errorNoFileLink: "Нет ссылки на файл",
+        errorFileDownload: "Ошибка загрузки файла",
+
+        audioSepTitle: "Сепарация аудио",
+        download: "Скачать",
+        errorSeparation: "Ошибка сепарации",
+    },
+    en: {
+        appTitle: "Guitar Workshop",
+
+        tabGenTitle: "Tab Generation",
+        sepTitle: "Audio Separation",
+        uploadAudio: "Upload Audio",
+        enableSeparation: "Enable Separation",
+        saveTab: "Save Tab",
+        copyTab: "Copy",
+        tabNamePlaceholder: "Tab Name",
+        loading: "Loading...",
+        loadingSeparation: "Audio Separation...",
+        errorNoFile: "No file selected",
+        errorNoStems: "No stems selected",
+
+        statusCreated: "Created",
+        statusPending: "Pending",
+        statusWaitingForSeparation: "Waiting for separation",
+        statusDone: "Done",
+        statusFail: "Failed",
+
+        errorNoTaskId: "No task ID",
+        errorLoadingTab: "Error loading tab",
+        errorGeneratingTab: "Generation error",
+        errorGeneric: "Error",
+        tabSaved: "Tab saved",
+
+        dropzonePlaceholder: "Drag and drop audio here or select a file",
+        fileLabel: "File",
+        statusLabel: "Status",
+
+        savedTabsTitle: "Saved Tabs",
+        searchPlaceholder: "Enter tab name",
+        search: "Search",
+        open: "Open",
+        delete: "Delete",
+        close: "Close",
+        confirmDelete: "Delete this tab?",
+        errorNoFileLink: "No file link available",
+        errorFileDownload: "File download error",
+
+        audioSepTitle: "Audio Separation",
+        download: "Download",
+        errorSeparation: "Separation error",
+    }
+};

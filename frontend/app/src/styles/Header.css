@@ -1,0 +1,63 @@
+/* Header.css — мягкий черно-синий стиль */
+
+.app-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 2rem;
+    background-color: #0f172a; /* тёмно-синий фон вместо черного */
+    border-bottom: 1px solid #263449; /* мягкая граница */
+}
+
+.app-header h1 {
+    margin: 0;
+    font-size: 1.5rem;
+    color: #3b82f6; /* приглушенный синий акцент */
+    font-weight: 600;
+}
+
+/* Навигация по вкладкам */
+.tab-nav {
+    display: flex;
+    gap: 1rem;
+}
+
+.tab-nav button {
+    background: transparent;
+    border: 1px solid #3b82f6;
+    color: #cbd5e1; /* мягкий светлый текст */
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: all 0.2s ease;
+}
+
+.tab-nav button.active,
+.tab-nav button:hover {
+    background-color: #3b82f6;
+    color: #0f172a;
+}
+
+/* LanguageSwitcher */
+.language-switcher {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.language-switcher button {
+    padding: 0.3rem 0.6rem;
+    border-radius: 6px;
+    border: 1px solid #3b82f6;
+    background: transparent;
+    color: #cbd5e1;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: all 0.2s ease;
+}
+
+.language-switcher button.active,
+.language-switcher button:hover {
+    background-color: #3b82f6;
+    color: #0f172a;
+}

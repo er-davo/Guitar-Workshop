@@ -1,0 +1,1 @@
+DROP TYPE gen_status IF EXISTS;

@@ -1,0 +1,22 @@
+app:
+  audio_bucket: "audio"
+
+s3:
+  endpoint: "https://tecxeovxpzxajmthpagq.storage.supabase.co/storage/v1/s3"
+  region: "eu-west-1"
+
+
+kafka:
+  bootstrap_servers: "kafka:9092"
+  group_id: "audio-sep-group"
+  audio_sep_start: "audio.separation.start"
+  audio_sep_completed: "audio.separation.complete"
+  poll_timeout: 1.0
+
+service:
+  concurrency: 2
+
+consumer:
+  concurrency: 2
+
+temp_dir: "temp"

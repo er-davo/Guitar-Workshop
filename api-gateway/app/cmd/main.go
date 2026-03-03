@@ -8,6 +8,7 @@ import (
 
 	"api-gateway/internal/app"
 	"api-gateway/internal/config"
+	"api-gateway/internal/database"
 	"api-gateway/internal/logger"
 
 	"go.uber.org/zap"
@@ -26,15 +27,20 @@ func main() {
 		log.Fatal("error on loading config: " + err.Error())
 	}
 
+	err = database.Migrate(cfg.App.MigrationDir, cfg.DatabaseURL)
+	if err != nil {
+		log.Fatal("error on migrating database: " + err.Error())
+	}
+
 	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGTERM, syscall.SIGINT)
 	defer stop()
 
-	app, err := app.New(ctx, cfg, log)
+	apiApp, err := app.New(ctx, cfg, log)
 	if err != nil {
 		log.Fatal("error on creating app", zap.Error(err))
 	}
 
-	if err := app.Run(ctx); err != nil {
+	if err := apiApp.Run(ctx); err != nil {
 		log.Fatal("server exited with error", zap.Error(err))
 	}
 }

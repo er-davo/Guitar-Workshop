@@ -2,71 +2,152 @@ package repository
 
 import (
 	"context"
+	"fmt"
 
 	"api-gateway/internal/models"
 
-	"github.com/jackc/pgx/v5"
+	sq "github.com/Masterminds/squirrel"
+	trmpgx "github.com/avito-tech/go-transaction-manager/drivers/pgxv5/v2"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-type TabRepository interface {
-	Create(ctx context.Context, tab *models.Tab) error
-	Delete(ctx context.Context, id string) error
-	GetByID(ctx context.Context, id string) (*models.Tab, error)
-	FindByNameLike(ctx context.Context, name string) ([]*models.Tab, error)
+type TabRepository struct {
+	db     *pgxpool.Pool
+	getter *trmpgx.CtxGetter
+	psql   sq.StatementBuilderType
 }
 
-type tabRepository struct {
-	db *pgxpool.Pool
+func NewTabRepository(db *pgxpool.Pool, c *trmpgx.CtxGetter) *TabRepository {
+	return &TabRepository{
+		db:     db,
+		getter: c,
+		psql:   sq.StatementBuilder.PlaceholderFormat(sq.Dollar),
+	}
 }
 
-func NewTabRepository(db *pgxpool.Pool) *tabRepository {
-	return &tabRepository{db: db}
-}
-
-func (r *tabRepository) Create(ctx context.Context, tab *models.Tab) error {
+func (r *TabRepository) Create(ctx context.Context, tab *models.Tab) error {
 	if tab == nil {
 		return ErrNilValue
 	}
-	query := `INSERT INTO tabs (name, file_path) VALUES ($1, $2) RETURNING id`
-	err := r.db.QueryRow(
-		ctx,
-		query,
-		pgx.QueryExecModeSimpleProtocol,
-		tab.Name,
-		tab.Path,
-	).Scan(&tab.ID)
+
+	query, args, err := r.psql.
+		Insert("tabs").
+		Columns("name", "file_path").
+		Values(tab.Name, tab.Path).
+		Suffix("RETURNING id").
+		ToSql()
+	if err != nil {
+		return err
+	}
+
+	conn := r.getter.DefaultTrOrDB(ctx, r.db)
+	err = conn.QueryRow(ctx, query, args...).Scan(&tab.ID)
 	return wrapDBError(err)
 }
 
-func (r *tabRepository) Delete(ctx context.Context, id string) error {
+func (r *TabRepository) Delete(ctx context.Context, id string) error {
 	if id == "" {
 		return ErrInvalidID
 	}
-	query := `DELETE FROM tabs WHERE id = $1`
-	cmd, err := r.db.Exec(ctx, query, pgx.QueryExecModeSimpleProtocol, id)
+
+	query, args, err := r.psql.
+		Delete("tabs").
+		Where(sq.Eq{"id": id}).
+		ToSql()
+	if err != nil {
+		return err
+	}
+
+	conn := r.getter.DefaultTrOrDB(ctx, r.db)
+	cmd, err := conn.Exec(ctx, query, args...)
+	if err != nil {
+		return wrapDBError(err)
+	}
 	if cmd.RowsAffected() == 0 {
 		return ErrNoRowsAffected
 	}
-	return wrapDBError(err)
+	return nil
 }
 
-func (r *tabRepository) GetByID(ctx context.Context, id string) (*models.Tab, error) {
+func (r *TabRepository) MarkDeleted(ctx context.Context, id string) error {
+	if id == "" {
+		return ErrInvalidID
+	}
+
+	query, args, err := r.psql.
+		Update("tabs").
+		Set("deleted_at", sq.Expr("NOW()")).
+		Where(sq.And{
+			sq.Eq{"id": id},
+			sq.Expr("deleted_at IS NULL"),
+		}).
+		ToSql()
+	if err != nil {
+		return err
+	}
+
+	conn := r.getter.DefaultTrOrDB(ctx, r.db)
+	cmd, err := conn.Exec(ctx, query, args...)
+	if err != nil {
+		return wrapDBError(err)
+	}
+	if cmd.RowsAffected() == 0 {
+		return ErrNoRowsAffected
+	}
+
+	return nil
+}
+
+func (r *TabRepository) Get(ctx context.Context, id string) (*models.Tab, error) {
 	if id == "" {
 		return nil, ErrInvalidID
 	}
-	tab := new(models.Tab)
-	query := `SELECT id, name, file_path FROM tabs WHERE id = $1`
-	err := r.db.QueryRow(ctx, query, pgx.QueryExecModeSimpleProtocol, id).Scan(&tab.ID, &tab.Name, &tab.Path)
+
+	query, args, err := r.psql.
+		Select(
+			"id", "name", "file_path",
+			"created_at", "deleted_at",
+		).
+		From("tabs").
+		Where(sq.And{
+			sq.Eq{"id": id},
+			sq.Expr("deleted_at IS NULL"),
+		}).
+		ToSql()
+	if err != nil {
+		return nil, err
+	}
+
+	tab := &models.Tab{}
+	conn := r.getter.DefaultTrOrDB(ctx, r.db)
+	err = conn.QueryRow(ctx, query, args...).Scan(
+		&tab.ID, &tab.Name, &tab.Path,
+		&tab.CreatedAt, &tab.DeletedAt,
+	)
 	if err != nil {
 		return nil, wrapDBError(err)
 	}
+
 	return tab, nil
 }
 
-func (r *tabRepository) FindByNameLike(ctx context.Context, name string) ([]*models.Tab, error) {
-	query := `SELECT id, name, file_path FROM tabs WHERE name ILIKE '%' || $1 || '%'`
-	rows, err := r.db.Query(ctx, query, pgx.QueryExecModeSimpleProtocol, name)
+func (r *TabRepository) FindByNameLike(ctx context.Context, name string) ([]*models.Tab, error) {
+	pattern := fmt.Sprintf("%%%s%%", name)
+
+	query, args, err := r.psql.
+		Select("id", "name", "file_path", "created_at").
+		From("tabs").
+		Where(sq.And{
+			sq.ILike{"name": pattern},
+			sq.Expr("deleted_at IS NULL"),
+		}).
+		ToSql()
+	if err != nil {
+		return nil, err
+	}
+
+	conn := r.getter.DefaultTrOrDB(ctx, r.db)
+	rows, err := conn.Query(ctx, query, args...)
 	if err != nil {
 		return nil, wrapDBError(err)
 	}
@@ -74,8 +155,11 @@ func (r *tabRepository) FindByNameLike(ctx context.Context, name string) ([]*mod
 
 	var tabs []*models.Tab
 	for rows.Next() {
-		tab := new(models.Tab)
-		if err := rows.Scan(&tab.ID, &tab.Name, &tab.Path); err != nil {
+		tab := &models.Tab{}
+		if err := rows.Scan(
+			&tab.ID, &tab.Name,
+			&tab.Path, &tab.CreatedAt,
+		); err != nil {
 			return nil, wrapDBError(err)
 		}
 		tabs = append(tabs, tab)

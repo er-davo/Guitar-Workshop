@@ -1,5 +1,7 @@
 # 🎸 Guitar Workshop
 
+![CI](https://github.com/er-davo/guitar-workshop/actions/workflows/go.yml/badge.svg)
+
 [На русском](README.ru.md)
 
 **Guitar Workshop** is a microservice-based Go application for generating guitar tablatures from audio.

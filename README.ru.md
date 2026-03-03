@@ -1,5 +1,7 @@
 # 🎸 Guitar Workshop
 
+![CI](https://github.com/er-davo/guitar-workshop/actions/workflows/go.yml/badge.svg)
+
 **Guitar Workshop** — микросервисное приложение на Go для генерации гитарных табулатур из аудио.
 
 Проект включает:

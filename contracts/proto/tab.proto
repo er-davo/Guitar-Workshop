@@ -1,0 +1,61 @@
+syntax = "proto3";
+
+package tab;
+
+option go_package = "contracts/tab";
+
+// Tab service 
+service TabService {
+    // SaveTab saves a tab to the database (when file already exists in storage)
+    rpc SaveTab(SaveTabRequest) returns (CreateTabResponse);
+    // DeleteTab deletes a tab from the database and storage
+    rpc DeleteTab(DeleteTabRequest) returns (DeleteTabResponse);
+    // GetTab gets a tab from the database with presigned url to file in storage
+    rpc GetTab(GetTabRequest) returns (GetTabResponse);
+    // SearchTabsByName searches tabs by query and returns a list of tabs without presigned url
+    rpc SearchTabsByName(SearchTabsRequest) returns (SearchTabsResponse);
+}
+
+message RawTab {
+    string id = 1;
+    string name = 2;
+    string path = 3;
+}
+
+message Tab {
+    string id = 1;
+    string name = 2;
+    string path = 3;
+    string presigned_url = 4;
+}
+
+message SaveTabRequest {
+    string name = 1;
+    string path = 2;
+}
+
+message CreateTabResponse {
+    string id = 1;
+}
+
+message DeleteTabRequest {
+    string id = 1;
+}
+
+message DeleteTabResponse {}
+
+message GetTabRequest {
+    string id = 1;
+}
+
+message GetTabResponse {
+    Tab tab = 1;
+}
+
+message SearchTabsRequest {
+    string name_query = 1;
+}
+
+message SearchTabsResponse {
+    repeated RawTab tabs = 1;
+}

@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package noteanlyzer;
 
-option go_package = "internal/proto/note-analyzer";
+option go_package = "contracts/note-analyzer";
 
 // NoteAnalyzer analyzes audio and retuns notes
 service NoteAnalyzer {

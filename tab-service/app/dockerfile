@@ -1,0 +1,25 @@
+FROM golang:1.25-alpine AS builder
+
+RUN apk --no-cache add bash gcc musl-dev
+
+WORKDIR /tab-service
+
+COPY /app/go.mod /tab-service/
+
+RUN go mod download
+
+COPY /app/ /tab-service/
+
+RUN go build -o main cmd/main.go
+
+FROM alpine AS runner
+
+WORKDIR /app
+
+COPY --from=builder /tab-service/main /app/main
+
+COPY /config/config.yaml /app/config.yaml
+
+ENV CONFIG_PATH=/app/config.yaml
+
+CMD [ "/app/main" ]

@@ -15,7 +15,7 @@ type TabRepository interface {
 	Delete(ctx context.Context, id string) error
 	MarkDeleted(ctx context.Context, id string) error
 	Get(ctx context.Context, id string) (*models.Tab, error)
-	FindByNameLike(ctx context.Context, name string) ([]*models.Tab, error)
+	Search(ctx context.Context, name string, limit, offset uint64) ([]*models.Tab, error)
 }
 
 type Storage interface {

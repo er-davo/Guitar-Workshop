@@ -126,7 +126,7 @@ func (s *TabService) DeleteTab(ctx context.Context, req *tab.DeleteTabRequest) (
 
 func (s *TabService) SearchTabs(ctx context.Context, req *tab.SearchTabsRequest) (*tab.SearchTabsResponse, error) {
 	s.log.Info("searching tabs", zap.String("query", req.NameQuery))
-	tabs, err := s.tabRepo.FindByNameLike(ctx, req.NameQuery)
+	tabs, err := s.tabRepo.Search(ctx, req.NameQuery, req.Limit, req.Offset)
 	if err != nil {
 		s.log.Error("failed to search tabs", zap.String("query", req.NameQuery), zap.Error(err))
 		return nil, err

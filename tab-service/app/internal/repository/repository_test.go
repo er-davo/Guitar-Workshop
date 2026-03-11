@@ -65,8 +65,8 @@ func TestTabRepository_CRUD(t *testing.T) {
 
 	// CREATE
 	tab := &models.Tab{
-		Name: "Master of Puppets",
-		Path: "/tabs/mop.gp",
+		Name: "Metallica Nothing Else Matters",
+		Path: "/tabs/nem.gp",
 	}
 
 	err := repo.Create(ctx, tab)
@@ -79,11 +79,35 @@ func TestTabRepository_CRUD(t *testing.T) {
 	require.Equal(t, tab.Name, fromDB.Name)
 	require.Equal(t, tab.Path, fromDB.Path)
 
-	// FIND BY NAME LIKE
-	list, err := repo.FindByNameLike(ctx, "puppet")
+	// CREATE SECOND TAB (чтобы проверить поиск)
+	tab2 := &models.Tab{
+		Name: "Metallica Master of Puppets",
+		Path: "/tabs/mop.gp",
+	}
+
+	err = repo.Create(ctx, tab2)
+	require.NoError(t, err)
+
+	// SEARCH (FTS)
+	list, err := repo.Search(ctx, "metallica nothing", 10, 0)
 	require.NoError(t, err)
 	require.Len(t, list, 1)
 	require.Equal(t, tab.ID, list[0].ID)
+
+	// SEARCH BY SINGLE WORD
+	list, err = repo.Search(ctx, "metallica", 10, 0)
+	require.NoError(t, err)
+	require.Len(t, list, 2)
+
+	// PAGINATION
+	list, err = repo.Search(ctx, "metallica", 1, 0)
+	require.NoError(t, err)
+	require.Len(t, list, 1)
+
+	list2, err := repo.Search(ctx, "metallica", 1, 1)
+	require.NoError(t, err)
+	require.Len(t, list2, 1)
+	require.NotEqual(t, list[0].ID, list2[0].ID)
 
 	// DELETE
 	err = repo.Delete(ctx, tab.ID)

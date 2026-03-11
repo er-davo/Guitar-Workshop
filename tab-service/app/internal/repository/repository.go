@@ -2,7 +2,6 @@ package repository
 
 import (
 	"context"
-	"fmt"
 
 	"tab-service/internal/models"
 
@@ -131,22 +130,29 @@ func (r *TabRepository) Get(ctx context.Context, id string) (*models.Tab, error)
 	return tab, nil
 }
 
-func (r *TabRepository) FindByNameLike(ctx context.Context, name string) ([]*models.Tab, error) {
-	pattern := fmt.Sprintf("%%%s%%", name)
+func (r *TabRepository) Search(
+	ctx context.Context,
+	name string,
+	limit uint64,
+	offset uint64,
+) ([]*models.Tab, error) {
 
 	query, args, err := r.psql.
 		Select("id", "name", "file_path", "created_at").
-		From("tabs").
-		Where(sq.And{
-			sq.ILike{"name": pattern},
-			sq.Expr("deleted_at IS NULL"),
-		}).
+		Prefix("WITH q AS (SELECT websearch_to_tsquery('simple', ?) AS query)", name).
+		From("tabs, q").
+		Where("deleted_at IS NULL").
+		Where("search_vector @@ q.query").
+		OrderBy("ts_rank_cd(search_vector, q.query) DESC, created_at DESC").
+		Limit(limit).
+		Offset(offset).
 		ToSql()
 	if err != nil {
 		return nil, err
 	}
 
 	conn := r.getter.DefaultTrOrDB(ctx, r.db)
+
 	rows, err := conn.Query(ctx, query, args...)
 	if err != nil {
 		return nil, wrapDBError(err)
@@ -154,20 +160,19 @@ func (r *TabRepository) FindByNameLike(ctx context.Context, name string) ([]*mod
 	defer rows.Close()
 
 	var tabs []*models.Tab
+
 	for rows.Next() {
 		tab := &models.Tab{}
 		if err := rows.Scan(
-			&tab.ID, &tab.Name,
-			&tab.Path, &tab.CreatedAt,
+			&tab.ID,
+			&tab.Name,
+			&tab.Path,
+			&tab.CreatedAt,
 		); err != nil {
 			return nil, wrapDBError(err)
 		}
 		tabs = append(tabs, tab)
 	}
 
-	if err := rows.Err(); err != nil {
-		return nil, wrapDBError(err)
-	}
-
-	return tabs, nil
+	return tabs, rows.Err()
 }

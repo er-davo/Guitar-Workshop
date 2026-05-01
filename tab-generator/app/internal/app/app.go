@@ -55,12 +55,6 @@ func New(ctx context.Context, cfg *config.Config, log *zap.Logger) (*App, error)
 		return nil, fmt.Errorf("connect to database: %w", err)
 	}
 
-	fmt.Println(cfg.Storage)
-
-	if err != nil {
-		return nil, fmt.Errorf("error on initializing minio client: %w", err)
-	}
-
 	tgRepo := repository.NewTabGenTaskRepository(db, trmpgx.DefaultCtxGetter)
 	asRepo := repository.NewAudioSepTaskRepository(db, trmpgx.DefaultCtxGetter)
 
